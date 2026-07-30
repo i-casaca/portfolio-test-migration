@@ -3,165 +3,191 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PROTOTIPO — Sistema visual v2 (ticket 5): A vs A2 refinado</title>
+<title>PROTOTIPO — Ticket 5 — Sistema visual v3: A3 (estructura Nate Fussner) vs A2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Fraunces:ital,wght@0,600;1,500&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
+
   :root{
-    --yellow:#F2B705; --red:#C81D25; --navy:#11132A; --cream:#F4EFE4; --ink:#161616;
-    --chrome-bg:#161616; --chrome-fg:#F4EFE4; --chrome-accent:#C9982F;
+    --cream:#F6F1E7; --mint:#A7DBCB; --ink:#1C1B19; --line:rgba(28,27,25,.12);
+    --chrome-bg:#1C1B19; --chrome-fg:#F6F1E7; --chrome-accent:#A7DBCB;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;font-family:'Inter',sans-serif;color:var(--ink);background:#fff;}
   .variant{display:none;}
   .variant.active{display:block;}
   a{color:inherit;text-decoration:none;}
-  .meta-banner{
-    font-family:'Inter',sans-serif; font-size:.8rem; text-align:center; padding:10px 16px;
-    background:var(--chrome-bg); color:var(--chrome-fg); letter-spacing:.02em;
-  }
+  .meta-banner{font-size:.8rem;text-align:center;padding:10px 16px;background:var(--chrome-bg);color:var(--chrome-fg);letter-spacing:.02em;}
   .meta-banner b{color:var(--chrome-accent);}
 
-  /* ---------- VARIANT A (original, para comparar) ---------- */
-  #variant-a .a-topbar{
-    display:flex;justify-content:space-between;padding:14px 24px;font-size:.75rem;
-    letter-spacing:.12em;text-transform:uppercase;background:var(--navy);color:var(--cream);
-  }
-  #variant-a .a-hero{background:var(--yellow);color:var(--navy);padding:14vh 6vw 10vh;text-align:center;}
-  #variant-a .a-hero h1{font-family:'Anton',sans-serif;font-size:min(20vw,11rem);line-height:.85;margin:0;text-transform:uppercase;}
-  #variant-a .a-hero p{font-size:1.1rem;max-width:34ch;margin:1.2rem auto 0;font-weight:600;}
-  #variant-a .a-works{background:var(--cream);}
-  #variant-a .a-row{display:flex;align-items:baseline;gap:2rem;padding:2.2rem 6vw;border-top:2px solid var(--navy);color:var(--ink);}
-  #variant-a .a-row:last-child{border-bottom:2px solid var(--navy);}
-  #variant-a .a-row:hover{background:var(--navy);color:var(--cream);}
-  #variant-a .a-num{font-family:'Anton',sans-serif;font-size:2.4rem;color:var(--red);min-width:2.4ch;}
-  #variant-a .a-title{font-family:'Anton',sans-serif;font-size:2rem;text-transform:uppercase;flex:1;}
-  #variant-a .work-tagline{opacity:.75;font-size:.95rem;margin-top:.25rem;}
-  #variant-a .lock{font-size:.7em;opacity:.6;margin-left:.4em;}
-
-  /* ---------- VARIANT A2 — refinado (paleta cálida + módulos + hero-grid) ---------- */
-  :root{
-    --a2-bg:#16130F; --a2-bg2:#1D1912; --a2-cream:#F3ECDD; --a2-rust:#C1622E; --a2-ochre:#C9982F;
-    --a2-line: rgba(243,236,221,.14);
-  }
+  /* ================= A2 (iteración anterior, para referencia) ================= */
+  :root{ --a2-bg:#16130F; --a2-bg2:#1D1912; --a2-cream:#F3ECDD; --a2-rust:#C1622E; --a2-ochre:#C9982F; --a2-line:rgba(243,236,221,.14); }
   #variant-a2{background:var(--a2-bg);color:var(--a2-cream);}
-  #variant-a2 .a2-topbar{
-    display:flex;justify-content:space-between;align-items:center;padding:20px 6vw;
-    border-bottom:1px solid var(--a2-line);
-  }
-  #variant-a2 .a2-wordmark{font-family:'Anton',sans-serif;font-size:1.3rem;letter-spacing:.02em;}
+  #variant-a2 .a2-topbar{display:flex;justify-content:space-between;align-items:center;padding:20px 6vw;border-bottom:1px solid var(--a2-line);}
+  #variant-a2 .a2-wordmark{font-family:'Anton',sans-serif;font-size:1.3rem;}
   #variant-a2 .a2-nav{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;opacity:.7;}
   #variant-a2 .a2-hero{padding:9vh 6vw 6vh;max-width:62ch;}
   #variant-a2 .a2-hero .kicker{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--a2-ochre);margin-bottom:1rem;font-weight:600;}
-  #variant-a2 .a2-hero h1{
-    font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(2rem,4.4vw,3.4rem);
-    line-height:1.15;margin:0 0 1rem;letter-spacing:-.01em;
-  }
+  #variant-a2 .a2-hero h1{font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(2rem,4.4vw,3.4rem);line-height:1.15;margin:0 0 1rem;}
   #variant-a2 .a2-hero p{font-size:1.05rem;line-height:1.6;opacity:.82;max-width:52ch;}
-
-  #variant-a2 .a2-grid{
-    display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-    gap:1px;background:var(--a2-line);margin-top:2vh;
-  }
-  #variant-a2 .a2-card{
-    background:var(--a2-bg);padding:1.75rem;display:flex;flex-direction:column;gap:1rem;
-    transition:background .2s ease;
-  }
-  #variant-a2 .a2-card:hover{background:var(--a2-bg2);}
-  #variant-a2 .a2-thumb{
-    height:170px;border-radius:6px;position:relative;overflow:hidden;
-    background:linear-gradient(150deg,var(--a2-rust),var(--a2-bg2) 70%);
-    transition:transform .35s ease;
-  }
-  #variant-a2 .a2-card:hover .a2-thumb{transform:scale(1.025);}
+  #variant-a2 .a2-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;background:var(--a2-line);margin-top:2vh;}
+  #variant-a2 .a2-card{background:var(--a2-bg);padding:1.75rem;display:flex;flex-direction:column;gap:1rem;}
+  #variant-a2 .a2-thumb{height:170px;border-radius:6px;background:linear-gradient(150deg,var(--a2-rust),var(--a2-bg2) 70%);}
   #variant-a2 .a2-thumb.tint-2{background:linear-gradient(150deg,var(--a2-ochre),var(--a2-bg2) 70%);}
   #variant-a2 .a2-thumb.tint-3{background:linear-gradient(150deg,#7d8a6a,var(--a2-bg2) 70%);}
   #variant-a2 .a2-meta-row{display:flex;justify-content:space-between;align-items:center;}
   #variant-a2 .a2-eyebrow{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.6;}
-  #variant-a2 .a2-arrow{
-    font-size:1.1rem;transform:translateX(0);transition:transform .2s ease;opacity:.7;
-  }
-  #variant-a2 .a2-card:hover .a2-arrow{transform:translateX(5px);opacity:1;color:var(--a2-ochre);}
-  #variant-a2 .a2-card h3{font-family:'Inter',sans-serif;font-weight:700;font-size:1.2rem;margin:0;}
-  #variant-a2 .a2-card .work-tagline{font-size:.92rem;opacity:.7;margin:0;}
+  #variant-a2 .a2-card h3{font-weight:700;font-size:1.2rem;margin:0;}
+  #variant-a2 .work-tagline{font-size:.92rem;opacity:.7;margin:0;}
   #variant-a2 .a2-lock{font-size:.75rem;opacity:.55;border:1px solid var(--a2-line);padding:2px 8px;border-radius:999px;}
 
-  /* ---------- Prototype switcher (dev-only, remove before merging) ---------- */
+  /* ================= A3 — estructura fiel a Nate Fussner ================= */
+  #variant-a3{background:var(--cream);color:var(--ink);}
+  #variant-a3 .a3-nav{
+    display:flex;justify-content:space-between;align-items:center;padding:22px 6vw;
+    font-size:.8rem;letter-spacing:.06em;
+  }
+  #variant-a3 .a3-wordmark{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:1.15rem;}
+  #variant-a3 .a3-navlinks{display:flex;gap:2rem;text-transform:uppercase;letter-spacing:.1em;opacity:.7;font-size:.72rem;}
+
+  #variant-a3 .a3-hero{
+    background:var(--mint);min-height:42vh;position:relative;overflow:hidden;
+    display:flex;align-items:flex-end;padding:0 6vw 2.4rem;
+  }
+  #variant-a3 .a3-hero-grid{
+    position:absolute;inset:0;margin:auto;width:min(46vw,420px);height:min(46vw,420px);
+    background-image:
+      linear-gradient(to right, rgba(28,27,25,.16) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(28,27,25,.16) 1px, transparent 1px);
+    background-size:33.34% 33.34%;
+    top:8%;
+  }
+  #variant-a3 .a3-hero-eyebrow{font-size:.75rem;letter-spacing:.08em;line-height:1.5;position:relative;z-index:1;}
+
+  #variant-a3 .a3-intro{padding:9vh 6vw 6vh;max-width:58ch;}
+  #variant-a3 .a3-intro p{font-size:1.35rem;line-height:1.5;margin:0;}
+
+  #variant-a3 .a3-list{padding:0 6vw 8vh;display:flex;flex-direction:column;gap:5vh;}
+  #variant-a3 .a3-row{display:flex;align-items:center;gap:4vw;}
+  #variant-a3 .a3-row:nth-child(even){flex-direction:row-reverse;}
+  #variant-a3 .a3-row-text{flex:0 0 34%;}
+  #variant-a3 .a3-eyebrow{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.55;margin-bottom:.6rem;display:block;}
+  #variant-a3 .a3-row h3{font-family:'Fraunces',serif;font-weight:600;font-size:2rem;margin:0 0 .8rem;line-height:1.1;}
+  #variant-a3 .a3-row .work-tagline{font-size:1rem;opacity:.7;margin:0 0 1.2rem;max-width:32ch;}
+  #variant-a3 .a3-arrow{
+    width:42px;height:42px;border-radius:50%;border:1px solid var(--ink);display:flex;
+    align-items:center;justify-content:center;font-size:1.1rem;transition:background .2s ease, color .2s ease;
+  }
+  #variant-a3 .a3-row:hover .a3-arrow{background:var(--ink);color:var(--cream);}
+  #variant-a3 .a3-lockbadge{
+    display:inline-flex;align-items:center;gap:.4em;font-size:.75rem;border:1px solid var(--line);
+    padding:6px 12px;border-radius:999px;opacity:.7;
+  }
+  #variant-a3 .a3-row-img{
+    flex:1;height:280px;border-radius:4px;background:linear-gradient(160deg,var(--tone1,#e8b7a4),var(--tone2,#f6f1e7) 75%);
+    transition:transform .35s ease;
+  }
+  #variant-a3 .a3-row:hover .a3-row-img{transform:scale(1.015);}
+
+  /* ---------- Prototype switcher ---------- */
   #proto-switcher{
     position:fixed;left:50%;bottom:20px;transform:translateX(-50%);
     background:var(--chrome-bg);color:var(--chrome-fg);border-radius:999px;padding:8px 6px;display:flex;align-items:center;
-    gap:10px;font-family:'Inter',sans-serif;font-size:.85rem;box-shadow:0 8px 24px rgba(0,0,0,.35);
-    z-index:9999;border:1px solid var(--chrome-accent);
+    gap:10px;font-size:.85rem;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:9999;border:1px solid var(--chrome-accent);
   }
   #proto-switcher button{background:var(--chrome-accent);color:#111;border:none;border-radius:999px;width:30px;height:30px;cursor:pointer;font-weight:800;}
   #proto-switcher button:focus-visible{outline:2px solid #fff;outline-offset:2px;}
   #proto-switcher .label{min-width:230px;text-align:center;}
-  #proto-switcher .tag{background:var(--a2-rust);color:#fff;font-size:.65rem;padding:2px 8px;border-radius:999px;letter-spacing:.05em;}
+  #proto-switcher .tag{background:#C1622E;color:#fff;font-size:.65rem;padding:2px 8px;border-radius:999px;letter-spacing:.05em;}
+
+  @media (max-width: 760px){
+    #variant-a3 .a3-row, #variant-a3 .a3-row:nth-child(even){flex-direction:column;align-items:flex-start;gap:1.5rem;}
+    #variant-a3 .a3-row-text{flex:none;}
+    #variant-a3 .a3-row-img{width:100%;}
+  }
 </style>
 </head>
 <body>
 
-<div class="meta-banner">Comparativa <b>A (original)</b> vs <b>A2 (refinado)</b> — flechas o ← → para cambiar.</div>
+<div class="meta-banner">A3 = estructura fiel a Nate Fussner (filas alternadas). <b>A2</b> queda de referencia de la iteración anterior. Flechas o ← → para cambiar.</div>
 
-<!-- ============ VARIANT A: original ============ -->
-<section id="variant-a" class="variant">
-  <div class="a-topbar"><span>Isma Casaca — Product Designer</span><span>Madrid, España</span></div>
-  <div class="a-hero">
-    <h1>Isma<br>Casaca</h1>
-    <p>Producto, UX/UI y una mochila siempre a mano. Diseño experiencias que resuelven problemas de verdad.</p>
+<!-- ============ A3 — estructura Nate Fussner ============ -->
+<section id="variant-a3" class="variant">
+  <div class="a3-nav">
+    <span class="a3-wordmark">Isma Casaca</span>
+    <div class="a3-navlinks"><span>Trabajo</span><span>Sobre mí</span><span>Contacto</span></div>
   </div>
-  <div class="a-works">
-    <a class="a-row" href="#"><span class="a-num">01</span><span class="a-title">Manu Cardiel</span><span class="work-tagline">Exposición virtual de arte</span></a>
-    <a class="a-row" href="#"><span class="a-num">02</span><span class="a-title">Adrenaline<span class="lock">🔒</span></span><span class="work-tagline">App deportiva whitelabel</span></a>
-    <a class="a-row" href="#"><span class="a-num">03</span><span class="a-title">Arabvision<span class="lock">🔒</span></span><span class="work-tagline">Streaming OTT</span></a>
-    <a class="a-row" href="#"><span class="a-num">04</span><span class="a-title">Nexahub<span class="lock">🔒</span></span><span class="work-tagline">CMS de incidencias</span></a>
-    <a class="a-row" href="#"><span class="a-num">05</span><span class="a-title">El Paraguas</span><span class="work-tagline">App de viajes post-pandemia</span></a>
+  <div class="a3-hero">
+    <div class="a3-hero-grid"></div>
+    <div class="a3-hero-eyebrow">Product<br>Design &amp;<br>UX</div>
+  </div>
+  <div class="a3-intro">
+    <p>Hola, soy Isma — diseño experiencias digitales que resuelven problemas de verdad, de Smart TV a realidad virtual. Backpacker, cafetero, y arquitecto de formación.</p>
+  </div>
+  <div class="a3-list">
+    <a class="a3-row" href="#" style="--tone1:#e8b7a4;--tone2:#f6f1e7">
+      <div class="a3-row-text">
+        <span class="a3-eyebrow">Personal · 2024</span>
+        <h3>Manu Cardiel</h3>
+        <p class="work-tagline">Exposición virtual del arte de Manu Cardiel, con un sistema propio para que él gestione el contenido.</p>
+        <div class="a3-arrow">→</div>
+      </div>
+      <div class="a3-row-img"></div>
+    </a>
+    <a class="a3-row" href="#" style="--tone1:#cfd8c8;--tone2:#f6f1e7">
+      <div class="a3-row-text">
+        <span class="a3-eyebrow">Cliente · 2023</span>
+        <h3>Adrenaline</h3>
+        <p class="work-tagline">App deportiva whitelabel: estadísticas, TV en vivo y VOD para clientes premium.</p>
+        <span class="a3-lockbadge">🔒 Privado — bajo NDA</span>
+      </div>
+      <div class="a3-row-img"></div>
+    </a>
+    <a class="a3-row" href="#" style="--tone1:#9fbfc9;--tone2:#f6f1e7">
+      <div class="a3-row-text">
+        <span class="a3-eyebrow">Cliente · 2022</span>
+        <h3>Arabvision</h3>
+        <p class="work-tagline">Streaming OTT para móvil y Android TV: Live TV y VOD en cualquier dispositivo.</p>
+        <span class="a3-lockbadge">🔒 Privado — bajo NDA</span>
+      </div>
+      <div class="a3-row-img"></div>
+    </a>
+    <a class="a3-row" href="#" style="--tone1:#e3c98f;--tone2:#f6f1e7">
+      <div class="a3-row-text">
+        <span class="a3-eyebrow">Cliente · 2021</span>
+        <h3>Nexahub</h3>
+        <p class="work-tagline">CMS para que QA gestione tickets de JIRA sin fricción dentro del ecosistema Nexahub.</p>
+        <span class="a3-lockbadge">🔒 Privado — bajo NDA</span>
+      </div>
+      <div class="a3-row-img"></div>
+    </a>
+    <a class="a3-row" href="#" style="--tone1:#a9c7dc;--tone2:#f6f1e7">
+      <div class="a3-row-text">
+        <span class="a3-eyebrow">Bootcamp · 2020</span>
+        <h3>El Paraguas</h3>
+        <p class="work-tagline">Una app de viajes para la nueva normalidad post-pandemia: guías, en cualquier momento.</p>
+        <div class="a3-arrow">→</div>
+      </div>
+      <div class="a3-row-img"></div>
+    </a>
   </div>
 </section>
 
-<!-- ============ VARIANT A2: refinado ============ -->
+<!-- ============ A2 (referencia) ============ -->
 <section id="variant-a2" class="variant">
-  <div class="a2-topbar">
-    <span class="a2-wordmark">ISMA CASACA</span>
-    <span class="a2-nav">Madrid · Product Designer</span>
-  </div>
+  <div class="a2-topbar"><span class="a2-wordmark">ISMA CASACA</span><span class="a2-nav">Madrid · Product Designer</span></div>
   <div class="a2-hero">
     <div class="kicker">Portfolio 2020—2024</div>
     <h1>Diseño experiencias que combinan tecnología, narrativa visual y ganas de resolver problemas de verdad.</h1>
-    <p>Backpacker, cafetero y diseñador de producto. Estudié arquitectura y ahora trabajo de Smart TV a realidad virtual — cinco proyectos, abajo, para que juzgues tú mismo.</p>
+    <p>Backpacker, cafetero y diseñador de producto. Estudié arquitectura y ahora trabajo de Smart TV a realidad virtual.</p>
   </div>
   <div class="a2-grid">
-    <a class="a2-card" href="#">
-      <div class="a2-thumb"></div>
-      <div class="a2-meta-row"><span class="a2-eyebrow">01 · Personal</span><span class="a2-arrow">→</span></div>
-      <h3>Manu Cardiel</h3>
-      <p class="work-tagline">Exposición virtual de arte</p>
-    </a>
-    <a class="a2-card" href="#">
-      <div class="a2-thumb tint-2"></div>
-      <div class="a2-meta-row"><span class="a2-eyebrow">02 · Cliente</span><span class="a2-lock">🔒 Privado</span></div>
-      <h3>Adrenaline</h3>
-      <p class="work-tagline">App deportiva whitelabel</p>
-    </a>
-    <a class="a2-card" href="#">
-      <div class="a2-thumb tint-3"></div>
-      <div class="a2-meta-row"><span class="a2-eyebrow">03 · Cliente</span><span class="a2-lock">🔒 Privado</span></div>
-      <h3>Arabvision</h3>
-      <p class="work-tagline">Streaming OTT</p>
-    </a>
-    <a class="a2-card" href="#">
-      <div class="a2-thumb"></div>
-      <div class="a2-meta-row"><span class="a2-eyebrow">04 · Cliente</span><span class="a2-lock">🔒 Privado</span></div>
-      <h3>Nexahub</h3>
-      <p class="work-tagline">CMS de incidencias</p>
-    </a>
-    <a class="a2-card" href="#">
-      <div class="a2-thumb tint-2"></div>
-      <div class="a2-meta-row"><span class="a2-eyebrow">05 · Bootcamp</span><span class="a2-arrow">→</span></div>
-      <h3>El Paraguas</h3>
-      <p class="work-tagline">App de viajes post-pandemia</p>
-    </a>
+    <a class="a2-card" href="#"><div class="a2-thumb"></div><div class="a2-meta-row"><span class="a2-eyebrow">01 · Personal</span><span>→</span></div><h3>Manu Cardiel</h3><p class="work-tagline">Exposición virtual de arte</p></a>
+    <a class="a2-card" href="#"><div class="a2-thumb tint-2"></div><div class="a2-meta-row"><span class="a2-eyebrow">02 · Cliente</span><span class="a2-lock">🔒</span></div><h3>Adrenaline</h3><p class="work-tagline">App deportiva whitelabel</p></a>
+    <a class="a2-card" href="#"><div class="a2-thumb tint-3"></div><div class="a2-meta-row"><span class="a2-eyebrow">03 · Cliente</span><span class="a2-lock">🔒</span></div><h3>Arabvision</h3><p class="work-tagline">Streaming OTT</p></a>
+    <a class="a2-card" href="#"><div class="a2-thumb"></div><div class="a2-meta-row"><span class="a2-eyebrow">04 · Cliente</span><span class="a2-lock">🔒</span></div><h3>Nexahub</h3><p class="work-tagline">CMS de incidencias</p></a>
+    <a class="a2-card" href="#"><div class="a2-thumb tint-2"></div><div class="a2-meta-row"><span class="a2-eyebrow">05 · Bootcamp</span><span>→</span></div><h3>El Paraguas</h3><p class="work-tagline">App de viajes post-pandemia</p></a>
   </div>
 </section>
 
@@ -174,13 +200,13 @@
 
 <script>
   const VARIANTS = [
-    { key:'a2', name:'A2 — Refinado (cálido, módulos, grid)' },
-    { key:'a', name:'A — Original (para comparar)' },
+    { key:'a3', name:'A3 — Estructura Nate Fussner (filas alternadas)' },
+    { key:'a2', name:'A2 — Iteración anterior (grid oscuro)' },
   ];
   function currentVariantFromURL(){
     const p = new URLSearchParams(location.search).get('variant');
     const found = VARIANTS.find(v => v.key === p);
-    return found ? found.key : 'a2';
+    return found ? found.key : 'a3';
   }
   function showVariant(key){
     document.querySelectorAll('.variant').forEach(el => el.classList.remove('active'));
@@ -206,5 +232,6 @@
     if (e.key === 'ArrowRight') cycle(1);
   });
 </script>
+
 </body>
 </html>
