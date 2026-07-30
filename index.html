@@ -1,12 +1,127 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Portfolio test migration</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Isma Casaca — Product Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,500&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F6F1E7; --mint:#A7DBCB; --ink:#1C1B19; --line:rgba(28,27,25,.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;font-family:'Inter',sans-serif;color:var(--ink);background:var(--cream);}
+  a{color:inherit;text-decoration:none;}
+
+  .nav{
+    display:flex;justify-content:space-between;align-items:center;padding:22px 6vw;
+    font-size:.8rem;letter-spacing:.06em;
+  }
+  .wordmark{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:1.15rem;}
+  .navlinks{display:flex;gap:2rem;text-transform:uppercase;letter-spacing:.1em;opacity:.7;font-size:.72rem;}
+
+  .hero{
+    background:var(--mint);min-height:78vh;position:relative;overflow:hidden;
+    display:flex;align-items:flex-end;padding:0 6vw 2.4rem;
+  }
+  .hero-grid{
+    position:absolute;inset:0;margin:auto;width:min(46vw,420px);height:min(46vw,420px);
+    background-image:
+      linear-gradient(to right, rgba(28,27,25,.16) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(28,27,25,.16) 1px, transparent 1px);
+    background-size:33.34% 33.34%;
+    top:8%;
+  }
+  .hero-eyebrow{font-size:.75rem;letter-spacing:.08em;line-height:1.5;position:relative;z-index:1;}
+
+  .works{padding:8vh 6vw;display:flex;flex-direction:column;gap:5vh;}
+  .work-row{display:flex;align-items:center;gap:4vw;}
+  .work-row:nth-child(even){flex-direction:row-reverse;}
+  .work-text{flex:0 0 34%;}
+  .eyebrow{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.55;margin-bottom:.6rem;display:block;}
+  .work-row h3{font-family:'Fraunces',serif;font-weight:600;font-size:2rem;margin:0 0 .8rem;line-height:1.1;}
+  .work-row .work-tagline{font-size:1rem;opacity:.7;margin:0 0 1.2rem;max-width:32ch;}
+  .arrow{
+    width:42px;height:42px;border-radius:50%;border:1px solid var(--ink);display:flex;
+    align-items:center;justify-content:center;font-size:1.1rem;transition:background .2s ease, color .2s ease;
+  }
+  .work-row:hover .arrow{background:var(--ink);color:var(--cream);}
+  .lockbadge{
+    display:inline-flex;align-items:center;gap:.4em;font-size:.75rem;border:1px solid var(--line);
+    padding:6px 12px;border-radius:999px;opacity:.7;
+  }
+  .work-img{
+    flex:1;height:280px;border-radius:4px;background:linear-gradient(160deg,var(--tone1,#e8b7a4),var(--tone2,#f6f1e7) 75%);
+    transition:transform .35s ease;
+  }
+  .work-row:hover .work-img{transform:scale(1.015);}
+
+  @media (max-width: 760px){
+    .work-row, .work-row:nth-child(even){flex-direction:column;align-items:flex-start;gap:1.5rem;}
+    .work-text{flex:none;}
+    .work-img{width:100%;}
+  }
+</style>
 </head>
 <body>
-  <h1>🚧 En construcción</h1>
-  <p>Esto confirma que GitHub Pages está sirviendo este repositorio correctamente.</p>
+
+<div class="nav">
+  <span class="wordmark">Isma Casaca</span>
+  <div class="navlinks"><span>Trabajo</span><span>Sobre mí</span><span>Contacto</span></div>
+</div>
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-eyebrow">Product<br>Design &amp;<br>UX</div>
+</div>
+<div class="works">
+  <a class="work-row" href="#" style="--tone1:#e8b7a4;--tone2:#f6f1e7">
+    <div class="work-text">
+      <span class="eyebrow">Personal · 2024</span>
+      <h3>Manu Cardiel</h3>
+      <p class="work-tagline">Exposición virtual del arte de Manu Cardiel, con un sistema propio para que él gestione el contenido.</p>
+      <div class="arrow">→</div>
+    </div>
+    <div class="work-img"></div>
+  </a>
+  <a class="work-row" href="#" style="--tone1:#cfd8c8;--tone2:#f6f1e7">
+    <div class="work-text">
+      <span class="eyebrow">Cliente · 2023</span>
+      <h3>Adrenaline</h3>
+      <p class="work-tagline">App deportiva whitelabel: estadísticas, TV en vivo y VOD para clientes premium.</p>
+      <span class="lockbadge">🔒 Privado — bajo NDA</span>
+    </div>
+    <div class="work-img"></div>
+  </a>
+  <a class="work-row" href="#" style="--tone1:#9fbfc9;--tone2:#f6f1e7">
+    <div class="work-text">
+      <span class="eyebrow">Cliente · 2022</span>
+      <h3>Arabvision</h3>
+      <p class="work-tagline">Streaming OTT para móvil y Android TV: Live TV y VOD en cualquier dispositivo.</p>
+      <span class="lockbadge">🔒 Privado — bajo NDA</span>
+    </div>
+    <div class="work-img"></div>
+  </a>
+  <a class="work-row" href="#" style="--tone1:#e3c98f;--tone2:#f6f1e7">
+    <div class="work-text">
+      <span class="eyebrow">Cliente · 2021</span>
+      <h3>Nexahub</h3>
+      <p class="work-tagline">CMS para que QA gestione tickets de JIRA sin fricción dentro del ecosistema Nexahub.</p>
+      <span class="lockbadge">🔒 Privado — bajo NDA</span>
+    </div>
+    <div class="work-img"></div>
+  </a>
+  <a class="work-row" href="#" style="--tone1:#a9c7dc;--tone2:#f6f1e7">
+    <div class="work-text">
+      <span class="eyebrow">Bootcamp · 2020</span>
+      <h3>El Paraguas</h3>
+      <p class="work-tagline">Una app de viajes para la nueva normalidad post-pandemia: guías, en cualquier momento.</p>
+      <div class="arrow">→</div>
+    </div>
+    <div class="work-img"></div>
+  </a>
+</div>
+
 </body>
 </html>
