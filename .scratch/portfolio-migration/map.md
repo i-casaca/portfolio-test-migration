@@ -53,7 +53,7 @@ Estructura del sitio:
 - [x] #5 Definir el sistema visual: hero Mickey17 + páginas de proyecto sobrias (prototype)
 - [x] #6 Definir el efecto de parallax y el rastro sutil del ratón (prototype)
 - [x] #7 Definir el mecanismo del muro de contraseña (grilling)
-- [ ] #8 Construir y desplegar el MVP completo del portfolio (task, bloqueado por #2-#7)
+- [x] #8 Construir y desplegar el MVP completo del portfolio (task, bloqueado por #2-#7)
 
 ## Decisiones hasta ahora
 
@@ -63,6 +63,7 @@ Estructura del sitio:
 - [Definir el mecanismo del muro de contraseña](https://github.com/i-casaca/portfolio-test-migration/issues/7) — contraseña única (`cafeculpable`) para los 3 proyectos NDA, se pide siempre (sin recordar), difumina todo (texto e imágenes), comparación por hash SHA-256 en el navegador; demostrado en `adrenaline.html`, fusionado a `main` vía PR #11.
 - [Extraer contenido y assets completos de los 4 proyectos restantes](https://github.com/i-casaca/portfolio-test-migration/issues/2) — construidas las 4 páginas que faltaban (`manu-cardiel.html`, `arabvision.html`, `nexahub.html`, `el-paraguas.html`) con contenido real traducido e imágenes reales descargadas; las 5 tarjetas de la home ya enlazan a páginas reales; fusionado a `main` vía PR #12.
 - [Conseguir el archivo del CV](https://github.com/i-casaca/portfolio-test-migration/issues/3) — el botón original enlazaba a una carpeta de Drive; Ismael pasó el PDF en español directo; solo se ofrece español por ahora (bilingüe fuera de alcance); enlace 'Descargar CV' añadido en las 6 páginas; fusionado a `main` vía PR #13.
+- [Construir y desplegar el MVP completo del portfolio](https://github.com/i-casaca/portfolio-test-migration/issues/8) — MVP completo en vivo: portadas reales en las 5 filas de la home (las 3 con NDA difuminadas y con capa "Bloqueado"), imágenes de Manu Cardiel capturadas, hero convertido en índice navegable de 3×2 con cambio de fondo y nombre en display propia deformada por shader, sección "Sobre mí", franja negra de contacto en las 6 páginas, transición entre páginas con spinner, y páginas de proyecto a 88vw con Contexto/Ejecución a dos columnas e imágenes que aparecen al hacer scroll; fusionado a `main` vía PR #14.
 
 ## Not yet specified
 
