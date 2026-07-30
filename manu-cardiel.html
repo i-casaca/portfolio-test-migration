@@ -4,51 +4,30 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Manu Cardiel — Isma Casaca</title>
+<meta name="description" content="Exposición virtual del arte mural de Manu Cardiel: una web responsive en Framer con un CMS para que él gestione su obra de forma autónoma." />
+<link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Manu Cardiel — Isma Casaca" />
+<meta property="og:description" content="Exposición virtual del arte mural de Manu Cardiel, con un sistema propio para que gestione el contenido." />
+<meta property="og:image" content="https://i-casaca.github.io/portfolio-test-migration/assets/images/manu-cardiel/hero.jpg" />
+<meta property="og:url" content="https://i-casaca.github.io/portfolio-test-migration/manu-cardiel.html" />
+<meta name="twitter:card" content="summary_large_image" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,500&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/css/site.css">
 <style>
-  :root{
-    --cream:#F6F1E7; --mint:#A7DBCB; --ink:#1C1B19; --line:rgba(28,27,25,.12);
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;font-family:'Inter',sans-serif;color:var(--ink);background:var(--cream);}
-  a{color:inherit;}
-
-  .nav{
-    display:flex;justify-content:space-between;align-items:center;padding:22px 6vw;
-    font-size:.8rem;letter-spacing:.06em;
-  }
-  .wordmark{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:1.15rem;text-decoration:none;}
-  .navlinks{display:flex;gap:2rem;text-transform:uppercase;letter-spacing:.1em;opacity:.7;font-size:.72rem;}
-  .navlinks a{text-decoration:none;}
-
-  .project-header{padding:4vh 6vw 3vh;max-width:70ch;}
-  .eyebrow{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.55;display:block;margin-bottom:.6rem;}
-  .project-header h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2.2rem,5vw,3.4rem);margin:0 0 1.2rem;line-height:1.05;}
-  .meta-row{display:flex;gap:2.5rem;flex-wrap:wrap;font-size:.85rem;border-top:1px solid var(--line);padding-top:1rem;}
-  .meta-row div span{display:block;opacity:.5;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem;}
-  .meta-row a{text-decoration:underline;}
-
   .content-wrap{padding:2vh 6vw 10vh;max-width:70ch;}
   .content-wrap h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.3rem;margin:2rem 0 .6rem;}
   .content-wrap p{font-size:1rem;line-height:1.65;margin:0 0 1rem;max-width:64ch;}
-  .content-wrap .media-placeholder{
-    height:220px;border-radius:6px;margin:1.5rem 0;
-    background:linear-gradient(150deg,#e8b7a4,#f6f1e7 75%);
-  }
-  .next-project{
-    display:inline-block;margin-top:1rem;font-size:.85rem;border-top:1px solid var(--line);padding-top:1rem;
-    text-decoration:none;
-  }
-  .next-project span{opacity:.5;display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;}
+  .content-wrap .media-shot{width:100%;height:auto;border-radius:6px;margin:1.5rem 0;display:block;}
 </style>
 </head>
 <body>
 
 <div class="nav">
   <a class="wordmark" href="./index.html">Isma Casaca</a>
-  <div class="navlinks"><a href="./index.html#trabajo">Trabajo</a><a href="./index.html#sobre-mi">Sobre mí</a><a href="./index.html#contacto">Contacto</a><a href="./assets/cv/isma-casado-cv-es.pdf" download>Descargar CV</a></div>
+  <div class="navlinks"><a href="./index.html#trabajo">Trabajo</a><a href="./index.html#sobre-mi">Sobre mí</a><a href="#contacto">Contacto</a><a href="./assets/cv/isma-casado-cv-es.pdf" download>Descargar CV</a></div>
 </div>
 
 <div class="project-header">
@@ -58,21 +37,39 @@
     <div><span>Organización</span>Manu Cardiel</div>
     <div><span>Año</span>2024</div>
     <div><span>Posición</span>Web Designer</div>
+    <div><span>Enlace</span><a href="https://manucardiel.framer.website/" target="_blank" rel="noopener">manucardiel.framer.website</a></div>
   </div>
 </div>
 
 <div class="content-wrap">
-  <div class="media-placeholder"></div>
+  <img class="media-shot" src="./assets/images/manu-cardiel/hero.jpg" width="1400" height="787" alt="Portátil mostrando la web de portfolio de arte urbano de Manu Cardiel" />
   <h2>↳ Contexto</h2>
   <p>La web anterior de Manu, desarrollada por el Gobierno de España bajo la iniciativa "Kit Digital", se volvió demasiado cara de mantener en 2024. Además, su diseño gráfico no encajaba con la visión de Manu como artista. El reto era rediseñar su presencia online, ofreciendo una solución que reflejara su identidad artística garantizando usabilidad, facilidad de gestión de contenido y sostenibilidad a largo plazo.</p>
+  <img class="media-shot" src="./assets/images/manu-cardiel/mockup-1.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups de la web de Manu Cardiel sobre fondo blanco" />
   <h2>↳ Ejecución</h2>
   <p>Trabajamos codo con codo mediante una serie de entrevistas para entender la visión de Manu para la web, iterando propuestas de diseño desde el canvas hasta la implementación final en Framer. Guié a Manu en catalogar su obra y desarrollar un sistema para gestionar el contenido vía CMS, garantizando que pudiera mantener y actualizar la web de forma independiente. Uno de los retos clave fue hacer la web responsive para móvil, ya que la versión anterior carecía de esa funcionalidad. Tras pruebas exhaustivas, logramos una solución eficiente que mostraba el trabajo de Manu de forma excelente en todos los dispositivos.</p>
-  <div class="media-placeholder"></div>
+  <img class="media-shot" src="./assets/images/manu-cardiel/mockup-2.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Pantallas de la web de Manu Cardiel en distintos dispositivos" />
+  <img class="media-shot" src="./assets/images/manu-cardiel/mockup-3.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Más pantallas del portfolio de arte urbano de Manu Cardiel" />
   <h2>↳ Resultado</h2>
   <p>El resultado final es una web elegante y responsive que representa a la perfección la visión artística de Manu, ofreciéndole plena autonomía para gestionar el contenido. La versión móvil está totalmente optimizada, ofreciendo una experiencia fluida a quienes la visitan desde cualquier dispositivo. Gracias a este diseño, Manu cuenta ahora con una plataforma económica y mantenible que muestra su trabajo y le permite gestionar y actualizar su portfolio con facilidad.</p>
+  <img class="media-shot" src="./assets/images/manu-cardiel/mockup-4.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Vista final de la web de Manu Cardiel" />
 
   <a class="next-project" href="./adrenaline.html"><span>Siguiente proyecto</span>Adrenaline →</a>
 </div>
+
+<footer class="site-footer" id="contacto">
+  <span class="eyebrow">Contacto</span>
+  <p class="footer-lead">¿Trabajamos <em>juntos?</em></p>
+  <div class="footer-links">
+    <a href="https://www.linkedin.com/in/ismaelcasadoc/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://medium.com/@ismael.casadoc" target="_blank" rel="noopener">Medium</a>
+    <a href="./assets/cv/isma-casado-cv-es.pdf" download>Descargar CV</a>
+  </div>
+  <div class="footer-base">
+    <span>☕️ Hecho con mucho café y podcasts</span>
+    <span>© 2026 Ismael Casado Camacho</span>
+  </div>
+</footer>
 
 </body>
 </html>

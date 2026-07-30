@@ -4,31 +4,19 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Nexahub — Isma Casaca</title>
+<meta name="description" content="CMS para que QA gestione tickets de JIRA sin fricción dentro del ecosistema Nexahub. Caso de estudio bajo NDA." />
+<link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Nexahub — Isma Casaca" />
+<meta property="og:description" content="CMS para que QA gestione tickets de JIRA sin fricción dentro del ecosistema Nexahub. Contenido bajo NDA." />
+<meta property="og:image" content="https://i-casaca.github.io/portfolio-test-migration/assets/images/manu-cardiel/hero.jpg" />
+<meta property="og:url" content="https://i-casaca.github.io/portfolio-test-migration/nexahub.html" />
+<meta name="twitter:card" content="summary_large_image" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,500&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/css/site.css">
 <style>
-  :root{
-    --cream:#F6F1E7; --mint:#A7DBCB; --ink:#1C1B19; --line:rgba(28,27,25,.12);
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;font-family:'Inter',sans-serif;color:var(--ink);background:var(--cream);}
-  a{color:inherit;}
-
-  .nav{
-    display:flex;justify-content:space-between;align-items:center;padding:22px 6vw;
-    font-size:.8rem;letter-spacing:.06em;
-  }
-  .wordmark{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:1.15rem;text-decoration:none;}
-  .navlinks{display:flex;gap:2rem;text-transform:uppercase;letter-spacing:.1em;opacity:.7;font-size:.72rem;}
-  .navlinks a{text-decoration:none;}
-
-  .project-header{padding:4vh 6vw 3vh;max-width:70ch;}
-  .eyebrow{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.55;display:block;margin-bottom:.6rem;}
-  .project-header h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2.2rem,5vw,3.4rem);margin:0 0 1.2rem;line-height:1.05;}
-  .meta-row{display:flex;gap:2.5rem;flex-wrap:wrap;font-size:.85rem;border-top:1px solid var(--line);padding-top:1rem;}
-  .meta-row div span{display:block;opacity:.5;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem;}
-
   .gate-wrap{position:relative;padding:2vh 6vw 10vh;max-width:70ch;}
   .gated-content h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.3rem;margin:2rem 0 .6rem;}
   .gated-content p{font-size:1rem;line-height:1.65;margin:0 0 1rem;max-width:64ch;}
@@ -62,18 +50,13 @@
   .gate-error{color:#a1332b;font-size:.82rem;min-height:1.2em;margin-top:.6rem;}
   .gate-contact{font-size:.78rem;opacity:.6;margin-top:1.1rem;padding-top:1rem;border-top:1px solid var(--line);}
   .gate-contact a{text-decoration:underline;}
-  .next-project{
-    display:inline-block;margin-top:1rem;font-size:.85rem;border-top:1px solid var(--line);padding-top:1rem;
-    text-decoration:none;
-  }
-  .next-project span{opacity:.5;display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;}
 </style>
 </head>
 <body>
 
 <div class="nav">
   <a class="wordmark" href="./index.html">Isma Casaca</a>
-  <div class="navlinks"><a href="./index.html#trabajo">Trabajo</a><a href="./index.html#sobre-mi">Sobre mí</a><a href="./index.html#contacto">Contacto</a><a href="./assets/cv/isma-casado-cv-es.pdf" download>Descargar CV</a></div>
+  <div class="navlinks"><a href="./index.html#trabajo">Trabajo</a><a href="./index.html#sobre-mi">Sobre mí</a><a href="#contacto">Contacto</a><a href="./assets/cv/isma-casado-cv-es.pdf" download>Descargar CV</a></div>
 </div>
 
 <div class="project-header">
@@ -88,16 +71,16 @@
 
 <div class="gate-wrap locked" id="gate-wrap">
   <div class="gated-content">
-    <img class="media-shot" src="./assets/images/nexahub/hero.jpg" alt="Portada del proyecto Nexahub" />
+    <img class="media-shot" src="./assets/images/nexahub/hero.jpg" width="1400" height="787" alt="Portada del proyecto Nexahub" />
     <h2>↳ Contexto</h2>
     <p>Nexahub identificó la necesidad de mejorar la eficiencia en la gestión de incidencias de JIRA entre sus usuarios FUT. Aunque inicialmente no era prioritario, el objetivo a largo plazo era convertir este CMS en una herramienta esencial a nivel global — respondiendo a la estrategia de invertir en mejoras técnicas y de diseño.</p>
-    <img class="media-shot" src="./assets/images/nexahub/mockup-1.jpg" alt="Mockups del CMS de Nexahub" />
+    <img class="media-shot" src="./assets/images/nexahub/mockup-1.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups del CMS de Nexahub" />
     <h2>↳ Ejecución</h2>
     <p>Junto con mi equipo, centramos la estrategia en entender con detalle las necesidades y el flujo de trabajo de los QA Engineers en cada paso. Mediante técnicas de shadowing, buscamos comprender a fondo estos aspectos y traducirlos en una interfaz efectiva e intuitiva. Para lograrlo, propusimos una serie de flujos de usuario, incorporando las interacciones necesarias en cada paso, capturando a la vez los elementos clave de la marca de Nexahub — todo ello mediante componentes e iconos iterables que contribuyeron a construir un design system.</p>
-    <img class="media-shot" src="./assets/images/nexahub/mockup-2.jpg" alt="Mockups adicionales de Nexahub" />
+    <img class="media-shot" src="./assets/images/nexahub/mockup-2.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups adicionales de Nexahub" />
     <h2>↳ Resultado</h2>
     <p>El resultado fue el lanzamiento exitoso del nuevo CMS en la intranet de Nexahub. El proyecto no solo cumplió sus objetivos, sino que mejoró la eficiencia de comunicación y la trazabilidad de las incidencias de JIRA. La nueva interfaz ofreció una experiencia más fluida, intuitiva y agradable, reforzando su lugar dentro de la marca de Nexahub.</p>
-    <img class="media-shot" src="./assets/images/nexahub/mockup-3.jpg" alt="Mockups finales de Nexahub" />
+    <img class="media-shot" src="./assets/images/nexahub/mockup-3.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups finales de Nexahub" />
     <p style="opacity:.5;font-size:.85rem;">Este proyecto ha sido revisado para proteger información confidencial, siguiendo los términos de uso justo.</p>
   </div>
 
@@ -119,6 +102,20 @@
 <div style="padding:0 6vw 6vh;max-width:70ch;">
   <a class="next-project" href="./el-paraguas.html"><span>Siguiente proyecto</span>El Paraguas →</a>
 </div>
+
+<footer class="site-footer" id="contacto">
+  <span class="eyebrow">Contacto</span>
+  <p class="footer-lead">¿Trabajamos <em>juntos?</em></p>
+  <div class="footer-links">
+    <a href="https://www.linkedin.com/in/ismaelcasadoc/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://medium.com/@ismael.casadoc" target="_blank" rel="noopener">Medium</a>
+    <a href="./assets/cv/isma-casado-cv-es.pdf" download>Descargar CV</a>
+  </div>
+  <div class="footer-base">
+    <span>☕️ Hecho con mucho café y podcasts</span>
+    <span>© 2026 Ismael Casado Camacho</span>
+  </div>
+</footer>
 
 <script>
   // Muro de cortesía: no es seguridad real (el hash viaja en el propio código fuente).

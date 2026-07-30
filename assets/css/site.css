@@ -1,0 +1,70 @@
+/* ===========================================================================
+   site.css — estilos comunes a las 6 páginas del portfolio.
+   Lo específico de cada página (el hero interactivo de la home, el muro de
+   contraseña de los 3 proyectos con NDA) sigue viviendo en un <style> dentro
+   de esa página. Aquí solo va lo que se repite en todas.
+   =========================================================================== */
+
+:root{
+  --cream:#F6F1E7; --mint:#A7DBCB; --ink:#1C1B19; --line:rgba(28,27,25,.12);
+  --chrome-bg:#1C1B19; --chrome-fg:#F6F1E7; --chrome-accent:#A7DBCB;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+html,body{margin:0;padding:0;font-family:'Inter',sans-serif;color:var(--ink);background:var(--cream);}
+a{color:inherit;text-decoration:none;}
+
+/* Los enlaces del nav apuntan a anclas de la home; sin este margen el título
+   de la sección queda tapado al saltar. */
+[id]{scroll-margin-top:2.5rem;}
+
+/* ---------- barra superior ---------- */
+.nav{
+  display:flex;justify-content:space-between;align-items:center;padding:22px 6vw;
+  font-size:.8rem;letter-spacing:.06em;
+}
+.wordmark{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:1.15rem;}
+.navlinks{display:flex;gap:2rem;text-transform:uppercase;letter-spacing:.1em;opacity:.7;font-size:.72rem;}
+.navlinks a{transition:opacity .2s ease;}
+.navlinks a:hover{opacity:.55;}
+
+@media (max-width: 620px){
+  .nav{flex-direction:column;align-items:flex-start;gap:.9rem;}
+  .navlinks{gap:1.1rem;flex-wrap:wrap;}
+}
+
+/* ---------- tipografía compartida ---------- */
+.eyebrow{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.55;display:block;margin-bottom:.6rem;}
+
+/* ---------- cabecera de las páginas de proyecto ---------- */
+.project-header{padding:4vh 6vw 3vh;max-width:70ch;}
+.project-header h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2.2rem,5vw,3.4rem);margin:0 0 1.2rem;line-height:1.05;}
+.meta-row{display:flex;gap:2.5rem;flex-wrap:wrap;font-size:.85rem;border-top:1px solid var(--line);padding-top:1rem;}
+.meta-row div span{display:block;opacity:.5;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem;}
+.meta-row a{text-decoration:underline;}
+
+.next-project{
+  display:inline-block;margin-top:1rem;font-size:.85rem;border-top:1px solid var(--line);padding-top:1rem;
+}
+.next-project span{opacity:.5;display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;}
+
+/* ---------- franja negra de contacto: el único contraste fuerte del sitio ---------- */
+.site-footer{background:var(--ink);color:var(--cream);padding:9vh 6vw 2.2rem;}
+.site-footer .eyebrow{opacity:.5;}
+.footer-lead{
+  font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2rem,5.5vw,3.4rem);
+  line-height:1.05;margin:0 0 1.8rem;max-width:16ch;
+}
+.footer-lead em{font-style:italic;font-weight:500;color:var(--mint);}
+.footer-links{display:flex;flex-wrap:wrap;gap:1.8rem;font-size:.92rem;}
+.footer-links a{
+  border-bottom:1px solid rgba(246,241,231,.3);padding-bottom:.2rem;
+  transition:color .2s ease, border-color .2s ease;
+}
+.footer-links a:hover{color:var(--mint);border-color:var(--mint);}
+.footer-base{
+  display:flex;justify-content:space-between;gap:.8rem;flex-wrap:wrap;
+  margin-top:7vh;padding-top:1.2rem;border-top:1px solid rgba(246,241,231,.18);
+  font-size:.74rem;opacity:.55;
+}
