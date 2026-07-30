@@ -1,12 +1,235 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Portfolio test migration</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PROTOTIPO — Sistema visual (ticket 5)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Bebas+Neue&family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --yellow:#F2B705; --red:#C81D25; --navy:#11132A; --cream:#F4EFE4; --ink:#161616;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;font-family:'Inter',sans-serif;color:var(--ink);background:#fff;}
+  .variant{display:none;}
+  .variant.active{display:block;}
+  a{color:inherit;}
+  .lock{font-size:.7em;opacity:.6;margin-left:.4em;}
+  .work-tagline{opacity:.75;font-size:.95rem;margin-top:.25rem;}
+
+  /* ---------- VARIANT A — Cartel de cine ---------- */
+  #variant-a .a-topbar{
+    display:flex;justify-content:space-between;padding:14px 24px;font-size:.75rem;
+    letter-spacing:.12em;text-transform:uppercase;background:var(--navy);color:var(--cream);
+  }
+  #variant-a .a-hero{
+    position:relative;overflow:hidden;background:var(--yellow);color:var(--navy);
+    padding:14vh 6vw 10vh;text-align:center;
+  }
+  #variant-a .a-hero h1{
+    font-family:'Anton',sans-serif;font-size:min(20vw,11rem);line-height:.85;margin:0;
+    text-transform:uppercase;letter-spacing:-.01em;
+  }
+  #variant-a .a-hero p{font-size:1.1rem;max-width:34ch;margin:1.2rem auto 0;font-weight:600;}
+  #variant-a .a-glow{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(280px circle at var(--mx,50%) var(--my,50%), rgba(193,39,45,.28), transparent 65%);
+  }
+  #variant-a .a-works{background:var(--cream);}
+  #variant-a .a-row{
+    display:flex;align-items:baseline;gap:2rem;padding:2.2rem 6vw;border-top:2px solid var(--navy);
+    transition:background .15s ease, color .15s ease; text-decoration:none; color:var(--ink);
+  }
+  #variant-a .a-row:last-child{border-bottom:2px solid var(--navy);}
+  #variant-a .a-row:hover{background:var(--navy);color:var(--cream);}
+  #variant-a .a-num{font-family:'Anton',sans-serif;font-size:2.4rem;color:var(--red);min-width:2.4ch;}
+  #variant-a .a-title{font-family:'Anton',sans-serif;font-size:2rem;text-transform:uppercase;flex:1;}
+
+  /* ---------- VARIANT B — Editorial split ---------- */
+  #variant-b .b-hero{display:flex;min-height:70vh;}
+  #variant-b .b-panel{
+    flex:0 0 38%;background:var(--navy);color:var(--cream);display:flex;align-items:center;
+    justify-content:center;position:relative;
+  }
+  #variant-b .b-panel h1{
+    font-family:'Bebas Neue',sans-serif;font-size:5rem;letter-spacing:.05em;
+    writing-mode:vertical-rl;transform:rotate(180deg);margin:0;
+  }
+  #variant-b .b-main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:6vw;}
+  #variant-b .b-main .kicker{letter-spacing:.15em;text-transform:uppercase;font-size:.75rem;opacity:.6;margin-bottom:1rem;}
+  #variant-b .b-main p{max-width:42ch;font-size:1.15rem;line-height:1.5;}
+  #variant-b .b-works{padding:5vh 6vw;}
+  #variant-b .b-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:#ddd;}
+  #variant-b .b-card{background:#fff;padding:2rem;position:relative;overflow:hidden;}
+  #variant-b .b-card .b-thumb{
+    height:120px;border-radius:2px;margin-bottom:1rem;background:linear-gradient(135deg,#e9e5da,#cfc9ba);
+    transform:translateY(var(--py,0));transition:transform .05s linear;
+  }
+  #variant-b .b-card h3{font-family:'Inter',sans-serif;font-weight:800;font-size:1.1rem;margin:0 0 .3rem;}
+  #variant-b .b-card:hover h3{text-decoration:underline;text-decoration-color:var(--red);text-decoration-thickness:3px;}
+
+  /* ---------- VARIANT C — Marquee / cinema ticker ---------- */
+  #variant-c{background:var(--navy);color:var(--cream);}
+  #variant-c .c-marquee{overflow:hidden;border-top:3px solid var(--yellow);border-bottom:3px solid var(--yellow);padding:2vh 0;white-space:nowrap;}
+  #variant-c .c-marquee-track{display:inline-block;animation:scrollLeft 14s linear infinite;}
+  #variant-c .c-marquee span{
+    font-family:'Archivo Black',sans-serif;font-size:min(9vw,6rem);text-transform:uppercase;
+    -webkit-text-stroke:2px var(--yellow); color:transparent; padding:0 2vw;
+  }
+  @keyframes scrollLeft{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  #variant-c .c-hero{position:relative;padding:8vh 6vw 6vh;text-align:center;}
+  #variant-c .c-hero p{max-width:38ch;margin:1rem auto 0;opacity:.8;}
+  #variant-c .c-spot{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;
+    background:radial-gradient(220px circle at var(--mx,50%) var(--my,50%), rgba(242,183,5,.35), transparent 70%);
+  }
+  #variant-c .c-works{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:2px;background:#000;padding:2px;}
+  #variant-c .c-tile{background:#1c1f3d;padding:2rem;position:relative;text-decoration:none;color:var(--cream);}
+  #variant-c .c-tile .c-tnum{font-family:'Archivo Black',sans-serif;font-size:.85rem;color:var(--yellow);}
+  #variant-c .c-tile h3{font-family:'Archivo Black',sans-serif;font-size:1.3rem;text-transform:uppercase;margin:.5rem 0;}
+  #variant-c .c-tile:hover{background:var(--red);}
+
+  /* ---------- Prototype switcher (dev-only, remove before merging) ---------- */
+  #proto-switcher{
+    position:fixed;left:50%;bottom:20px;transform:translateX(-50%);
+    background:#111;color:#fff;border-radius:999px;padding:8px 6px;display:flex;align-items:center;
+    gap:10px;font-family:'Inter',sans-serif;font-size:.85rem;box-shadow:0 8px 24px rgba(0,0,0,.35);
+    z-index:9999;border:1px solid #F2B705;
+  }
+  #proto-switcher button{
+    background:#F2B705;color:#111;border:none;border-radius:999px;width:30px;height:30px;
+    cursor:pointer;font-weight:800;
+  }
+  #proto-switcher .label{min-width:190px;text-align:center;}
+  #proto-switcher .tag{background:#C81D25;color:#fff;font-size:.65rem;padding:2px 8px;border-radius:999px;letter-spacing:.05em;}
+</style>
 </head>
 <body>
-  <h1>🚧 En construcción</h1>
-  <p>Esto confirma que GitHub Pages está sirviendo este repositorio correctamente.</p>
+
+<!-- ============ VARIANT A: Cartel de cine ============ -->
+<section id="variant-a" class="variant">
+  <div class="a-topbar">
+    <span>Isma Casaca — Product Designer</span>
+    <span>Madrid, España</span>
+  </div>
+  <div class="a-hero" id="a-hero-glow">
+    <div class="a-glow"></div>
+    <h1>Isma<br>Casaca</h1>
+    <p>Producto, UX/UI y una mochila siempre a mano. Diseño experiencias que resuelven problemas de verdad.</p>
+  </div>
+  <div class="a-works">
+    <a class="a-row" href="#"><span class="a-num">01</span><span class="a-title">Manu Cardiel</span><span class="work-tagline">Exposición virtual de arte</span></a>
+    <a class="a-row" href="#"><span class="a-num">02</span><span class="a-title">Adrenaline<span class="lock">🔒</span></span><span class="work-tagline">App deportiva whitelabel</span></a>
+    <a class="a-row" href="#"><span class="a-num">03</span><span class="a-title">Arabvision<span class="lock">🔒</span></span><span class="work-tagline">Streaming OTT</span></a>
+    <a class="a-row" href="#"><span class="a-num">04</span><span class="a-title">Nexahub<span class="lock">🔒</span></span><span class="work-tagline">CMS de incidencias</span></a>
+    <a class="a-row" href="#"><span class="a-num">05</span><span class="a-title">El Paraguas</span><span class="work-tagline">App de viajes post-pandemia</span></a>
+  </div>
+</section>
+
+<!-- ============ VARIANT B: Editorial split ============ -->
+<section id="variant-b" class="variant">
+  <div class="b-hero">
+    <div class="b-panel"><h1>Isma Casaca</h1></div>
+    <div class="b-main">
+      <div class="kicker">Product Designer · Madrid</div>
+      <p>Backpacker, cafetero y diseñador de producto. Estudié arquitectura y ahora diseño sistemas y experiencias digitales, de Smart TV a realidad virtual.</p>
+    </div>
+  </div>
+  <div class="b-works">
+    <div class="b-grid" id="b-grid">
+      <a class="b-card" href="#"><div class="b-thumb"></div><h3>01 · Manu Cardiel</h3><div class="work-tagline">Exposición virtual de arte</div></a>
+      <a class="b-card" href="#"><div class="b-thumb"></div><h3>02 · Adrenaline 🔒</h3><div class="work-tagline">App deportiva whitelabel</div></a>
+      <a class="b-card" href="#"><div class="b-thumb"></div><h3>03 · Arabvision 🔒</h3><div class="work-tagline">Streaming OTT</div></a>
+      <a class="b-card" href="#"><div class="b-thumb"></div><h3>04 · Nexahub 🔒</h3><div class="work-tagline">CMS de incidencias</div></a>
+      <a class="b-card" href="#"><div class="b-thumb"></div><h3>05 · El Paraguas</h3><div class="work-tagline">App de viajes post-pandemia</div></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VARIANT C: Marquee / cinema ticker ============ -->
+<section id="variant-c" class="variant">
+  <div class="c-marquee"><div class="c-marquee-track">
+    <span>ISMA CASACA · ISMA CASACA · ISMA CASACA · ISMA CASACA ·</span>
+  </div></div>
+  <div class="c-hero" id="c-hero-glow">
+    <div class="c-spot"></div>
+    <p>Product Designer basado en Madrid. Diseño experiencias que combinan tecnología, narrativa visual y muchas ganas de viajar.</p>
+  </div>
+  <div class="c-works">
+    <a class="c-tile" href="#"><div class="c-tnum">01</div><h3>Manu Cardiel</h3><div class="work-tagline">Exposición virtual de arte</div></a>
+    <a class="c-tile" href="#"><div class="c-tnum">02</div><h3>Adrenaline 🔒</h3><div class="work-tagline">App deportiva whitelabel</div></a>
+    <a class="c-tile" href="#"><div class="c-tnum">03</div><h3>Arabvision 🔒</h3><div class="work-tagline">Streaming OTT</div></a>
+    <a class="c-tile" href="#"><div class="c-tnum">04</div><h3>Nexahub 🔒</h3><div class="work-tagline">CMS de incidencias</div></a>
+    <a class="c-tile" href="#"><div class="c-tnum">05</div><h3>El Paraguas</h3><div class="work-tagline">App de viajes post-pandemia</div></a>
+  </div>
+</section>
+
+<!-- ============ PROTOTYPE SWITCHER — remove before merging to main ============ -->
+<div id="proto-switcher">
+  <span class="tag">PROTOTIPO</span>
+  <button id="proto-prev" aria-label="Variante anterior">‹</button>
+  <span class="label" id="proto-label"></span>
+  <button id="proto-next" aria-label="Variante siguiente">›</button>
+</div>
+
+<script>
+  const VARIANTS = [
+    { key:'a', name:'A — Cartel de cine (Anton, amarillo/navy, lista)' },
+    { key:'b', name:'B — Editorial split (Bebas Neue, grid sobrio)' },
+    { key:'c', name:'C — Marquee cinema (Archivo Black, oscuro, focos)' },
+  ];
+
+  function currentVariantFromURL(){
+    const p = new URLSearchParams(location.search).get('variant');
+    const found = VARIANTS.find(v => v.key === p);
+    return found ? found.key : 'a';
+  }
+
+  function showVariant(key){
+    document.querySelectorAll('.variant').forEach(el => el.classList.remove('active'));
+    document.getElementById('variant-' + key).classList.add('active');
+    const v = VARIANTS.find(v => v.key === key);
+    document.getElementById('proto-label').textContent = v.name;
+    const url = new URL(location.href);
+    url.searchParams.set('variant', key);
+    history.replaceState(null, '', url);
+  }
+
+  let idx = VARIANTS.findIndex(v => v.key === currentVariantFromURL());
+  showVariant(VARIANTS[idx].key);
+
+  function cycle(delta){
+    idx = (idx + delta + VARIANTS.length) % VARIANTS.length;
+    showVariant(VARIANTS[idx].key);
+  }
+  document.getElementById('proto-prev').addEventListener('click', () => cycle(-1));
+  document.getElementById('proto-next').addEventListener('click', () => cycle(1));
+  window.addEventListener('keydown', (e) => {
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+    if (e.key === 'ArrowLeft') cycle(-1);
+    if (e.key === 'ArrowRight') cycle(1);
+  });
+
+  // Subtle mouse-glow demo (variants A and C)
+  function wireGlow(el){
+    if(!el) return;
+    el.addEventListener('mousemove', (e) => {
+      const r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  }
+  wireGlow(document.getElementById('a-hero-glow'));
+  wireGlow(document.getElementById('c-hero-glow'));
+
+  // Subtle parallax demo (variant B thumbs)
+  window.addEventListener('scroll', () => {
+    document.querySelectorAll('#b-grid .b-thumb').forEach((el, i) => {
+      const speed = 0.06 + (i % 3) * 0.02;
+      el.style.setProperty('--py', (window.scrollY * speed * -1) + 'px');
+    });
+  });
+</script>
 </body>
 </html>
