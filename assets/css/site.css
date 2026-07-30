@@ -8,6 +8,7 @@
 :root{
   --cream:#F6F1E7; --mint:#A7DBCB; --ink:#1C1B19; --line:rgba(28,27,25,.12);
   --chrome-bg:#1C1B19; --chrome-fg:#F6F1E7; --chrome-accent:#A7DBCB;
+  --pt-bg:#141312; /* casi negro del panel de transición */
 }
 
 *{box-sizing:border-box;}
@@ -32,6 +33,67 @@ a{color:inherit;text-decoration:none;}
 @media (max-width: 620px){
   .nav{flex-direction:column;align-items:flex-start;gap:.9rem;}
   .navlinks{gap:1.1rem;flex-wrap:wrap;}
+}
+
+/* ---------- transición entre páginas ---------- */
+
+/* ENTRADA. Pseudo-elemento del <html>, no un div: así ya está pintado en el
+   primer fotograma, sin esperar a que se parsee el <body>. Es una animación,
+   no una transición, para que se destape sola: si el JS falla, la página nueva
+   no puede quedarse con la pantalla negra puesta. La clase la pone un script
+   diminuto en el <head> de cada página. */
+html.pt-cover::after{
+  content:"";position:fixed;inset:0;z-index:9998;pointer-events:none;
+  background:var(--pt-bg);transform:translateY(0);
+  animation:pt-reveal .55s cubic-bezier(.65,0,.35,1) .1s forwards;
+}
+@keyframes pt-reveal{ to{ transform:translateY(-100%); } }
+
+/* SALIDA. Este sí es un div, porque lleva el spinner dentro. */
+#pt{
+  position:fixed;inset:0;z-index:10000;background:var(--pt-bg);
+  display:grid;place-items:center;
+  transform:translateY(100%);
+  transition:transform .4s cubic-bezier(.65,0,.35,1);
+}
+#pt.is-in{transform:translateY(0);}
+#pt .pt-spinner{opacity:0;transition:opacity .22s ease .16s;}
+#pt.is-in .pt-spinner{opacity:1;}
+
+/* El spinner es la rejilla del hero en miniatura: seis celdas, y el punto de
+   cada una se enciende por turnos. */
+.pt-spinner{
+  display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);
+  width:54px;height:36px;
+}
+.pt-spinner span{
+  display:grid;place-items:center;
+  border-right:1px solid rgba(246,241,231,.26);
+  border-bottom:1px solid rgba(246,241,231,.26);
+}
+.pt-spinner span:nth-child(3n){border-right:none;}
+.pt-spinner span:nth-child(n+4){border-bottom:none;}
+.pt-spinner span::before{
+  content:"";width:5px;height:5px;border-radius:50%;background:var(--cream);
+  opacity:.2;transform:scale(.65);
+  animation:pt-blink 1.15s ease-in-out infinite;
+}
+.pt-spinner span:nth-child(1)::before{animation-delay:0s;}
+.pt-spinner span:nth-child(2)::before{animation-delay:.1s;}
+.pt-spinner span:nth-child(3)::before{animation-delay:.2s;}
+.pt-spinner span:nth-child(4)::before{animation-delay:.3s;}
+.pt-spinner span:nth-child(5)::before{animation-delay:.4s;}
+.pt-spinner span:nth-child(6)::before{animation-delay:.5s;}
+@keyframes pt-blink{
+  0%,65%,100%{opacity:.2;transform:scale(.65);}
+  22%{opacity:1;transform:scale(1);}
+}
+
+@media (prefers-reduced-motion: reduce){
+  /* El JS ni siquiera intercepta los clics; esto solo evita que un panel
+     heredado de una pestaña restaurada se quede a la vista. */
+  html.pt-cover::after{animation-duration:.01s;animation-delay:0s;}
+  .pt-spinner span::before{animation:none;opacity:.7;transform:none;}
 }
 
 /* Texto solo para lectores de pantalla (los enlaces del hero son puro dibujo). */
