@@ -15,17 +15,26 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,500&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<!-- Una display distinta por proyecto para el hero. Cada petición lleva `text=`,
+     así Google devuelve solo los caracteres de ese nombre y cada fuente pesa
+     unos cientos de bytes en vez de decenas de kB. -->
+<link href="https://fonts.googleapis.com/css2?family=Bungee&text=Manu%20Cardiel&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&text=Adrenaline&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@700&text=Arabvision&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700&text=Nexahub&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Yeseva+One&text=El%20Paraguas&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./assets/css/site.css">
 <style>
   .hero{
-    background:var(--mint);min-height:78vh;position:relative;overflow:hidden;
+    background:var(--hero-bg,var(--mint));min-height:78vh;position:relative;overflow:hidden;
     display:flex;align-items:flex-end;padding:0 6vw 2.4rem;
+    transition:background-color .55s cubic-bezier(.4,0,.2,1);
   }
   @media (hover:hover) and (pointer:fine){ .hero{cursor:none;} }
 
   /* ---------- capa de distorsión: mancha de ruido borroso (rollo shader) que sigue al cursor ---------- */
   .hero-distort{
-    position:absolute;width:420px;height:420px;left:0;top:0;pointer-events:none;
+    position:absolute;width:420px;height:420px;left:0;top:0;pointer-events:none;z-index:0;
     transform:translate3d(-9999px,-9999px,0);
     filter:url(#hero-distort-filter);
     -webkit-mask-image: radial-gradient(circle, black 0%, transparent 68%);
@@ -33,21 +42,74 @@
     opacity:.55;
   }
 
-  /* ---------- grid central: 9 celdas independientes, parallax de profundidad falsa ---------- */
-  .hero-grid{
-    position:absolute;inset:0;margin:auto;width:min(46vw,420px);height:min(46vw,420px);top:8%;
-    display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
-    pointer-events:none;
+  /* ---------- nombres de proyecto: uno por celda, apilados en el mismo sitio ---------- */
+  .hero-titles{
+    position:absolute;inset:0;display:grid;place-items:center;
+    pointer-events:none;z-index:1;padding:0 4vw;
   }
-  .grid-cell{
-    border-right:1px solid rgba(28,27,25,.18);border-bottom:1px solid rgba(28,27,25,.18);
-    transform:translate(var(--cx,0px),var(--cy,0px));
-    transition:transform .18s ease-out;will-change:transform;
+  .hero-title{
+    grid-area:1/1;white-space:nowrap;line-height:.95;color:var(--ink);
+    font-size:clamp(2.4rem, calc(9.5vw * var(--sz,1)), 8rem);
+    opacity:0;transform:translateY(30px);
+    transition:opacity .34s ease, transform .52s cubic-bezier(.2,.7,.3,1);
   }
-  .grid-cell:nth-child(3n){border-right:none;}
-  .grid-cell:nth-child(n+7){border-bottom:none;}
+  /* El filtro solo se engancha a la pieza visible: mantenerlo siempre activo
+     obligaría al navegador a recalcular el desplazamiento de 6 titulares. */
+  .hero-title.is-on{opacity:1;transform:translateY(0);filter:url(#liquid-warp);}
 
-  .hero-eyebrow{font-size:.75rem;letter-spacing:.08em;line-height:1.5;position:relative;z-index:1;}
+  /* ---------- rejilla: 6 celdas, cada una un destino ---------- */
+  .hero-grid{
+    position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
+    width:min(62vw,720px);aspect-ratio:3/2;max-height:60vh;z-index:2;
+    display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);
+  }
+  .grid-cell{position:relative;display:block;}
+  /* El área clicable se queda quieta y lo que se desplaza es el interior: si
+     moviéramos la propia celda, se escaparía del cursor y el hover parpadearía. */
+  .cell-inner{
+    position:absolute;inset:0;display:grid;place-items:center;
+    border:1px solid rgba(28,27,25,.28);
+    transform:translate(var(--cx,0px),var(--cy,0px));
+    transition:transform .18s ease-out, background-color .28s ease, border-color .28s ease;
+    will-change:transform;
+  }
+  .cell-dot{
+    width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.92);
+    transition:opacity .2s ease, transform .2s ease;
+  }
+  .cell-arrow{
+    position:absolute;width:46px;height:46px;border-radius:50%;border:1px solid var(--ink);
+    display:grid;place-items:center;font-size:1.05rem;
+    opacity:0;transform:scale(.78);
+    transition:opacity .24s ease, transform .34s cubic-bezier(.2,.7,.3,1);
+  }
+  .grid-cell:hover .cell-inner,
+  .grid-cell:focus-visible .cell-inner{background:rgba(246,241,231,.94);border-color:transparent;}
+  .grid-cell:hover .cell-dot,
+  .grid-cell:focus-visible .cell-dot{opacity:0;transform:scale(.4);}
+  .grid-cell:hover .cell-arrow,
+  .grid-cell:focus-visible .cell-arrow{opacity:1;transform:scale(1);}
+  .grid-cell:focus{outline:none;}
+  .grid-cell:focus-visible .cell-inner{outline:2px solid var(--ink);outline-offset:-2px;}
+
+  .cell-label{display:none;}
+
+  /* Sin hover (móvil/táctil) no hay forma de descubrir los nombres, así que
+     cada celda los lleva escritos y los titulares grandes sobran. Se incluye
+     el ancho porque hay navegadores que declaran hover aunque sean táctiles,
+     y con la rejilla pequeña las celdas quedan por debajo del tamaño mínimo
+     para tocarlas con el dedo. */
+  @media (hover:none), (max-width: 760px){
+    .hero-titles{display:none;}
+    .cell-dot, .cell-arrow{display:none;}
+    .cell-label{
+      display:block;text-align:center;padding:.4rem;line-height:1.1;
+      font-size:clamp(.72rem,2.6vw,.95rem);
+    }
+    .hero-grid{width:88vw;top:44%;}
+  }
+
+  .hero-eyebrow{font-size:.75rem;letter-spacing:.08em;line-height:1.5;position:relative;z-index:3;}
 
   /* ---------- cursor a medida: bolita de 24px que invierte lo que tiene detrás ---------- */
   #cursor-dot{
@@ -134,8 +196,11 @@
   }
 
   @media (prefers-reduced-motion: reduce){
-    .grid-cell{transition:none;}
+    .cell-inner{transition:background-color .28s ease;}
     .hero-distort{display:none;}
+    /* Sin el filtro los nombres siguen apareciendo; lo que se va es el temblor. */
+    .hero-title{transition:opacity .25s ease;transform:none;}
+    .hero-title.is-on{transform:none;filter:none;}
     .work-media img, .work-row:hover .work-media img{transition:none;transform:none;}
     .work-media.is-locked img, .work-row:hover .work-media.is-locked img{transform:scale(1.15);}
   }
@@ -154,6 +219,13 @@
     <feComposite in="tint" in2="softGrain" operator="in" result="tintedGrain"/>
     <feGaussianBlur in="tintedGrain" stdDeviation="7"/>
   </filter>
+
+  <!-- Distorsión líquida de los titulares. El JS mueve `baseFrequency` y `scale`
+       según dónde esté el ratón, así la onda viaja con el cursor. -->
+  <filter id="liquid-warp" x="-35%" y="-35%" width="170%" height="170%" color-interpolation-filters="sRGB">
+    <feTurbulence id="liquid-turb" type="fractalNoise" baseFrequency="0.006 0.011" numOctaves="2" seed="3" result="warp"/>
+    <feDisplacementMap id="liquid-disp" in="SourceGraphic" in2="warp" scale="0" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
 </svg>
 
 <div class="nav">
@@ -163,17 +235,43 @@
 
 <div class="hero" id="hero">
   <div class="hero-distort" id="hero-distort"></div>
-  <div class="hero-grid" id="hero-grid">
-    <div class="grid-cell" data-depth="1.5"></div>
-    <div class="grid-cell" data-depth="1.0"></div>
-    <div class="grid-cell" data-depth="1.5"></div>
-    <div class="grid-cell" data-depth="1.0"></div>
-    <div class="grid-cell" data-depth="0.5"></div>
-    <div class="grid-cell" data-depth="1.0"></div>
-    <div class="grid-cell" data-depth="1.5"></div>
-    <div class="grid-cell" data-depth="1.0"></div>
-    <div class="grid-cell" data-depth="1.5"></div>
+
+  <div class="hero-titles" id="hero-titles" aria-hidden="true">
+    <span class="hero-title" style="font-family:'Bungee',sans-serif;--sz:.78">Manu Cardiel</span>
+    <span class="hero-title" style="font-family:'Anton',sans-serif;--sz:1.15;letter-spacing:-.01em">Adrenaline</span>
+    <span class="hero-title" style="font-family:'Bodoni Moda',serif;font-weight:700;--sz:1">Arabvision</span>
+    <span class="hero-title" style="font-family:'Unbounded',sans-serif;font-weight:700;--sz:.88">Nexahub</span>
+    <span class="hero-title" style="font-family:'Yeseva One',serif;--sz:.95">El Paraguas</span>
+    <span class="hero-title" style="font-family:'Fraunces',serif;font-style:italic;font-weight:500;--sz:1.1">Sobre mí</span>
   </div>
+
+  <nav class="hero-grid" id="hero-grid" aria-label="Índice del sitio">
+    <a class="grid-cell" href="./manu-cardiel.html" data-depth="1.4" data-tone="#E8B7A4">
+      <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">Manu Cardiel</span></span>
+      <span class="sr-only">Manu Cardiel</span>
+    </a>
+    <a class="grid-cell" href="./adrenaline.html" data-depth="0.7" data-tone="#CFD8C8">
+      <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">Adrenaline</span></span>
+      <span class="sr-only">Adrenaline</span>
+    </a>
+    <a class="grid-cell" href="./arabvision.html" data-depth="1.4" data-tone="#9FBFC9">
+      <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">Arabvision</span></span>
+      <span class="sr-only">Arabvision</span>
+    </a>
+    <a class="grid-cell" href="./nexahub.html" data-depth="0.7" data-tone="#E3C98F">
+      <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">Nexahub</span></span>
+      <span class="sr-only">Nexahub</span>
+    </a>
+    <a class="grid-cell" href="./el-paraguas.html" data-depth="1.4" data-tone="#A9C7DC">
+      <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">El Paraguas</span></span>
+      <span class="sr-only">El Paraguas</span>
+    </a>
+    <a class="grid-cell" href="#sobre-mi" data-depth="0.7" data-tone="#E0D6C8">
+      <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">Sobre mí</span></span>
+      <span class="sr-only">Sobre mí</span>
+    </a>
+  </nav>
+
   <div class="hero-eyebrow">Product<br>Design &amp;<br>UX</div>
 </div>
 
@@ -299,25 +397,35 @@
   const hero = document.getElementById('hero');
   const heroDistort = document.getElementById('hero-distort');
   const cells = Array.from(document.querySelectorAll('.grid-cell'));
+  const titles = Array.from(document.querySelectorAll('.hero-title'));
   const cursorDot = document.getElementById('cursor-dot');
   const finePointer = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
 
-  const AMP = 22; // px máximo de desplazamiento para el depth=1
+  // Amplitud contenida a propósito: lo que se mueve es el interior de la celda,
+  // no su área clicable, pero pasarse haría que el borde se despegue del cursor.
+  const AMP = 13; // px máximo de desplazamiento para el depth=1
 
   const SHADER_SIZE = 420;
+
+  // Posición del ratón dentro del hero, en 0..1. La usan tanto el parallax como
+  // el shader de los titulares.
+  let mouseNX = 0.5, mouseNY = 0.5;
 
   function onHeroMove(e){
     const r = hero.getBoundingClientRect();
     const mx = e.clientX - r.left;
     const my = e.clientY - r.top;
+    mouseNX = mx / r.width;
+    mouseNY = my / r.height;
 
     if (!reduceMotion){
-      const px = mx / r.width - 0.5;
-      const py = my / r.height - 0.5;
+      const px = mouseNX - 0.5;
+      const py = mouseNY - 0.5;
       cells.forEach(cell => {
         const depth = parseFloat(cell.dataset.depth);
-        cell.style.setProperty('--cx', (px * AMP * depth) + 'px');
-        cell.style.setProperty('--cy', (py * AMP * depth) + 'px');
+        const inner = cell.firstElementChild;
+        inner.style.setProperty('--cx', (px * AMP * depth) + 'px');
+        inner.style.setProperty('--cy', (py * AMP * depth) + 'px');
       });
       heroDistort.style.transform =
         `translate3d(${mx - SHADER_SIZE / 2}px, ${my - SHADER_SIZE / 2}px, 0)`;
@@ -327,6 +435,58 @@
   hero.addEventListener('mouseleave', () => {
     heroDistort.style.transform = 'translate3d(-9999px,-9999px,0)';
   });
+
+  /* ---------- hover de celda: fondo del hero + nombre del proyecto ---------- */
+
+  const turb = document.getElementById('liquid-turb');
+  const disp = document.getElementById('liquid-disp');
+  let activeIndex = -1;
+  let warpFrame = null;
+
+  // El desplazamiento arranca fuerte y se asienta: la letra "cuaja" al entrar
+  // en vez de quedarse temblando de forma constante.
+  let warpEnergy = 0;
+
+  function warpLoop(){
+    warpEnergy += (1 - warpEnergy) * 0.06;       // se asienta en ~0,8 s
+    const settle = 1 - warpEnergy;               // 1 al entrar -> 0 al reposar
+    // El nombre tiene que seguir leyéndose una vez asentado, así que el chapuzón
+    // inicial es fuerte pero el reposo se queda en una ondulación suave.
+    const band = 1 - Math.min(1, Math.abs(mouseNY - 0.5) * 2);
+    const scale = 5 + settle * 20 + band * 9;
+    // Las ondas se estiran o comprimen según dónde esté el cursor, así el
+    // líquido parece venir de donde está el ratón.
+    const fx = (0.004 + mouseNX * 0.010).toFixed(4);
+    const fy = (0.006 + mouseNY * 0.014).toFixed(4);
+    turb.setAttribute('baseFrequency', fx + ' ' + fy);
+    disp.setAttribute('scale', scale.toFixed(1));
+    warpFrame = requestAnimationFrame(warpLoop);
+  }
+
+  function activate(i){
+    if (i === activeIndex) return;
+    activeIndex = i;
+    titles.forEach((t, n) => t.classList.toggle('is-on', n === i));
+
+    if (i === -1){
+      hero.style.removeProperty('--hero-bg');
+      if (warpFrame){ cancelAnimationFrame(warpFrame); warpFrame = null; }
+      disp.setAttribute('scale', '0');
+      return;
+    }
+
+    hero.style.setProperty('--hero-bg', cells[i].dataset.tone);
+    if (reduceMotion) return;
+    warpEnergy = 0;
+    if (!warpFrame) warpFrame = requestAnimationFrame(warpLoop);
+  }
+
+  cells.forEach((cell, i) => {
+    cell.addEventListener('mouseenter', () => activate(i));
+    cell.addEventListener('focus', () => activate(i));
+    cell.addEventListener('blur', () => activate(-1));
+  });
+  document.getElementById('hero-grid').addEventListener('mouseleave', () => activate(-1));
 
   if (finePointer){
     document.addEventListener('mousemove', (e) => {
