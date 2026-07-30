@@ -3,17 +3,20 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Isma Casaca — Product Designer</title>
+<title>PROTOTIPO — Ticket 6: parallax + rastro del ratón (variantes 1/2/3)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,500&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --cream:#F6F1E7; --mint:#A7DBCB; --ink:#1C1B19; --line:rgba(28,27,25,.12);
+    --chrome-bg:#1C1B19; --chrome-fg:#F6F1E7; --chrome-accent:#A7DBCB;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;font-family:'Inter',sans-serif;color:var(--ink);background:var(--cream);}
   a{color:inherit;text-decoration:none;}
+  .meta-banner{font-size:.8rem;text-align:center;padding:10px 16px;background:var(--chrome-bg);color:var(--chrome-fg);letter-spacing:.02em;}
+  .meta-banner b{color:var(--chrome-accent);}
 
   .nav{
     display:flex;justify-content:space-between;align-items:center;padding:22px 6vw;
@@ -33,6 +36,8 @@
       linear-gradient(to bottom, rgba(28,27,25,.16) 1px, transparent 1px);
     background-size:33.34% 33.34%;
     top:8%;
+    transform:translate(var(--hx,0px),var(--hy,0px));
+    transition:transform .2s ease-out;
   }
   .hero-eyebrow{font-size:.75rem;letter-spacing:.08em;line-height:1.5;position:relative;z-index:1;}
 
@@ -54,26 +59,56 @@
   }
   .work-img{
     flex:1;height:280px;border-radius:4px;background:linear-gradient(160deg,var(--tone1,#e8b7a4),var(--tone2,#f6f1e7) 75%);
+    transform:translateY(var(--py,0px));
     transition:transform .35s ease;
   }
-  .work-row:hover .work-img{transform:scale(1.015);}
+  .work-row:hover .work-img{transform:translateY(var(--py,0px)) scale(1.015);}
+
+  /* ---------- Variante 3: rastro de luz sobre el texto ---------- */
+  .glow-target{position:relative;}
+  .glow-target::after{
+    content:"";position:absolute;inset:-14px -18px;pointer-events:none;border-radius:10px;
+    opacity:0;transition:opacity .3s ease;z-index:-1;
+    background:radial-gradient(160px circle at var(--gx,50%) var(--gy,50%), rgba(193,98,46,.22), transparent 70%);
+  }
+  .glow-target:hover::after{opacity:1;}
+  .hero-eyebrow.glow-target::after{
+    background:radial-gradient(180px circle at var(--gx,50%) var(--gy,50%), rgba(28,27,25,.14), transparent 70%);
+  }
 
   @media (max-width: 760px){
     .work-row, .work-row:nth-child(even){flex-direction:column;align-items:flex-start;gap:1.5rem;}
     .work-text{flex:none;}
     .work-img{width:100%;}
   }
+
+  @media (prefers-reduced-motion: reduce){
+    .hero-grid, .work-img{transition:none;}
+  }
+
+  /* ---------- Prototype switcher ---------- */
+  #proto-switcher{
+    position:fixed;left:50%;bottom:20px;transform:translateX(-50%);
+    background:var(--chrome-bg);color:var(--chrome-fg);border-radius:999px;padding:8px 6px;display:flex;align-items:center;
+    gap:10px;font-size:.85rem;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:9999;border:1px solid var(--chrome-accent);
+  }
+  #proto-switcher button{background:var(--chrome-accent);color:#111;border:none;border-radius:999px;width:30px;height:30px;cursor:pointer;font-weight:800;}
+  #proto-switcher button:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+  #proto-switcher .label{min-width:230px;text-align:center;}
+  #proto-switcher .tag{background:#C1622E;color:#fff;font-size:.65rem;padding:2px 8px;border-radius:999px;letter-spacing:.05em;}
 </style>
 </head>
 <body>
+
+<div class="meta-banner">PROTOTIPO ticket 6 — <b>1</b> solo hero · <b>2</b> + parallax miniaturas · <b>3</b> + glow de texto. Flechas o ← → para cambiar.</div>
 
 <div class="nav">
   <span class="wordmark">Isma Casaca</span>
   <div class="navlinks"><span>Trabajo</span><span>Sobre mí</span><span>Contacto</span></div>
 </div>
-<div class="hero">
-  <div class="hero-grid"></div>
-  <div class="hero-eyebrow">Product<br>Design &amp;<br>UX</div>
+<div class="hero" id="hero">
+  <div class="hero-grid" id="hero-grid"></div>
+  <div class="hero-eyebrow" id="hero-eyebrow">Product<br>Design &amp;<br>UX</div>
 </div>
 <div class="works">
   <a class="work-row" href="#" style="--tone1:#e8b7a4;--tone2:#f6f1e7">
@@ -123,5 +158,97 @@
   </a>
 </div>
 
+<div id="proto-switcher">
+  <span class="tag">PROTOTIPO</span>
+  <button id="proto-prev" aria-label="Variante anterior">‹</button>
+  <span class="label" id="proto-label"></span>
+  <button id="proto-next" aria-label="Variante siguiente">›</button>
+</div>
+
+<script>
+  const VARIANTS = [
+    { key:'1', name:'1 — Solo hero (parallax de profundidad)' },
+    { key:'2', name:'2 — + parallax en miniaturas al hacer scroll' },
+    { key:'3', name:'3 — + rastro de luz sobre los títulos' },
+  ];
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const hero = document.getElementById('hero');
+  const heroGrid = document.getElementById('hero-grid');
+  const heroEyebrow = document.getElementById('hero-eyebrow');
+  const workImgs = Array.from(document.querySelectorAll('.work-img'));
+  const titles = Array.from(document.querySelectorAll('.work-row h3'));
+
+  let current = '1';
+
+  function heroParallax(e){
+    if (reduceMotion) return;
+    const r = hero.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    heroGrid.style.setProperty('--hx', (px * 18) + 'px');
+    heroGrid.style.setProperty('--hy', (py * 18) + 'px');
+  }
+
+  function scrollParallax(){
+    if (reduceMotion || current === '1') return;
+    workImgs.forEach((el, i) => {
+      const speed = 0.05 + (i % 3) * 0.02;
+      el.style.setProperty('--py', (window.scrollY * speed * -1) + 'px');
+    });
+  }
+
+  function wireGlow(el){
+    el.addEventListener('mousemove', (e) => {
+      const r = el.getBoundingClientRect();
+      el.style.setProperty('--gx', (e.clientX - r.left) + 'px');
+      el.style.setProperty('--gy', (e.clientY - r.top) + 'px');
+    });
+  }
+  wireGlow(heroEyebrow);
+  titles.forEach(wireGlow);
+
+  function applyVariant(key){
+    current = key;
+    const showGlow = key === '3';
+    heroEyebrow.classList.toggle('glow-target', showGlow);
+    titles.forEach(t => t.classList.toggle('glow-target', showGlow));
+    if (key === '1') {
+      workImgs.forEach(el => el.style.setProperty('--py', '0px'));
+    } else {
+      scrollParallax();
+    }
+  }
+
+  hero.addEventListener('mousemove', heroParallax);
+  window.addEventListener('scroll', scrollParallax);
+
+  function currentVariantFromURL(){
+    const p = new URLSearchParams(location.search).get('variant');
+    return VARIANTS.find(v => v.key === p) ? p : '1';
+  }
+  function showVariant(key){
+    applyVariant(key);
+    const v = VARIANTS.find(v => v.key === key);
+    document.getElementById('proto-label').textContent = v.name;
+    try{
+      const url = new URL(location.href);
+      url.searchParams.set('variant', key);
+      history.replaceState(null, '', url);
+    }catch(e){}
+  }
+  let idx = VARIANTS.findIndex(v => v.key === currentVariantFromURL());
+  if (idx < 0) idx = 0;
+  showVariant(VARIANTS[idx].key);
+  function cycle(delta){ idx = (idx + delta + VARIANTS.length) % VARIANTS.length; showVariant(VARIANTS[idx].key); }
+  document.getElementById('proto-prev').addEventListener('click', () => cycle(-1));
+  document.getElementById('proto-next').addEventListener('click', () => cycle(1));
+  window.addEventListener('keydown', (e) => {
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+    if (e.key === 'ArrowLeft') cycle(-1);
+    if (e.key === 'ArrowRight') cycle(1);
+  });
+</script>
 </body>
 </html>
