@@ -51,7 +51,7 @@ Estructura del sitio:
 - [ ] #3 Conseguir el archivo del CV (task)
 - [x] #4 Crear el repo GitHub y desplegar una página de prueba con Pages (task)
 - [x] #5 Definir el sistema visual: hero Mickey17 + páginas de proyecto sobrias (prototype)
-- [ ] #6 Definir el efecto de parallax y el rastro sutil del ratón (prototype)
+- [x] #6 Definir el efecto de parallax y el rastro sutil del ratón (prototype)
 - [ ] #7 Definir el mecanismo del muro de contraseña (grilling)
 - [ ] #8 Construir y desplegar el MVP completo del portfolio (task, bloqueado por #2-#7)
 
@@ -59,6 +59,7 @@ Estructura del sitio:
 
 - [Crear el repo GitHub y desplegar una página de prueba con Pages](https://github.com/i-casaca/portfolio-test-migration/issues/4) — repo público creado, Pages activo en `main`/`/`, verificado en navegador; tracker migrado a GitHub Issues; convención de ramas acordada (`main` + rama por ticket + PR).
 - [Definir el sistema visual: hero Mickey17 + páginas de proyecto sobrias](https://github.com/i-casaca/portfolio-test-migration/issues/5) — el hero "cartel de cine" (Mickey17) se descartó por "demasiado brutal"; dirección final: estructura de filas alternadas fiel a natefussner.com (crema + menta, Fraunces/Inter), fusionada a `main` vía PR #9.
+- [Definir el efecto de parallax y el rastro sutil del ratón](https://github.com/i-casaca/portfolio-test-migration/issues/6) — grid del hero con 9 celdas independientes (parallax 3D falso), cursor a medida de 24px con inversión de color, y una mancha de ruido borroso gris-verdoso (shader SVG) que sigue al cursor; fusionado a `main` vía PR #10.
 
 ## Not yet specified
 
@@ -79,4 +80,5 @@ Estructura del sitio:
   explícitamente como muro "blando" (cortesía visual), no como control de acceso real.
 - Repo privado de GitHub / GitHub Pro de pago — descartado a favor de repo público, dado que es
   una prueba y no justifica el coste.
+
 
