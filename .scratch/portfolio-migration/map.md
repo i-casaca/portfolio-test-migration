@@ -48,7 +48,7 @@ Estructura del sitio:
 ## Tickets
 
 - [x] #2 Extraer contenido y assets completos de los 4 proyectos restantes (research)
-- [ ] #3 Conseguir el archivo del CV (task)
+- [x] #3 Conseguir el archivo del CV (task)
 - [x] #4 Crear el repo GitHub y desplegar una página de prueba con Pages (task)
 - [x] #5 Definir el sistema visual: hero Mickey17 + páginas de proyecto sobrias (prototype)
 - [x] #6 Definir el efecto de parallax y el rastro sutil del ratón (prototype)
@@ -62,6 +62,7 @@ Estructura del sitio:
 - [Definir el efecto de parallax y el rastro sutil del ratón](https://github.com/i-casaca/portfolio-test-migration/issues/6) — grid del hero con 9 celdas independientes (parallax 3D falso), cursor a medida de 24px con inversión de color, y una mancha de ruido borroso gris-verdoso (shader SVG) que sigue al cursor; fusionado a `main` vía PR #10.
 - [Definir el mecanismo del muro de contraseña](https://github.com/i-casaca/portfolio-test-migration/issues/7) — contraseña única (`cafeculpable`) para los 3 proyectos NDA, se pide siempre (sin recordar), difumina todo (texto e imágenes), comparación por hash SHA-256 en el navegador; demostrado en `adrenaline.html`, fusionado a `main` vía PR #11.
 - [Extraer contenido y assets completos de los 4 proyectos restantes](https://github.com/i-casaca/portfolio-test-migration/issues/2) — construidas las 4 páginas que faltaban (`manu-cardiel.html`, `arabvision.html`, `nexahub.html`, `el-paraguas.html`) con contenido real traducido e imágenes reales descargadas; las 5 tarjetas de la home ya enlazan a páginas reales; fusionado a `main` vía PR #12.
+- [Conseguir el archivo del CV](https://github.com/i-casaca/portfolio-test-migration/issues/3) — el botón original enlazaba a una carpeta de Drive; Ismael pasó el PDF en español directo; solo se ofrece español por ahora (bilingüe fuera de alcance); enlace 'Descargar CV' añadido en las 6 páginas; fusionado a `main` vía PR #13.
 
 ## Not yet specified
 
@@ -82,6 +83,7 @@ Estructura del sitio:
   explícitamente como muro "blando" (cortesía visual), no como control de acceso real.
 - Repo privado de GitHub / GitHub Pro de pago — descartado a favor de repo público, dado que es
   una prueba y no justifica el coste.
+
 
 
 
