@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Adrenaline — Isma Casaca</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,500&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F6F1E7; --mint:#A7DBCB; --ink:#1C1B19; --line:rgba(28,27,25,.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;font-family:'Inter',sans-serif;color:var(--ink);background:var(--cream);}
+  a{color:inherit;}
+
+  .nav{
+    display:flex;justify-content:space-between;align-items:center;padding:22px 6vw;
+    font-size:.8rem;letter-spacing:.06em;
+  }
+  .wordmark{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:1.15rem;text-decoration:none;}
+  .navlinks{display:flex;gap:2rem;text-transform:uppercase;letter-spacing:.1em;opacity:.7;font-size:.72rem;}
+  .navlinks a{text-decoration:none;}
+
+  .project-header{padding:4vh 6vw 3vh;max-width:70ch;}
+  .eyebrow{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.55;display:block;margin-bottom:.6rem;}
+  .project-header h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2.2rem,5vw,3.4rem);margin:0 0 1.2rem;line-height:1.05;}
+  .meta-row{display:flex;gap:2.5rem;flex-wrap:wrap;font-size:.85rem;border-top:1px solid var(--line);padding-top:1rem;}
+  .meta-row div span{display:block;opacity:.5;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem;}
+
+  .gate-wrap{position:relative;padding:2vh 6vw 10vh;max-width:70ch;}
+  .gated-content h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.3rem;margin:2rem 0 .6rem;}
+  .gated-content p{font-size:1rem;line-height:1.65;margin:0 0 1rem;max-width:64ch;}
+  .gated-content .media-placeholder{
+    height:220px;border-radius:6px;margin:1.5rem 0;
+    background:linear-gradient(150deg,#cfd8c8,#f6f1e7 75%);
+  }
+  .gate-wrap.locked .gated-content{
+    filter:blur(14px);user-select:none;pointer-events:none;
+  }
+
+  .password-gate{
+    display:none;position:fixed;inset:0;align-items:center;justify-content:center;padding:2rem;
+    background:rgba(246,241,231,.55);
+  }
+  .gate-wrap.locked .password-gate{display:flex;}
+  .gate-card{
+    background:#fff;border:1px solid var(--line);border-radius:10px;padding:2rem 2.2rem;
+    max-width:360px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(28,27,25,.12);
+  }
+  .gate-card .lock-icon{font-size:1.6rem;margin-bottom:.6rem;}
+  .gate-card h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.2rem;margin:0 0 .5rem;}
+  .gate-card p{font-size:.88rem;opacity:.7;margin:0 0 1.2rem;line-height:1.5;}
+  .gate-card input[type="password"]{
+    width:100%;padding:.7rem .9rem;border:1px solid var(--line);border-radius:6px;
+    font-size:1rem;font-family:'Inter',sans-serif;margin-bottom:.7rem;
+  }
+  .gate-card input[type="password"]:focus{outline:2px solid var(--ink);outline-offset:1px;}
+  .gate-card button{
+    width:100%;padding:.7rem;border:none;border-radius:6px;background:var(--ink);color:var(--cream);
+    font-family:'Inter',sans-serif;font-weight:600;font-size:.9rem;cursor:pointer;
+  }
+  .gate-card button:hover{opacity:.9;}
+  .gate-error{color:#a1332b;font-size:.82rem;min-height:1.2em;margin-top:.6rem;}
+  .gate-contact{font-size:.78rem;opacity:.6;margin-top:1.1rem;padding-top:1rem;border-top:1px solid var(--line);}
+  .gate-contact a{text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a class="wordmark" href="./index.html">Isma Casaca</a>
+  <div class="navlinks"><a href="./index.html#trabajo">Trabajo</a><a href="./index.html#sobre-mi">Sobre mí</a><a href="./index.html#contacto">Contacto</a></div>
+</div>
+
+<div class="project-header">
+  <span class="eyebrow">Cliente · 2023</span>
+  <h1>Adrenaline</h1>
+  <div class="meta-row">
+    <div><span>Organización</span>Top Global IT Company</div>
+    <div><span>Año</span>2023</div>
+    <div><span>Posición</span>UX Designer</div>
+  </div>
+</div>
+
+<div class="gate-wrap locked" id="gate-wrap">
+  <div class="gated-content">
+    <div class="media-placeholder"></div>
+    <h2>↳ Contexto</h2>
+    <p>Adrenaline surgió de la necesidad de alinear nuestro producto insignia con el panorama cambiante de los eventos deportivos. El cliente buscaba adaptar su backend flexible, distinto para cada proveedor externo, a una interfaz que conectara con una audiencia exigente, ávida de contenido deportivo completo. El foco en un MVP buscaba resolver el reto de adaptar estadísticas y resultados de deportes muy distintos entre sí, dadas sus diferencias en sistemas de puntuación y formatos de competición.</p>
+    <h2>↳ Ejecución</h2>
+    <p>Nuestro enfoque partió de crear un MVP mediante dos esquemas predominantes: competiciones individuales y competiciones por partido. Esta decisión estratégica permitió abordar necesidades cambiantes y resolver retos alejándose del "camino feliz" convencional. El producto final adapta sin fricción el esquema de un servicio de streaming, incorporando funciones de referencia de servicios deportivos como DAZN en una interfaz competente y atractiva.</p>
+    <div class="media-placeholder"></div>
+    <h2>↳ Resultado</h2>
+    <p>La flexibilidad, escalabilidad y facilidad de componetización del producto convierten a Adrenaline en una base sólida para futuros clientes del sector del streaming deportivo. Su capacidad de adaptarse a distintos deportes e iterar sin fricciones la posiciona como una solución clave, con una interfaz competitiva que marca el estándar para próximos proyectos del sector.</p>
+    <p style="opacity:.5;font-size:.85rem;">Este proyecto ha sido revisado para proteger información confidencial, siguiendo los términos de uso justo.</p>
+  </div>
+
+  <div class="password-gate">
+    <div class="gate-card">
+      <div class="lock-icon">🔒</div>
+      <h3>Contenido bajo NDA</h3>
+      <p>Este proyecto es para un cliente y su contenido es confidencial. Introduce la contraseña para verlo.</p>
+      <form id="gate-form">
+        <input type="password" id="gate-input" placeholder="Contraseña" autocomplete="off" />
+        <button type="submit">Desbloquear</button>
+        <div class="gate-error" id="gate-error"></div>
+      </form>
+      <div class="gate-contact">¿Necesitas la contraseña? <a href="https://www.linkedin.com/in/ismaelcasadoc/" target="_blank" rel="noopener">Escríbeme por LinkedIn</a>.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Muro de cortesía: no es seguridad real (el hash viaja en el propio código fuente).
+  // Sirve para no mostrar contenido de cliente a quien navegue la web por curiosidad.
+  const PASSWORD_HASH = "16a6293c0df358beac52eef47093b535068570717895e7eb2998f5f6a383bf7d";
+
+  async function sha256Hex(text){
+    const data = new TextEncoder().encode(text);
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  const gateWrap = document.getElementById('gate-wrap');
+  const form = document.getElementById('gate-form');
+  const input = document.getElementById('gate-input');
+  const error = document.getElementById('gate-error');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const hash = await sha256Hex(input.value.trim());
+    if (hash === PASSWORD_HASH){
+      gateWrap.classList.remove('locked');
+    } else {
+      error.textContent = 'Contraseña incorrecta.';
+      input.value = '';
+      input.focus();
+    }
+  });
+</script>
+</body>
+</html>
