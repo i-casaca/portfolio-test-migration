@@ -19,13 +19,11 @@
 <!-- Marca puesta por la página anterior: si venimos de una transición, entrar
      tapados. Va inline y en el <head> porque tiene que correr antes del primer
      pintado; si falla, simplemente no hay panel. -->
-<script>try{if(sessionStorage.getItem('pt-nav')){sessionStorage.removeItem('pt-nav');document.documentElement.className+=' pt-cover';}}catch(e){}</script>
+<script>document.documentElement.className+=' js';try{if(sessionStorage.getItem('pt-nav')){sessionStorage.removeItem('pt-nav');document.documentElement.className+=' pt-cover';}}catch(e){}</script>
 <script src="./assets/js/page-transition.js" defer></script>
+<script src="./assets/js/reveal.js" defer></script>
 <style>
-  .gate-wrap{position:relative;padding:2vh 6vw 10vh;max-width:70ch;}
-  .gated-content h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.3rem;margin:2rem 0 .6rem;}
-  .gated-content p{font-size:1rem;line-height:1.65;margin:0 0 1rem;max-width:64ch;}
-  .gated-content .media-shot{width:100%;height:auto;border-radius:6px;margin:1.5rem 0;display:block;}
+  .gate-wrap{position:relative;}
   .gate-wrap.locked .gated-content{
     filter:blur(14px);user-select:none;pointer-events:none;
   }
@@ -64,7 +62,7 @@
   <div class="navlinks"><a href="./index.html#trabajo">Trabajo</a><a href="./index.html#sobre-mi">Sobre mí</a><a href="#contacto">Contacto</a><a href="./assets/cv/isma-casado-cv-es.pdf" download>Descargar CV</a></div>
 </div>
 
-<div class="project-header">
+<div class="project-header project-wrap">
   <span class="eyebrow">Cliente · 2023</span>
   <h1>Arabvision</h1>
   <div class="meta-row">
@@ -74,19 +72,40 @@
   </div>
 </div>
 
-<div class="gate-wrap locked" id="gate-wrap">
-  <div class="gated-content">
-    <img class="media-shot" src="./assets/images/arabvision/hero.jpg" width="1400" height="787" alt="Portada del proyecto Arabvision" />
-    <h2>↳ Contexto</h2>
-    <p>Arabvision surgió de la necesidad de adaptarse a los tiempos actuales, refinando su oferta de producto en un mercado donde el streaming bajo demanda se ha vuelto casi obligatorio para las cadenas de televisión y productoras. El objetivo era diseñar una aplicación que no solo cumpliera con las expectativas de UI, sino que también abordara la complejidad de la estructura de lectura RTL (de derecha a izquierda) del árabe. Buscábamos crear una plataforma capaz de mostrar el producto de forma atractiva y ofrecer, a la vez, una experiencia totalmente accesible.</p>
-    <img class="media-shot" src="./assets/images/arabvision/mockup-1.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups de la app Arabvision" />
-    <h2>↳ Ejecución</h2>
-    <p>Analicé con detalle las preferencias de los usuarios y los matices culturales, ajustando el diseño de la aplicación a las necesidades específicas del público árabe. El desarrollo de la interfaz se integró sin fricciones con el contenido de Arabvision, garantizando una experiencia atractiva y accesible en todos los dispositivos. La supervisión continua del equipo de marca de Arabvision —con entrevistas y comprobaciones de contexto cultural— fue dando forma al diseño. Revisiones periódicas y un proceso de refinamiento colaborativo entre ambos equipos permitieron mejoras continuas basadas en ciclos de feedback dinámicos.</p>
-    <img class="media-shot" src="./assets/images/arabvision/mockup-2.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups adicionales de Arabvision" />
+<div class="gate-wrap project-wrap locked" id="gate-wrap">
+  <div class="gated-content project-body">
+  <figure class="media">
+    <img src="./assets/images/arabvision/hero.jpg" width="1400" height="787" alt="Portada del proyecto Arabvision" />
+  </figure>
+
+  <div class="text-cols">
+    <section>
+      <h2>↳ Contexto</h2>
+      <p>Arabvision surgió de la necesidad de adaptarse a los tiempos actuales, refinando su oferta de producto en un mercado donde el streaming bajo demanda se ha vuelto casi obligatorio para las cadenas de televisión y productoras. El objetivo era diseñar una aplicación que no solo cumpliera con las expectativas de UI, sino que también abordara la complejidad de la estructura de lectura RTL (de derecha a izquierda) del árabe. Buscábamos crear una plataforma capaz de mostrar el producto de forma atractiva y ofrecer, a la vez, una experiencia totalmente accesible.</p>
+    </section>
+    <section>
+      <h2>↳ Ejecución</h2>
+      <p>Analicé con detalle las preferencias de los usuarios y los matices culturales, ajustando el diseño de la aplicación a las necesidades específicas del público árabe. El desarrollo de la interfaz se integró sin fricciones con el contenido de Arabvision, garantizando una experiencia atractiva y accesible en todos los dispositivos. La supervisión continua del equipo de marca de Arabvision —con entrevistas y comprobaciones de contexto cultural— fue dando forma al diseño. Revisiones periódicas y un proceso de refinamiento colaborativo entre ambos equipos permitieron mejoras continuas basadas en ciclos de feedback dinámicos.</p>
+    </section>
+  </div>
+
+  <figure class="media">
+    <img src="./assets/images/arabvision/mockup-1.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups de la app Arabvision" />
+  </figure>
+  <figure class="media">
+    <img src="./assets/images/arabvision/mockup-2.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups adicionales de Arabvision" />
+  </figure>
+
+  <section class="text-end">
     <h2>↳ Resultado</h2>
     <p>Aunque el proyecto se detuvo lamentablemente por el conflicto en Israel, el diseño de interfaz propuesto demostró una adaptabilidad notable y una fuerte coherencia con la marca de Arabvision. La aplicación, aunque no llegó a desarrollarse por completo, mostró un compromiso claro con una experiencia de visualización atractiva y accesible, adaptada a las preferencias actuales de streaming. La colaboración continua, las mejoras iterativas de la interfaz y unos mecanismos de feedback sólidos fueron clave para lograr un diseño fiel a la visión y al público de Arabvision.</p>
-    <img class="media-shot" src="./assets/images/arabvision/mockup-3.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups finales de Arabvision" />
-    <p style="opacity:.5;font-size:.85rem;">Este proyecto ha sido revisado para proteger información confidencial, siguiendo los términos de uso justo.</p>
+  </section>
+
+  <figure class="media">
+    <img src="./assets/images/arabvision/mockup-3.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups finales de Arabvision" />
+  </figure>
+
+  <p class="disclaimer">Este proyecto ha sido revisado para proteger información confidencial, siguiendo los términos de uso justo.</p>
   </div>
 
   <div class="password-gate">
@@ -104,7 +123,7 @@
   </div>
 </div>
 
-<div style="padding:0 6vw 6vh;max-width:70ch;">
+<div class="project-wrap" style="padding:0 0 6vh;">
   <a class="next-project" href="./nexahub.html"><span>Siguiente proyecto</span>Nexahub →</a>
 </div>
 

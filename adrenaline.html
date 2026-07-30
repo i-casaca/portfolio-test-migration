@@ -19,13 +19,11 @@
 <!-- Marca puesta por la página anterior: si venimos de una transición, entrar
      tapados. Va inline y en el <head> porque tiene que correr antes del primer
      pintado; si falla, simplemente no hay panel. -->
-<script>try{if(sessionStorage.getItem('pt-nav')){sessionStorage.removeItem('pt-nav');document.documentElement.className+=' pt-cover';}}catch(e){}</script>
+<script>document.documentElement.className+=' js';try{if(sessionStorage.getItem('pt-nav')){sessionStorage.removeItem('pt-nav');document.documentElement.className+=' pt-cover';}}catch(e){}</script>
 <script src="./assets/js/page-transition.js" defer></script>
+<script src="./assets/js/reveal.js" defer></script>
 <style>
-  .gate-wrap{position:relative;padding:2vh 6vw 10vh;max-width:70ch;}
-  .gated-content h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.3rem;margin:2rem 0 .6rem;}
-  .gated-content p{font-size:1rem;line-height:1.65;margin:0 0 1rem;max-width:64ch;}
-  .gated-content .media-shot{width:100%;height:auto;border-radius:6px;margin:1.5rem 0;display:block;}
+  .gate-wrap{position:relative;}
   .gate-wrap.locked .gated-content{
     filter:blur(14px);user-select:none;pointer-events:none;
   }
@@ -64,7 +62,7 @@
   <div class="navlinks"><a href="./index.html#trabajo">Trabajo</a><a href="./index.html#sobre-mi">Sobre mí</a><a href="#contacto">Contacto</a><a href="./assets/cv/isma-casado-cv-es.pdf" download>Descargar CV</a></div>
 </div>
 
-<div class="project-header">
+<div class="project-header project-wrap">
   <span class="eyebrow">Cliente · 2023</span>
   <h1>Adrenaline</h1>
   <div class="meta-row">
@@ -74,19 +72,40 @@
   </div>
 </div>
 
-<div class="gate-wrap locked" id="gate-wrap">
-  <div class="gated-content">
-    <img class="media-shot" src="./assets/images/adrenaline/hero.jpg" width="1400" height="787" alt="Portada del proyecto Adrenaline" />
-    <h2>↳ Contexto</h2>
-    <p>Adrenaline surgió de la necesidad de alinear nuestro producto insignia con el panorama cambiante de los eventos deportivos. El cliente buscaba adaptar su backend flexible, distinto para cada proveedor externo, a una interfaz que conectara con una audiencia exigente, ávida de contenido deportivo completo. El foco en un MVP buscaba resolver el reto de adaptar estadísticas y resultados de deportes muy distintos entre sí, dadas sus diferencias en sistemas de puntuación y formatos de competición.</p>
-    <img class="media-shot" src="./assets/images/adrenaline/mockup-1.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups de la app Adrenaline" />
-    <h2>↳ Ejecución</h2>
-    <p>Nuestro enfoque partió de crear un MVP mediante dos esquemas predominantes: competiciones individuales y competiciones por partido. Esta decisión estratégica permitió abordar necesidades cambiantes y resolver retos alejándose del "camino feliz" convencional. El producto final adapta sin fricción el esquema de un servicio de streaming, incorporando funciones de referencia de servicios deportivos como DAZN en una interfaz competente y atractiva.</p>
-    <img class="media-shot" src="./assets/images/adrenaline/mockup-2.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups adicionales de Adrenaline" />
+<div class="gate-wrap project-wrap locked" id="gate-wrap">
+  <div class="gated-content project-body">
+  <figure class="media">
+    <img src="./assets/images/adrenaline/hero.jpg" width="1400" height="787" alt="Portada del proyecto Adrenaline" />
+  </figure>
+
+  <div class="text-cols">
+    <section>
+      <h2>↳ Contexto</h2>
+      <p>Adrenaline surgió de la necesidad de alinear nuestro producto insignia con el panorama cambiante de los eventos deportivos. El cliente buscaba adaptar su backend flexible, distinto para cada proveedor externo, a una interfaz que conectara con una audiencia exigente, ávida de contenido deportivo completo. El foco en un MVP buscaba resolver el reto de adaptar estadísticas y resultados de deportes muy distintos entre sí, dadas sus diferencias en sistemas de puntuación y formatos de competición.</p>
+    </section>
+    <section>
+      <h2>↳ Ejecución</h2>
+      <p>Nuestro enfoque partió de crear un MVP mediante dos esquemas predominantes: competiciones individuales y competiciones por partido. Esta decisión estratégica permitió abordar necesidades cambiantes y resolver retos alejándose del "camino feliz" convencional. El producto final adapta sin fricción el esquema de un servicio de streaming, incorporando funciones de referencia de servicios deportivos como DAZN en una interfaz competente y atractiva.</p>
+    </section>
+  </div>
+
+  <figure class="media">
+    <img src="./assets/images/adrenaline/mockup-1.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups de la app Adrenaline" />
+  </figure>
+  <figure class="media">
+    <img src="./assets/images/adrenaline/mockup-2.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups adicionales de Adrenaline" />
+  </figure>
+
+  <section class="text-end">
     <h2>↳ Resultado</h2>
     <p>La flexibilidad, escalabilidad y facilidad de componetización del producto convierten a Adrenaline en una base sólida para futuros clientes del sector del streaming deportivo. Su capacidad de adaptarse a distintos deportes e iterar sin fricciones la posiciona como una solución clave, con una interfaz competitiva que marca el estándar para próximos proyectos del sector.</p>
-    <img class="media-shot" src="./assets/images/adrenaline/mockup-3.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups finales de Adrenaline" />
-    <p style="opacity:.5;font-size:.85rem;">Este proyecto ha sido revisado para proteger información confidencial, siguiendo los términos de uso justo.</p>
+  </section>
+
+  <figure class="media">
+    <img src="./assets/images/adrenaline/mockup-3.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups finales de Adrenaline" />
+  </figure>
+
+  <p class="disclaimer">Este proyecto ha sido revisado para proteger información confidencial, siguiendo los términos de uso justo.</p>
   </div>
 
   <div class="password-gate">
@@ -104,7 +123,7 @@
   </div>
 </div>
 
-<div style="padding:0 6vw 6vh;max-width:70ch;">
+<div class="project-wrap" style="padding:0 0 6vh;">
   <a class="next-project" href="./arabvision.html"><span>Siguiente proyecto</span>Arabvision →</a>
 </div>
 

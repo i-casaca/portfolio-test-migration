@@ -27,8 +27,9 @@
 <!-- Marca puesta por la página anterior: si venimos de una transición, entrar
      tapados. Va inline y en el <head> porque tiene que correr antes del primer
      pintado; si falla, simplemente no hay panel. -->
-<script>try{if(sessionStorage.getItem('pt-nav')){sessionStorage.removeItem('pt-nav');document.documentElement.className+=' pt-cover';}}catch(e){}</script>
+<script>document.documentElement.className+=' js';try{if(sessionStorage.getItem('pt-nav')){sessionStorage.removeItem('pt-nav');document.documentElement.className+=' pt-cover';}}catch(e){}</script>
 <script src="./assets/js/page-transition.js" defer></script>
+<script src="./assets/js/reveal.js" defer></script>
 <style>
   .hero{
     background:var(--hero-bg,var(--mint));min-height:78vh;position:relative;overflow:hidden;

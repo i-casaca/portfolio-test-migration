@@ -105,8 +105,54 @@ html.pt-cover::after{
 /* ---------- tipografía compartida ---------- */
 .eyebrow{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.55;display:block;margin-bottom:.6rem;}
 
-/* ---------- cabecera de las páginas de proyecto ---------- */
-.project-header{padding:4vh 6vw 3vh;max-width:70ch;}
+/* ---------- páginas de proyecto ---------- */
+
+/* Contenedor ancho, alineado con el gutter del nav (6vw a cada lado). Lo que
+   no se ensancha es la medida del texto: eso se controla por párrafo. */
+.project-wrap{width:min(88vw,1440px);margin-inline:auto;}
+
+.project-body{padding-bottom:10vh;}
+.project-body h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.35rem;margin:0 0 .9rem;}
+.project-body p{font-size:1rem;line-height:1.65;margin:0 0 1rem;max-width:52ch;}
+
+/* Contexto y Ejecución van en paralelo: aprovechan el ancho sin que ninguna
+   línea pase de una medida cómoda de leer. */
+.text-cols{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:3rem 5vw;align-items:start;margin:7vh 0;
+}
+/* Resultado cierra en un solo bloque. */
+.text-end{margin:7vh 0;max-width:56ch;}
+
+.disclaimer{opacity:.5;font-size:.85rem;}
+
+/* Las imágenes van centradas y anchas, pero nunca a sangre: llegan hasta el
+   contenedor (88vw) y ahí paran. Comparten eje con el texto y con el nav a
+   propósito: metidas solo unos px respecto al texto, el desfase se leía como
+   descuadre en vez de como decisión. */
+.media{width:100%;margin:7vh auto;}
+.media img{width:100%;height:auto;display:block;border-radius:6px;}
+
+/* Aparición al entrar en pantalla. El estado oculto se aplica solo si hay JS
+   (clase `js` puesta antes del primer pintado); sin él las imágenes se ven
+   siempre, en vez de quedarse invisibles para siempre. */
+html.js .media{
+  opacity:0;transform:translateY(30px) scale(.985);
+  transition:opacity .7s cubic-bezier(.2,.7,.3,1), transform .8s cubic-bezier(.2,.7,.3,1);
+}
+html.js .media.is-visible{opacity:1;transform:none;}
+
+@media (max-width: 860px){
+  .text-cols{grid-template-columns:1fr;gap:2.5rem;margin:5vh 0;}
+  .media{width:100%;margin:5vh auto;}
+  .project-body p, .text-end{max-width:none;}
+}
+
+@media (prefers-reduced-motion: reduce){
+  html.js .media{opacity:1;transform:none;transition:none;}
+}
+
+.project-header{padding:5vh 0 3vh;}
 .project-header h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2.2rem,5vw,3.4rem);margin:0 0 1.2rem;line-height:1.05;}
 .meta-row{display:flex;gap:2.5rem;flex-wrap:wrap;font-size:.85rem;border-top:1px solid var(--line);padding-top:1rem;}
 .meta-row div span{display:block;opacity:.5;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem;}

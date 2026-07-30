@@ -19,14 +19,9 @@
 <!-- Marca puesta por la página anterior: si venimos de una transición, entrar
      tapados. Va inline y en el <head> porque tiene que correr antes del primer
      pintado; si falla, simplemente no hay panel. -->
-<script>try{if(sessionStorage.getItem('pt-nav')){sessionStorage.removeItem('pt-nav');document.documentElement.className+=' pt-cover';}}catch(e){}</script>
+<script>document.documentElement.className+=' js';try{if(sessionStorage.getItem('pt-nav')){sessionStorage.removeItem('pt-nav');document.documentElement.className+=' pt-cover';}}catch(e){}</script>
 <script src="./assets/js/page-transition.js" defer></script>
-<style>
-  .content-wrap{padding:2vh 6vw 10vh;max-width:70ch;}
-  .content-wrap h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.3rem;margin:2rem 0 .6rem;}
-  .content-wrap p{font-size:1rem;line-height:1.65;margin:0 0 1rem;max-width:64ch;}
-  .content-wrap .media-shot{width:100%;height:auto;border-radius:6px;margin:1.5rem 0;display:block;}
-</style>
+<script src="./assets/js/reveal.js" defer></script>
 </head>
 <body>
 
@@ -35,7 +30,7 @@
   <div class="navlinks"><a href="./index.html#trabajo">Trabajo</a><a href="./index.html#sobre-mi">Sobre mí</a><a href="#contacto">Contacto</a><a href="./assets/cv/isma-casado-cv-es.pdf" download>Descargar CV</a></div>
 </div>
 
-<div class="project-header">
+<div class="project-header project-wrap">
   <span class="eyebrow">Personal · 2024</span>
   <h1>Manu Cardiel</h1>
   <div class="meta-row">
@@ -46,18 +41,40 @@
   </div>
 </div>
 
-<div class="content-wrap">
-  <img class="media-shot" src="./assets/images/manu-cardiel/hero.jpg" width="1400" height="787" alt="Portátil mostrando la web de portfolio de arte urbano de Manu Cardiel" />
-  <h2>↳ Contexto</h2>
-  <p>La web anterior de Manu, desarrollada por el Gobierno de España bajo la iniciativa "Kit Digital", se volvió demasiado cara de mantener en 2024. Además, su diseño gráfico no encajaba con la visión de Manu como artista. El reto era rediseñar su presencia online, ofreciendo una solución que reflejara su identidad artística garantizando usabilidad, facilidad de gestión de contenido y sostenibilidad a largo plazo.</p>
-  <img class="media-shot" src="./assets/images/manu-cardiel/mockup-1.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups de la web de Manu Cardiel sobre fondo blanco" />
-  <h2>↳ Ejecución</h2>
-  <p>Trabajamos codo con codo mediante una serie de entrevistas para entender la visión de Manu para la web, iterando propuestas de diseño desde el canvas hasta la implementación final en Framer. Guié a Manu en catalogar su obra y desarrollar un sistema para gestionar el contenido vía CMS, garantizando que pudiera mantener y actualizar la web de forma independiente. Uno de los retos clave fue hacer la web responsive para móvil, ya que la versión anterior carecía de esa funcionalidad. Tras pruebas exhaustivas, logramos una solución eficiente que mostraba el trabajo de Manu de forma excelente en todos los dispositivos.</p>
-  <img class="media-shot" src="./assets/images/manu-cardiel/mockup-2.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Pantallas de la web de Manu Cardiel en distintos dispositivos" />
-  <img class="media-shot" src="./assets/images/manu-cardiel/mockup-3.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Más pantallas del portfolio de arte urbano de Manu Cardiel" />
-  <h2>↳ Resultado</h2>
-  <p>El resultado final es una web elegante y responsive que representa a la perfección la visión artística de Manu, ofreciéndole plena autonomía para gestionar el contenido. La versión móvil está totalmente optimizada, ofreciendo una experiencia fluida a quienes la visitan desde cualquier dispositivo. Gracias a este diseño, Manu cuenta ahora con una plataforma económica y mantenible que muestra su trabajo y le permite gestionar y actualizar su portfolio con facilidad.</p>
-  <img class="media-shot" src="./assets/images/manu-cardiel/mockup-4.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Vista final de la web de Manu Cardiel" />
+<div class="project-body project-wrap">
+  <figure class="media">
+    <img src="./assets/images/manu-cardiel/hero.jpg" width="1400" height="787" alt="Portátil mostrando la web de portfolio de arte urbano de Manu Cardiel" />
+  </figure>
+
+  <div class="text-cols">
+    <section>
+      <h2>↳ Contexto</h2>
+      <p>La web anterior de Manu, desarrollada por el Gobierno de España bajo la iniciativa "Kit Digital", se volvió demasiado cara de mantener en 2024. Además, su diseño gráfico no encajaba con la visión de Manu como artista. El reto era rediseñar su presencia online, ofreciendo una solución que reflejara su identidad artística garantizando usabilidad, facilidad de gestión de contenido y sostenibilidad a largo plazo.</p>
+    </section>
+    <section>
+      <h2>↳ Ejecución</h2>
+      <p>Trabajamos codo con codo mediante una serie de entrevistas para entender la visión de Manu para la web, iterando propuestas de diseño desde el canvas hasta la implementación final en Framer. Guié a Manu en catalogar su obra y desarrollar un sistema para gestionar el contenido vía CMS, garantizando que pudiera mantener y actualizar la web de forma independiente. Uno de los retos clave fue hacer la web responsive para móvil, ya que la versión anterior carecía de esa funcionalidad. Tras pruebas exhaustivas, logramos una solución eficiente que mostraba el trabajo de Manu de forma excelente en todos los dispositivos.</p>
+    </section>
+  </div>
+
+  <figure class="media">
+    <img src="./assets/images/manu-cardiel/mockup-1.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups de la web de Manu Cardiel sobre fondo blanco" />
+  </figure>
+  <figure class="media">
+    <img src="./assets/images/manu-cardiel/mockup-2.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Pantallas de la web de Manu Cardiel en distintos dispositivos" />
+  </figure>
+  <figure class="media">
+    <img src="./assets/images/manu-cardiel/mockup-3.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Más pantallas del portfolio de arte urbano de Manu Cardiel" />
+  </figure>
+
+  <section class="text-end">
+    <h2>↳ Resultado</h2>
+    <p>El resultado final es una web elegante y responsive que representa a la perfección la visión artística de Manu, ofreciéndole plena autonomía para gestionar el contenido. La versión móvil está totalmente optimizada, ofreciendo una experiencia fluida a quienes la visitan desde cualquier dispositivo. Gracias a este diseño, Manu cuenta ahora con una plataforma económica y mantenible que muestra su trabajo y le permite gestionar y actualizar su portfolio con facilidad.</p>
+  </section>
+
+  <figure class="media">
+    <img src="./assets/images/manu-cardiel/mockup-4.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Vista final de la web de Manu Cardiel" />
+  </figure>
 
   <a class="next-project" href="./adrenaline.html"><span>Siguiente proyecto</span>Adrenaline →</a>
 </div>
