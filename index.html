@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PROTOTIPO — Ticket 6 v2: grid 3D falso + cursor + distorsión</title>
+<title>Isma Casaca — Product Designer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,500&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -15,7 +15,6 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;font-family:'Inter',sans-serif;color:var(--ink);background:var(--cream);}
   a{color:inherit;text-decoration:none;}
-  .meta-banner{font-size:.8rem;text-align:center;padding:10px 16px;background:var(--chrome-bg);color:var(--chrome-fg);letter-spacing:.02em;}
 
   .nav{
     display:flex;justify-content:space-between;align-items:center;padding:22px 6vw;
@@ -56,7 +55,7 @@
 
   .hero-eyebrow{font-size:.75rem;letter-spacing:.08em;line-height:1.5;position:relative;z-index:1;}
 
-  /* ---------- cursor a medida: bolita de 8px que invierte lo que tiene detrás ---------- */
+  /* ---------- cursor a medida: bolita de 24px que invierte lo que tiene detrás ---------- */
   #cursor-dot{
     position:fixed;top:0;left:0;width:24px;height:24px;border-radius:50%;background:#fff;
     mix-blend-mode:difference;pointer-events:none;z-index:9999;opacity:0;
@@ -96,8 +95,6 @@
 </style>
 </head>
 <body>
-
-<div class="meta-banner">PROTOTIPO ticket 6 v2 — grid 3D falso (9 celdas independientes) + cursor de 8px con inversión + distorsión de fondo.</div>
 
 <svg width="0" height="0" style="position:absolute">
   <filter id="hero-distort-filter" x="-20%" y="-20%" width="140%" height="140%">
