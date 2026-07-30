@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PROTOTIPO — Ticket 6: parallax + rastro del ratón (variantes 1/2/3)</title>
+<title>PROTOTIPO — Ticket 6 v2: grid 3D falso + cursor + distorsión</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,500&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -16,7 +16,6 @@
   html,body{margin:0;padding:0;font-family:'Inter',sans-serif;color:var(--ink);background:var(--cream);}
   a{color:inherit;text-decoration:none;}
   .meta-banner{font-size:.8rem;text-align:center;padding:10px 16px;background:var(--chrome-bg);color:var(--chrome-fg);letter-spacing:.02em;}
-  .meta-banner b{color:var(--chrome-accent);}
 
   .nav{
     display:flex;justify-content:space-between;align-items:center;padding:22px 6vw;
@@ -29,17 +28,41 @@
     background:var(--mint);min-height:78vh;position:relative;overflow:hidden;
     display:flex;align-items:flex-end;padding:0 6vw 2.4rem;
   }
-  .hero-grid{
-    position:absolute;inset:0;margin:auto;width:min(46vw,420px);height:min(46vw,420px);
+  @media (hover:hover) and (pointer:fine){ .hero{cursor:none;} }
+
+  /* ---------- capa de distorsión: textura fina de líneas que se revela y ondula cerca del cursor ---------- */
+  .hero-distort{
+    position:absolute;inset:0;pointer-events:none;
     background-image:
-      linear-gradient(to right, rgba(28,27,25,.16) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(28,27,25,.16) 1px, transparent 1px);
-    background-size:33.34% 33.34%;
-    top:8%;
-    transform:translate(var(--hx,0px),var(--hy,0px));
-    transition:transform .2s ease-out;
+      repeating-linear-gradient(0deg, rgba(28,27,25,.5) 0 1px, transparent 1px 40px),
+      repeating-linear-gradient(90deg, rgba(28,27,25,.5) 0 1px, transparent 1px 40px);
+    filter:url(#hero-distort-filter);
+    -webkit-mask-image: radial-gradient(180px circle at var(--mx,50%) var(--my,50%), black 0%, transparent 72%);
+    mask-image: radial-gradient(180px circle at var(--mx,50%) var(--my,50%), black 0%, transparent 72%);
   }
+
+  /* ---------- grid central: 9 celdas independientes, parallax de profundidad falsa ---------- */
+  .hero-grid{
+    position:absolute;inset:0;margin:auto;width:min(46vw,420px);height:min(46vw,420px);top:8%;
+    display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+    pointer-events:none;
+  }
+  .grid-cell{
+    border-right:1px solid rgba(28,27,25,.18);border-bottom:1px solid rgba(28,27,25,.18);
+    transform:translate(var(--cx,0px),var(--cy,0px));
+    transition:transform .18s ease-out;will-change:transform;
+  }
+  .grid-cell:nth-child(3n){border-right:none;}
+  .grid-cell:nth-child(n+7){border-bottom:none;}
+
   .hero-eyebrow{font-size:.75rem;letter-spacing:.08em;line-height:1.5;position:relative;z-index:1;}
+
+  /* ---------- cursor a medida: bolita de 8px que invierte lo que tiene detrás ---------- */
+  #cursor-dot{
+    position:fixed;top:0;left:0;width:8px;height:8px;border-radius:50%;background:#fff;
+    mix-blend-mode:difference;pointer-events:none;z-index:9999;opacity:0;
+    transform:translate3d(-100px,-100px,0);
+  }
 
   .works{padding:8vh 6vw;display:flex;flex-direction:column;gap:5vh;}
   .work-row{display:flex;align-items:center;gap:4vw;}
@@ -59,21 +82,6 @@
   }
   .work-img{
     flex:1;height:280px;border-radius:4px;background:linear-gradient(160deg,var(--tone1,#e8b7a4),var(--tone2,#f6f1e7) 75%);
-    transform:translateY(var(--py,0px));
-    transition:transform .35s ease;
-  }
-  .work-row:hover .work-img{transform:translateY(var(--py,0px)) scale(1.015);}
-
-  /* ---------- Variante 3: rastro de luz sobre el texto ---------- */
-  .glow-target{position:relative;}
-  .glow-target::after{
-    content:"";position:absolute;inset:-14px -18px;pointer-events:none;border-radius:10px;
-    opacity:0;transition:opacity .3s ease;z-index:-1;
-    background:radial-gradient(160px circle at var(--gx,50%) var(--gy,50%), rgba(193,98,46,.22), transparent 70%);
-  }
-  .glow-target:hover::after{opacity:1;}
-  .hero-eyebrow.glow-target::after{
-    background:radial-gradient(180px circle at var(--gx,50%) var(--gy,50%), rgba(28,27,25,.14), transparent 70%);
   }
 
   @media (max-width: 760px){
@@ -83,33 +91,43 @@
   }
 
   @media (prefers-reduced-motion: reduce){
-    .hero-grid, .work-img{transition:none;}
+    .grid-cell{transition:none;}
+    .hero-distort{display:none;}
   }
-
-  /* ---------- Prototype switcher ---------- */
-  #proto-switcher{
-    position:fixed;left:50%;bottom:20px;transform:translateX(-50%);
-    background:var(--chrome-bg);color:var(--chrome-fg);border-radius:999px;padding:8px 6px;display:flex;align-items:center;
-    gap:10px;font-size:.85rem;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:9999;border:1px solid var(--chrome-accent);
-  }
-  #proto-switcher button{background:var(--chrome-accent);color:#111;border:none;border-radius:999px;width:30px;height:30px;cursor:pointer;font-weight:800;}
-  #proto-switcher button:focus-visible{outline:2px solid #fff;outline-offset:2px;}
-  #proto-switcher .label{min-width:230px;text-align:center;}
-  #proto-switcher .tag{background:#C1622E;color:#fff;font-size:.65rem;padding:2px 8px;border-radius:999px;letter-spacing:.05em;}
 </style>
 </head>
 <body>
 
-<div class="meta-banner">PROTOTIPO ticket 6 — <b>1</b> solo hero · <b>2</b> + parallax miniaturas · <b>3</b> + glow de texto. Flechas o ← → para cambiar.</div>
+<div class="meta-banner">PROTOTIPO ticket 6 v2 — grid 3D falso (9 celdas independientes) + cursor de 8px con inversión + distorsión de fondo.</div>
+
+<svg width="0" height="0" style="position:absolute">
+  <filter id="hero-distort-filter">
+    <feTurbulence type="fractalNoise" baseFrequency="0.012 0.018" numOctaves="2" seed="7" result="noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="26" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
 
 <div class="nav">
   <span class="wordmark">Isma Casaca</span>
   <div class="navlinks"><span>Trabajo</span><span>Sobre mí</span><span>Contacto</span></div>
 </div>
+
 <div class="hero" id="hero">
-  <div class="hero-grid" id="hero-grid"></div>
-  <div class="hero-eyebrow" id="hero-eyebrow">Product<br>Design &amp;<br>UX</div>
+  <div class="hero-distort" id="hero-distort"></div>
+  <div class="hero-grid" id="hero-grid">
+    <div class="grid-cell" data-depth="1.5"></div>
+    <div class="grid-cell" data-depth="1.0"></div>
+    <div class="grid-cell" data-depth="1.5"></div>
+    <div class="grid-cell" data-depth="1.0"></div>
+    <div class="grid-cell" data-depth="0.5"></div>
+    <div class="grid-cell" data-depth="1.0"></div>
+    <div class="grid-cell" data-depth="1.5"></div>
+    <div class="grid-cell" data-depth="1.0"></div>
+    <div class="grid-cell" data-depth="1.5"></div>
+  </div>
+  <div class="hero-eyebrow">Product<br>Design &amp;<br>UX</div>
 </div>
+
 <div class="works">
   <a class="work-row" href="#" style="--tone1:#e8b7a4;--tone2:#f6f1e7">
     <div class="work-text">
@@ -158,97 +176,48 @@
   </a>
 </div>
 
-<div id="proto-switcher">
-  <span class="tag">PROTOTIPO</span>
-  <button id="proto-prev" aria-label="Variante anterior">‹</button>
-  <span class="label" id="proto-label"></span>
-  <button id="proto-next" aria-label="Variante siguiente">›</button>
-</div>
+<div id="cursor-dot"></div>
 
 <script>
-  const VARIANTS = [
-    { key:'1', name:'1 — Solo hero (parallax de profundidad)' },
-    { key:'2', name:'2 — + parallax en miniaturas al hacer scroll' },
-    { key:'3', name:'3 — + rastro de luz sobre los títulos' },
-  ];
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
   const hero = document.getElementById('hero');
-  const heroGrid = document.getElementById('hero-grid');
-  const heroEyebrow = document.getElementById('hero-eyebrow');
-  const workImgs = Array.from(document.querySelectorAll('.work-img'));
-  const titles = Array.from(document.querySelectorAll('.work-row h3'));
+  const heroDistort = document.getElementById('hero-distort');
+  const cells = Array.from(document.querySelectorAll('.grid-cell'));
+  const cursorDot = document.getElementById('cursor-dot');
+  const finePointer = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
 
-  let current = '1';
+  const AMP = 22; // px máximo de desplazamiento para el depth=1
 
-  function heroParallax(e){
-    if (reduceMotion) return;
+  function onHeroMove(e){
     const r = hero.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width - 0.5;
-    const py = (e.clientY - r.top) / r.height - 0.5;
-    heroGrid.style.setProperty('--hx', (px * 18) + 'px');
-    heroGrid.style.setProperty('--hy', (py * 18) + 'px');
-  }
+    const mx = e.clientX - r.left;
+    const my = e.clientY - r.top;
 
-  function scrollParallax(){
-    if (reduceMotion || current === '1') return;
-    workImgs.forEach((el, i) => {
-      const speed = 0.05 + (i % 3) * 0.02;
-      el.style.setProperty('--py', (window.scrollY * speed * -1) + 'px');
-    });
-  }
-
-  function wireGlow(el){
-    el.addEventListener('mousemove', (e) => {
-      const r = el.getBoundingClientRect();
-      el.style.setProperty('--gx', (e.clientX - r.left) + 'px');
-      el.style.setProperty('--gy', (e.clientY - r.top) + 'px');
-    });
-  }
-  wireGlow(heroEyebrow);
-  titles.forEach(wireGlow);
-
-  function applyVariant(key){
-    current = key;
-    const showGlow = key === '3';
-    heroEyebrow.classList.toggle('glow-target', showGlow);
-    titles.forEach(t => t.classList.toggle('glow-target', showGlow));
-    if (key === '1') {
-      workImgs.forEach(el => el.style.setProperty('--py', '0px'));
-    } else {
-      scrollParallax();
+    if (!reduceMotion){
+      const px = mx / r.width - 0.5;
+      const py = my / r.height - 0.5;
+      cells.forEach(cell => {
+        const depth = parseFloat(cell.dataset.depth);
+        cell.style.setProperty('--cx', (px * AMP * depth) + 'px');
+        cell.style.setProperty('--cy', (py * AMP * depth) + 'px');
+      });
+      heroDistort.style.setProperty('--mx', mx + 'px');
+      heroDistort.style.setProperty('--my', my + 'px');
     }
   }
-
-  hero.addEventListener('mousemove', heroParallax);
-  window.addEventListener('scroll', scrollParallax);
-
-  function currentVariantFromURL(){
-    const p = new URLSearchParams(location.search).get('variant');
-    return VARIANTS.find(v => v.key === p) ? p : '1';
-  }
-  function showVariant(key){
-    applyVariant(key);
-    const v = VARIANTS.find(v => v.key === key);
-    document.getElementById('proto-label').textContent = v.name;
-    try{
-      const url = new URL(location.href);
-      url.searchParams.set('variant', key);
-      history.replaceState(null, '', url);
-    }catch(e){}
-  }
-  let idx = VARIANTS.findIndex(v => v.key === currentVariantFromURL());
-  if (idx < 0) idx = 0;
-  showVariant(VARIANTS[idx].key);
-  function cycle(delta){ idx = (idx + delta + VARIANTS.length) % VARIANTS.length; showVariant(VARIANTS[idx].key); }
-  document.getElementById('proto-prev').addEventListener('click', () => cycle(-1));
-  document.getElementById('proto-next').addEventListener('click', () => cycle(1));
-  window.addEventListener('keydown', (e) => {
-    const tag = (e.target.tagName || '').toLowerCase();
-    if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
-    if (e.key === 'ArrowLeft') cycle(-1);
-    if (e.key === 'ArrowRight') cycle(1);
+  hero.addEventListener('mousemove', onHeroMove);
+  hero.addEventListener('mouseleave', () => {
+    heroDistort.style.setProperty('--mx', '-500px');
+    heroDistort.style.setProperty('--my', '-500px');
   });
+
+  if (finePointer){
+    document.addEventListener('mousemove', (e) => {
+      cursorDot.style.opacity = 1;
+      cursorDot.style.transform = `translate3d(${e.clientX - 4}px, ${e.clientY - 4}px, 0)`;
+    });
+    document.addEventListener('mouseleave', () => { cursorDot.style.opacity = 0; });
+  }
 </script>
 </body>
 </html>
