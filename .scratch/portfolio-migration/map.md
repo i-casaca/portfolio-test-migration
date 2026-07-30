@@ -36,12 +36,27 @@ Estructura del sitio:
   o en una siguiente, en vez de dejar solo una decisión en papel — es un experimento hands-on, no un
   hand-off a otro desarrollador.
 - Repo objetivo: `i-casaca/portfolio-test-migration` (repo de proyecto normal, no el repo raíz
-  `i-casaca.github.io`). `gh` CLI no está instalado en esta máquina — usar la web de GitHub +
-  `git` desde terminal es más simple que instalar y autenticar `gh` para este experimento.
+  `i-casaca.github.io`). `gh` CLI instalado y autenticado como `i-casaca` (login vía navegador,
+  sin gestionar contraseñas ni tokens directamente).
+- **Este tracker vive ahora en GitHub Issues** de `i-casaca/portfolio-test-migration` (migrado
+  desde markdown local). Este archivo se conserva como snapshot histórico de la carta inicial;
+  la fuente de verdad es el issue #1 y sus hijos.
+- Convención de ramas: `main` = publicado (fuente de Pages); una rama por ticket
+  (`ticket-N-slug`), fusionada por Pull Request al resolver ese ticket.
+
+## Tickets
+
+- [ ] #2 Extraer contenido y assets completos de los 4 proyectos restantes (research)
+- [ ] #3 Conseguir el archivo del CV (task)
+- [ ] #4 Crear el repo GitHub y desplegar una página de prueba con Pages (task)
+- [ ] #5 Definir el sistema visual: hero Mickey17 + páginas de proyecto sobrias (prototype)
+- [ ] #6 Definir el efecto de parallax y el rastro sutil del ratón (prototype)
+- [ ] #7 Definir el mecanismo del muro de contraseña (grilling)
+- [ ] #8 Construir y desplegar el MVP completo del portfolio (task, bloqueado por #2-#7)
 
 ## Decisiones hasta ahora
 
-*(vacío — el mapa se acaba de crear)*
+- [Crear el repo GitHub y desplegar una página de prueba con Pages](https://github.com/i-casaca/portfolio-test-migration/issues/4) — repo público creado, Pages activo en `main`/`/`, verificado en navegador; tracker migrado a GitHub Issues; convención de ramas acordada (`main` + rama por ticket + PR).
 
 ## Not yet specified
 

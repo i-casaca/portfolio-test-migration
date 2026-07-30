@@ -1,20 +1,16 @@
-# Tracker local (markdown)
+# Tracker: GitHub Issues
 
-No hay tracker externo configurado (proyecto sin repo Git todavía), así que este esfuerzo usa un
-tracker local en markdown, siguiendo la convención genérica de Wayfinder:
+El tracker de este esfuerzo vive en **GitHub Issues** de
+[i-casaca/portfolio-test-migration](https://github.com/i-casaca/portfolio-test-migration):
 
-- `map.md` — el mapa: destino, notas, decisiones tomadas, niebla (lo que aún no está lo bastante
-  definido para ser un ticket) y lo que queda fuera de alcance.
-- `tickets/NNN-slug.md` — un archivo por ticket (issue hijo del mapa). Frontmatter:
-  - `id`: número de ticket
-  - `title`: título corto
-  - `type`: uno de `research`, `prototype`, `grilling`, `task`
-  - `status`: `open` | `closed`
-  - `assignee`: quién lo ha reclamado (vacío = sin reclamar)
-  - `blocked_by`: lista de ids de tickets que deben cerrarse antes de poder trabajar este
+- El mapa es el issue [#1](https://github.com/i-casaca/portfolio-test-migration/issues/1)
+  (label `wayfinder:map`).
+- Cada ticket es un issue hijo con label `wayfinder:research` / `wayfinder:prototype` /
+  `wayfinder:grilling` / `wayfinder:task`.
+- Un ticket se "reclama" asignándoselo a quien lo trabaja.
+- El bloqueo entre tickets se anota como texto en el cuerpo del issue ("Bloqueado por: #N") — este
+  repo no usa el bloqueo nativo de GitHub para mantenerlo simple.
 
-Un ticket está **desbloqueado** cuando todos los tickets en `blocked_by` están `closed`. La
-**frontera** son los tickets abiertos, desbloqueados y sin reclamar — lo que se puede coger ahora.
-
-Al cerrar un ticket, se añade un comentario de resolución al final de su archivo (bajo `## Resolución`)
-y se apunta un resumen de una línea en `map.md` → Decisiones hasta ahora.
+`map.md` en esta carpeta es solo el snapshot histórico de la carta inicial (antes de migrar a
+Issues) — no se actualiza más. `research/` guarda hallazgos de investigación (contenido/assets
+extraídos) que alimentan a los tickets correspondientes.
