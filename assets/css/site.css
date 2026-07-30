@@ -1,0 +1,184 @@
+/* ===========================================================================
+   site.css — estilos comunes a las 6 páginas del portfolio.
+   Lo específico de cada página (el hero interactivo de la home, el muro de
+   contraseña de los 3 proyectos con NDA) sigue viviendo en un <style> dentro
+   de esa página. Aquí solo va lo que se repite en todas.
+   =========================================================================== */
+
+:root{
+  --cream:#F6F1E7; --mint:#A7DBCB; --ink:#1C1B19; --line:rgba(28,27,25,.12);
+  --chrome-bg:#1C1B19; --chrome-fg:#F6F1E7; --chrome-accent:#A7DBCB;
+  --pt-bg:#141312; /* casi negro del panel de transición */
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+html,body{margin:0;padding:0;font-family:'Inter',sans-serif;color:var(--ink);background:var(--cream);}
+a{color:inherit;text-decoration:none;}
+
+/* Los enlaces del nav apuntan a anclas de la home; sin este margen el título
+   de la sección queda tapado al saltar. */
+[id]{scroll-margin-top:2.5rem;}
+
+/* ---------- barra superior ---------- */
+.nav{
+  display:flex;justify-content:space-between;align-items:center;padding:22px 6vw;
+  font-size:.8rem;letter-spacing:.06em;
+}
+.wordmark{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:1.15rem;}
+.navlinks{display:flex;gap:2rem;text-transform:uppercase;letter-spacing:.1em;opacity:.7;font-size:.72rem;}
+.navlinks a{transition:opacity .2s ease;}
+.navlinks a:hover{opacity:.55;}
+
+@media (max-width: 620px){
+  .nav{flex-direction:column;align-items:flex-start;gap:.9rem;}
+  .navlinks{gap:1.1rem;flex-wrap:wrap;}
+}
+
+/* ---------- transición entre páginas ---------- */
+
+/* ENTRADA. Pseudo-elemento del <html>, no un div: así ya está pintado en el
+   primer fotograma, sin esperar a que se parsee el <body>. Es una animación,
+   no una transición, para que se destape sola: si el JS falla, la página nueva
+   no puede quedarse con la pantalla negra puesta. La clase la pone un script
+   diminuto en el <head> de cada página. */
+html.pt-cover::after{
+  content:"";position:fixed;inset:0;z-index:9998;pointer-events:none;
+  background:var(--pt-bg);transform:translateY(0);
+  animation:pt-reveal .55s cubic-bezier(.65,0,.35,1) .1s forwards;
+}
+@keyframes pt-reveal{ to{ transform:translateY(-100%); } }
+
+/* SALIDA. Este sí es un div, porque lleva el spinner dentro. */
+#pt{
+  position:fixed;inset:0;z-index:10000;background:var(--pt-bg);
+  display:grid;place-items:center;
+  transform:translateY(100%);
+  transition:transform .4s cubic-bezier(.65,0,.35,1);
+}
+#pt.is-in{transform:translateY(0);}
+#pt .pt-spinner{opacity:0;transition:opacity .22s ease .16s;}
+#pt.is-in .pt-spinner{opacity:1;}
+
+/* El spinner es la rejilla del hero en miniatura: seis celdas, y el punto de
+   cada una se enciende por turnos. */
+.pt-spinner{
+  display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);
+  width:54px;height:36px;
+}
+.pt-spinner span{
+  display:grid;place-items:center;
+  border-right:1px solid rgba(246,241,231,.26);
+  border-bottom:1px solid rgba(246,241,231,.26);
+}
+.pt-spinner span:nth-child(3n){border-right:none;}
+.pt-spinner span:nth-child(n+4){border-bottom:none;}
+.pt-spinner span::before{
+  content:"";width:5px;height:5px;border-radius:50%;background:var(--cream);
+  opacity:.2;transform:scale(.65);
+  animation:pt-blink 1.15s ease-in-out infinite;
+}
+.pt-spinner span:nth-child(1)::before{animation-delay:0s;}
+.pt-spinner span:nth-child(2)::before{animation-delay:.1s;}
+.pt-spinner span:nth-child(3)::before{animation-delay:.2s;}
+.pt-spinner span:nth-child(4)::before{animation-delay:.3s;}
+.pt-spinner span:nth-child(5)::before{animation-delay:.4s;}
+.pt-spinner span:nth-child(6)::before{animation-delay:.5s;}
+@keyframes pt-blink{
+  0%,65%,100%{opacity:.2;transform:scale(.65);}
+  22%{opacity:1;transform:scale(1);}
+}
+
+@media (prefers-reduced-motion: reduce){
+  /* El JS ni siquiera intercepta los clics; esto solo evita que un panel
+     heredado de una pestaña restaurada se quede a la vista. */
+  html.pt-cover::after{animation-duration:.01s;animation-delay:0s;}
+  .pt-spinner span::before{animation:none;opacity:.7;transform:none;}
+}
+
+/* Texto solo para lectores de pantalla (los enlaces del hero son puro dibujo). */
+.sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;
+}
+
+/* ---------- tipografía compartida ---------- */
+.eyebrow{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.55;display:block;margin-bottom:.6rem;}
+
+/* ---------- páginas de proyecto ---------- */
+
+/* Contenedor ancho, alineado con el gutter del nav (6vw a cada lado). Lo que
+   no se ensancha es la medida del texto: eso se controla por párrafo. */
+.project-wrap{width:min(88vw,1440px);margin-inline:auto;}
+
+.project-body{padding-bottom:10vh;}
+.project-body h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.35rem;margin:0 0 .9rem;}
+.project-body p{font-size:1rem;line-height:1.65;margin:0 0 1rem;max-width:52ch;}
+
+/* Contexto y Ejecución van en paralelo: aprovechan el ancho sin que ninguna
+   línea pase de una medida cómoda de leer. */
+.text-cols{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:3rem 5vw;align-items:start;margin:7vh 0;
+}
+/* Resultado cierra en un solo bloque. */
+.text-end{margin:7vh 0;max-width:56ch;}
+
+.disclaimer{opacity:.5;font-size:.85rem;}
+
+/* Las imágenes van centradas y anchas, pero nunca a sangre: llegan hasta el
+   contenedor (88vw) y ahí paran. Comparten eje con el texto y con el nav a
+   propósito: metidas solo unos px respecto al texto, el desfase se leía como
+   descuadre en vez de como decisión. */
+.media{width:100%;margin:7vh auto;}
+.media img{width:100%;height:auto;display:block;border-radius:6px;}
+
+/* Aparición al entrar en pantalla. El estado oculto se aplica solo si hay JS
+   (clase `js` puesta antes del primer pintado); sin él las imágenes se ven
+   siempre, en vez de quedarse invisibles para siempre. */
+html.js .media{
+  opacity:0;transform:translateY(30px) scale(.985);
+  transition:opacity .7s cubic-bezier(.2,.7,.3,1), transform .8s cubic-bezier(.2,.7,.3,1);
+}
+html.js .media.is-visible{opacity:1;transform:none;}
+
+@media (max-width: 860px){
+  .text-cols{grid-template-columns:1fr;gap:2.5rem;margin:5vh 0;}
+  .media{width:100%;margin:5vh auto;}
+  .project-body p, .text-end{max-width:none;}
+}
+
+@media (prefers-reduced-motion: reduce){
+  html.js .media{opacity:1;transform:none;transition:none;}
+}
+
+.project-header{padding:5vh 0 3vh;}
+.project-header h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2.2rem,5vw,3.4rem);margin:0 0 1.2rem;line-height:1.05;}
+.meta-row{display:flex;gap:2.5rem;flex-wrap:wrap;font-size:.85rem;border-top:1px solid var(--line);padding-top:1rem;}
+.meta-row div span{display:block;opacity:.5;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem;}
+.meta-row a{text-decoration:underline;}
+
+.next-project{
+  display:inline-block;margin-top:1rem;font-size:.85rem;border-top:1px solid var(--line);padding-top:1rem;
+}
+.next-project span{opacity:.5;display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;}
+
+/* ---------- franja negra de contacto: el único contraste fuerte del sitio ---------- */
+.site-footer{background:var(--ink);color:var(--cream);padding:9vh 6vw 2.2rem;}
+.site-footer .eyebrow{opacity:.5;}
+.footer-lead{
+  font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2rem,5.5vw,3.4rem);
+  line-height:1.05;margin:0 0 1.8rem;max-width:16ch;
+}
+.footer-lead em{font-style:italic;font-weight:500;color:var(--mint);}
+.footer-links{display:flex;flex-wrap:wrap;gap:1.8rem;font-size:.92rem;}
+.footer-links a{
+  border-bottom:1px solid rgba(246,241,231,.3);padding-bottom:.2rem;
+  transition:color .2s ease, border-color .2s ease;
+}
+.footer-links a:hover{color:var(--mint);border-color:var(--mint);}
+.footer-base{
+  display:flex;justify-content:space-between;gap:.8rem;flex-wrap:wrap;
+  margin-top:7vh;padding-top:1.2rem;border-top:1px solid rgba(246,241,231,.18);
+  font-size:.74rem;opacity:.55;
+}
