@@ -17,3 +17,17 @@ verdad, día a día.
 
 En la práctica, mi primera semana es sobre todo mapear: quién es quién, qué hace cada uno, a quién
 acudir para cada cosa. Para cuando toca ejecutar, ya sé cómo hacerlo.
+
+## Qué herramientas uso, y cómo elijo
+
+No me cierro dentro de un framework fijo. Conozco Design Thinking, uso shadowing, sigo buenas
+prácticas — pero no las trato como un procedimiento que hay que seguir al pie de la letra. Sigo
+normas básicas y sentido común, y dejo sitio a la improvisación de cada situación concreta.
+
+Qué herramienta uso depende de la persona, de la situación, de lo que quiero investigar en ese
+momento: no es lo mismo tomar notas textuales que montar un workshop o una sesión colaborativa.
+Tengo muchas a mano y decido sobre la marcha cuál pide el momento.
+
+No aplico siempre el mismo proceso — para mí, la metodología de hacer metodologías es precisamente
+que no sea siempre la misma. Lo que sí se estandariza es entender cómo afecta cada decisión a cada
+persona involucrada.
