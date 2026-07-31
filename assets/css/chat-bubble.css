@@ -1,9 +1,9 @@
 /* ===========================================================================
    chat-bubble.css — la burbuja del chatbot del portfolio.
 
-   PROTOTIPO del ticket #18: las tres variantes conviven aquí a la vez,
-   conmutadas por `data-variant` en el <body>. Al cerrar el ticket se queda
-   solo la ganadora y se borran las otras dos.
+   Decidido en el ticket #18 (variante "Discreta", elegida entre tres): un
+   círculo con anillo de pulso, sin globo de saludo ni etiqueta de texto, y la
+   fuente citada al pie de cada respuesta como una nota.
 
    Reutiliza los tokens de site.css (--cream, --mint, --ink, --line). El único
    token nuevo es --bubble-shadow, porque el sitio no tenía sombras hasta ahora.
@@ -19,35 +19,22 @@
 .cb-launcher{
   position:fixed; right:clamp(16px,3vw,32px); bottom:clamp(16px,3vw,32px);
   z-index:60; border:0; cursor:pointer; font-family:inherit;
+  width:56px; height:56px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
   background:var(--ink); color:var(--cream);
   box-shadow:var(--bubble-shadow);
-  display:flex; align-items:center; gap:.55rem;
-  transition:transform .25s cubic-bezier(.2,.7,.3,1), background-color .25s ease;
+  transition:transform .25s cubic-bezier(.2,.7,.3,1);
 }
 .cb-launcher:hover{transform:translateY(-2px);}
 .cb-launcher:focus-visible{outline:2px solid var(--mint); outline-offset:3px;}
 
-/* Variantes 1 y 2: círculo. Variante 3: pastilla con texto. */
-[data-variant="1"] .cb-launcher,
-[data-variant="2"] .cb-launcher{
-  width:56px; height:56px; border-radius:50%; justify-content:center;
-}
-[data-variant="3"] .cb-launcher{
-  border-radius:999px; padding:.85rem 1.25rem;
-  font-size:.85rem; letter-spacing:.02em;
-}
-[data-variant="1"] .cb-launcher-text,
-[data-variant="2"] .cb-launcher-text{display:none;}
+.cb-launcher-icon{width:22px; height:22px; display:block;}
 
-.cb-launcher-icon{width:22px; height:22px; display:block; flex:none;}
-
-/* Anillo de pulso — solo variante 1. Es la señal más callada de las tres:
-   no ocupa sitio, solo insinúa que la burbuja está viva. */
+/* Anillo de pulso: la señal de presencia más callada que se probó en el ticket
+   #18. No ocupa sitio ni interrumpe — solo insinúa que la burbuja está viva. */
 .cb-launcher::before{
   content:""; position:absolute; inset:0; border-radius:inherit;
   border:1.5px solid var(--ink); opacity:0; pointer-events:none;
-}
-[data-variant="1"] .cb-launcher::before{
   animation:cb-pulse 3.4s cubic-bezier(.2,.7,.3,1) infinite;
 }
 @keyframes cb-pulse{
@@ -55,30 +42,6 @@
   70%  {opacity:0;  transform:scale(1.45);}
   100% {opacity:0;  transform:scale(1.45);}
 }
-
-/* ---------- globo de saludo (variante 2) ---------- */
-
-.cb-greeting{
-  position:fixed; right:clamp(16px,3vw,32px); bottom:calc(clamp(16px,3vw,32px) + 68px);
-  z-index:60; max-width:min(70vw, 268px);
-  background:var(--cream); color:var(--ink);
-  border:1px solid var(--line); border-radius:var(--bubble-radius);
-  box-shadow:var(--bubble-shadow);
-  padding:.85rem 2.2rem .85rem 1rem;
-  font-size:.88rem; line-height:1.45;
-  opacity:0; transform:translateY(8px); pointer-events:none;
-  transition:opacity .45s ease, transform .45s cubic-bezier(.2,.7,.3,1);
-}
-.cb-greeting.is-visible{opacity:1; transform:none; pointer-events:auto;}
-.cb-greeting-close{
-  position:absolute; top:.35rem; right:.4rem;
-  border:0; background:none; cursor:pointer; font-size:1rem;
-  line-height:1; padding:.25rem; opacity:.4; color:inherit;
-}
-.cb-greeting-close:hover{opacity:.8;}
-/* El globo solo existe en la variante 2. */
-[data-variant="1"] .cb-greeting,
-[data-variant="3"] .cb-greeting{display:none;}
 
 /* ---------- el panel ---------- */
 
@@ -130,45 +93,19 @@
 .cb-msg-bot p{margin:0 0 .6rem;}
 .cb-msg-bot p:last-child{margin-bottom:0;}
 
-/* ---------- la cita: una forma distinta por variante ---------- */
+/* ---------- la cita ---------- */
 
-/* V1 — al pie: la respuesta se lee como texto normal y la fuente va debajo,
-   discreta, como una nota. Lo más callado, y lo que menos delata que la
-   respuesta es literal. */
-[data-variant="1"] .cb-cite{
+/* Al pie y discreta: la respuesta se lee como texto normal y la fuente va
+   debajo, como una nota. Se prefirió a tratarla como bloque citado o como
+   chip de acción — ver el ticket #18. */
+.cb-cite{
   display:inline-block; margin-top:.55rem;
   font-size:.76rem; opacity:.62;
   border-bottom:1px solid var(--line); padding-bottom:.12rem;
   transition:opacity .2s ease, border-color .2s ease;
 }
-[data-variant="1"] .cb-cite:hover{opacity:1; border-color:var(--ink);}
-
-/* V2 — bloque citado: la fuente encabeza y un filete marca dónde empieza el
-   texto documentado. Es la forma que más se parece a lo decidido en #16
-   ("esto es lo que documenté"), porque separa la voz del documento. */
-[data-variant="2"] .cb-quote{
-  border-left:2px solid var(--mint); padding-left:.9rem; margin-top:.55rem;
-}
-[data-variant="2"] .cb-cite{
-  display:block; font-size:.7rem; text-transform:uppercase;
-  letter-spacing:.08em; opacity:.5; margin-bottom:.4rem;
-  transition:opacity .2s ease;
-}
-[data-variant="2"] .cb-cite:hover{opacity:.9; text-decoration:underline;}
-
-/* V3 — chip: la fuente es una pastilla clicable al final del texto, tratada
-   como acción y no como nota. La más visible de las tres. */
-[data-variant="3"] .cb-cite{
-  display:inline-flex; align-items:center; gap:.35rem; margin-top:.6rem;
-  font-size:.74rem; padding:.28rem .6rem; border-radius:999px;
-  background:var(--mint); color:var(--ink);
-  transition:transform .2s ease, filter .2s ease;
-}
-[data-variant="3"] .cb-cite:hover{transform:translateY(-1px); filter:brightness(.95);}
-
-/* En las variantes donde no aplica, el envoltorio de cita no debe estorbar. */
-[data-variant="1"] .cb-quote,
-[data-variant="3"] .cb-quote{border:0; padding:0;}
+.cb-cite:hover{opacity:1; border-color:var(--ink);}
+.cb-cite:focus-visible{outline:2px solid var(--mint); outline-offset:2px;}
 
 /* ---------- estados ---------- */
 
@@ -240,7 +177,7 @@
 }
 
 @media (prefers-reduced-motion: reduce){
-  .cb-launcher, .cb-panel, .cb-greeting{transition:none;}
-  [data-variant="1"] .cb-launcher::before{animation:none;}
+  .cb-launcher, .cb-panel{transition:none;}
+  .cb-launcher::before{animation:none;}
   .cb-typing span{animation:none; opacity:.4;}
 }

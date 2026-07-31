@@ -1,20 +1,21 @@
 /* ===========================================================================
    chat-bubble.js — la burbuja del chatbot del portfolio.
 
-   PROTOTIPO del ticket #18. Aquí NO hay motor: las respuestas están enlatadas
-   para poder juzgar la interfaz. El motor real (recuperación léxica sobre el
-   sitio leído en vivo) es el ticket #22.
+   Forma decidida en el ticket #18 (variante "Discreta"). El comportamiento
+   viene de los tickets #16 (marco honesto, umbral, salida a contacto) y #21
+   (solo español, sin perfiles, memoria de 3 turnos).
 
-   Lo que sí es real: el texto citado y los enlaces. Salen del contenido que
-   está hoy en las páginas, para que la cita se pueda juzgar de verdad.
+   OJO — AQUÍ TODAVÍA NO HAY MOTOR. Las respuestas están enlatadas para poder
+   juzgar la interfaz. El motor real (recuperación léxica sobre las 6 páginas
+   leídas en vivo, según el ticket #20) es el ticket #22, y sustituye a
+   `resolve()` sin tocar el resto de este archivo.
+
+   Lo que sí es real: el texto citado y los enlaces salen del contenido que
+   está hoy en las páginas.
    =========================================================================== */
 
 (function () {
   'use strict';
-
-  // ---- respuestas enlatadas -------------------------------------------------
-  // Cada una imita lo decidido en el ticket #16: marco de una línea + texto
-  // documentado literal + cita que lleva a la página.
 
   var CANNED = {
     'sobre-mi': {
@@ -43,7 +44,7 @@
     { label: '¿Dónde trabajas ahora?', key: 'experiencia' }
   ];
 
-  var GREETING_DELAY = 4000;
+  var LINKEDIN = 'https://www.linkedin.com/in/ismaelcasadoc/';
 
   // ---- montaje --------------------------------------------------------------
 
@@ -53,13 +54,8 @@
     '  <svg class="cb-launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">',
     '    <path d="M21 11.5a8.38 8.38 0 0 1-9 8.3 8.5 8.5 0 0 1-3.8-.9L3 20l1.9-4.1A8.38 8.38 0 0 1 4 11.5a8.5 8.5 0 0 1 8.5-8.5A8.38 8.38 0 0 1 21 11.5z"/>',
     '  </svg>',
-    '  <span class="cb-launcher-text">Pregúntame</span>',
     '  <span class="sr-only">Abrir el chat sobre el trabajo de Ismael</span>',
     '</button>',
-    '<div class="cb-greeting" id="cb-greeting" role="status">',
-    '  <button class="cb-greeting-close" id="cb-greeting-close" aria-label="Cerrar el saludo">×</button>',
-    '  Pregúntame lo que quieras sobre mi trabajo.',
-    '</div>',
     '<div class="cb-panel" id="cb-panel" role="dialog" aria-modal="false" aria-labelledby="cb-title">',
     '  <div class="cb-head">',
     '    <div>',
@@ -75,7 +71,7 @@
     '      <button type="submit">Enviar</button>',
     '    </form>',
     '    <div class="cb-contact">',
-    '      <a href="https://www.linkedin.com/in/ismaelcasadoc/" target="_blank" rel="noopener">Escríbeme por LinkedIn</a>',
+    '      <a href="' + LINKEDIN + '" target="_blank" rel="noopener">Escríbeme por LinkedIn</a>',
     '      <a href="./assets/cv/isma-casado-cv-es.pdf" download>Descargar CV</a>',
     '    </div>',
     '  </div>',
@@ -85,7 +81,6 @@
 
   var launcher = document.getElementById('cb-launcher');
   var panel = document.getElementById('cb-panel');
-  var greeting = document.getElementById('cb-greeting');
   var log = document.getElementById('cb-log');
   var form = document.getElementById('cb-form');
   var input = document.getElementById('cb-input');
@@ -124,7 +119,7 @@
 
   function addTyping() {
     var el = document.createElement('div');
-    el.className = 'cb-msg cb-msg-bot cb-typing-wrap';
+    el.className = 'cb-msg cb-msg-bot';
     el.innerHTML = '<div class="cb-typing"><span></span><span></span><span></span></div>';
     log.appendChild(el);
     scrollDown();
@@ -139,28 +134,16 @@
     frame.textContent = data.frame;
     el.appendChild(frame);
 
-    var quote = document.createElement('div');
-    quote.className = 'cb-quote';
+    var body = document.createElement('p');
+    body.textContent = data.quote;
+    el.appendChild(body);
 
-    // En la variante 2 la fuente encabeza el bloque citado; en las otras dos
-    // va después del texto. El orden en el DOM importa para el lector de
-    // pantalla, así que se construye distinto, no solo se recoloca por CSS.
     var cite = document.createElement('a');
     cite.className = 'cb-cite';
     cite.href = data.href;
-    cite.textContent = (currentVariant() === '3' ? '↗ ' : '↳ ') + data.cite;
+    cite.textContent = '↳ ' + data.cite;
+    el.appendChild(cite);
 
-    var body = document.createElement('p');
-    body.textContent = data.quote;
-
-    if (currentVariant() === '2') {
-      quote.appendChild(cite);
-      quote.appendChild(body);
-    } else {
-      quote.appendChild(body);
-      quote.appendChild(cite);
-    }
-    el.appendChild(quote);
     log.appendChild(el);
     scrollDown();
   }
@@ -176,7 +159,7 @@
     scrollDown();
   }
 
-  // ---- "motor" enlatado ------------------------------------------------------
+  // ---- "motor" enlatado — lo sustituye el ticket #22 --------------------------
 
   function resolve(text) {
     var t = text.toLowerCase();
@@ -191,15 +174,11 @@
     var typing = addTyping();
     setTimeout(function () {
       typing.remove();
-      if (forcedKey === '__error__') {
-        addNote('No he podido leer el contenido del sitio. Recarga la página, o <a href="https://www.linkedin.com/in/ismaelcasadoc/" target="_blank" rel="noopener">escríbeme por LinkedIn</a>.');
-        return;
-      }
       var data = forcedKey && CANNED[forcedKey] ? CANNED[forcedKey] : resolve(text);
       if (data) {
         addAnswer(data);
       } else {
-        addNote('Eso no lo tengo documentado. Puedo contarte de <strong>Arabvision</strong>, <strong>mi experiencia</strong> o <strong>de dónde vengo</strong> — o puedes <a href="https://www.linkedin.com/in/ismaelcasadoc/" target="_blank" rel="noopener">escribirme por LinkedIn</a>.');
+        addNote('Eso no lo tengo documentado. Puedo contarte de <strong>Arabvision</strong>, <strong>mi experiencia</strong> o <strong>de dónde vengo</strong> — o puedes <a href="' + LINKEDIN + '" target="_blank" rel="noopener">escribirme por LinkedIn</a>.');
       }
     }, 620);
   }
@@ -211,7 +190,6 @@
   function openPanel() {
     panel.classList.add('is-open');
     launcher.setAttribute('aria-expanded', 'true');
-    hideGreeting();
     if (!opened) { opened = true; addEmptyState(); }
     input.focus();
   }
@@ -220,16 +198,11 @@
     launcher.setAttribute('aria-expanded', 'false');
     launcher.focus();
   }
-  function hideGreeting() { greeting.classList.remove('is-visible'); }
 
   launcher.addEventListener('click', function () {
     if (panel.classList.contains('is-open')) closePanel(); else openPanel();
   });
   document.getElementById('cb-close').addEventListener('click', closePanel);
-  document.getElementById('cb-greeting-close').addEventListener('click', hideGreeting);
-  greeting.addEventListener('click', function (e) {
-    if (e.target.id !== 'cb-greeting-close') openPanel();
-  });
 
   window.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && panel.classList.contains('is-open')) closePanel();
@@ -242,46 +215,4 @@
     input.value = '';
     ask(v);
   });
-
-  // El saludo solo aparece en la variante 2, y solo una vez por visita.
-  var greetTimer = null;
-  function armGreeting() {
-    clearTimeout(greetTimer);
-    hideGreeting();
-    if (currentVariant() !== '2') return;
-    greetTimer = setTimeout(function () {
-      if (!panel.classList.contains('is-open')) greeting.classList.add('is-visible');
-    }, GREETING_DELAY);
-  }
-
-  function currentVariant() {
-    return document.body.getAttribute('data-variant') || '1';
-  }
-
-  // ---- enganches para el conmutador del prototipo ----------------------------
-  // Los usa el chrome de variantes de index.html. Desaparecen al plegar el
-  // ganador y quedarse con una sola variante.
-
-  window.__cbProto = {
-    reset: function () {
-      log.innerHTML = '';
-      opened = false;
-      closePanel();
-      armGreeting();
-    },
-    open: openPanel,
-    demo: function (state) {
-      openPanel();
-      log.innerHTML = '';
-      opened = true;
-      if (state === 'vacio') { addEmptyState(); return; }
-      if (state === 'escribiendo') { addUser('¿Qué hiciste en Arabvision?'); addTyping(); return; }
-      if (state === 'cita') { addUser('¿Qué hiciste en Arabvision?'); addAnswer(CANNED.arabvision); return; }
-      if (state === 'no-se') { ask('¿Cuánto cobras?'); return; }
-      if (state === 'error') { ask('¿Qué hiciste en Arabvision?', '__error__'); return; }
-    },
-    armGreeting: armGreeting
-  };
-
-  armGreeting();
 })();
