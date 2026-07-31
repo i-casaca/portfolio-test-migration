@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Isma Casaca — Product Designer</title>
+<title>PROTOTIPO — Ticket 18: la burbuja del chat (variantes 1/2/3)</title>
 <meta name="description" content="Portfolio de Ismael Casado, Product Designer en Madrid. Diseño de producto y UX para streaming, Smart TV, CMS y web: 5 proyectos con su caso de estudio." />
 <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
 <meta property="og:type" content="website" />
@@ -24,6 +24,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700&text=Nexahub&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Yeseva+One&text=El%20Paraguas&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./assets/css/site.css">
+<link rel="stylesheet" href="./assets/css/chat-bubble.css">
 <!-- Marca puesta por la página anterior: si venimos de una transición, entrar
      tapados. Va inline y en el <head> porque tiene que correr antes del primer
      pintado; si falla, simplemente no hay panel. -->
@@ -501,6 +502,95 @@
     });
     document.addEventListener('mouseleave', () => { cursorDot.style.opacity = 0; });
   }
+</script>
+
+<!-- ===================================================================
+     CHROME DEL PROTOTIPO — ticket #18. Todo lo que hay de aquí al final
+     del archivo se borra al plegar la variante ganadora, igual que se
+     hizo en los tickets #5 y #6.
+     =================================================================== -->
+<style>
+  .proto-bar{
+    position:fixed; left:50%; transform:translateX(-50%); bottom:18px; z-index:80;
+    display:flex; flex-wrap:wrap; gap:.5rem; align-items:center;
+    background:var(--chrome-bg); color:var(--chrome-fg);
+    padding:.6rem .8rem; border-radius:999px; font-size:.74rem;
+    box-shadow:0 8px 28px rgba(0,0,0,.28); max-width:94vw;
+  }
+  .proto-bar b{color:var(--chrome-accent); font-weight:600; letter-spacing:.02em;}
+  .proto-bar button{
+    font-family:inherit; font-size:.72rem; cursor:pointer; color:inherit;
+    background:rgba(246,241,231,.1); border:1px solid rgba(246,241,231,.22);
+    padding:.32rem .6rem; border-radius:999px;
+  }
+  .proto-bar button:hover{background:rgba(246,241,231,.2);}
+  .proto-bar .proto-sep{opacity:.3; padding:0 .15rem;}
+  .proto-bar .proto-states{opacity:.6;}
+  /* La barra vive donde el lanzador, así que se aparta hacia la izquierda
+     para no taparlo. */
+  @media (max-width: 900px){ .proto-bar{left:12px; transform:none; bottom:12px;} }
+</style>
+
+<div class="proto-bar">
+  <button id="proto-prev" aria-label="Variante anterior">◀</button>
+  <b id="proto-label">…</b>
+  <button id="proto-next" aria-label="Variante siguiente">▶</button>
+  <span class="proto-sep">·</span>
+  <span class="proto-states">estados:</span>
+  <button data-state="vacio">vacío</button>
+  <button data-state="escribiendo">escribiendo</button>
+  <button data-state="cita">cita</button>
+  <button data-state="no-se">no lo sé</button>
+  <button data-state="error">error</button>
+  <span class="proto-sep">·</span>
+  <button id="proto-reset">reiniciar</button>
+</div>
+
+<script src="./assets/js/chat-bubble.js"></script>
+<script>
+(function(){
+  const VARIANTS = [
+    { key:'1', name:'1 · Discreta — círculo con pulso, cita al pie' },
+    { key:'2', name:'2 · Saludo — globo a los 4s, cita como bloque' },
+    { key:'3', name:'3 · Pestaña — pastilla con texto, cita como chip' }
+  ];
+
+  function fromURL(){
+    const p = new URLSearchParams(location.search).get('variant');
+    return VARIANTS.find(v => v.key === p) ? p : '1';
+  }
+  function show(key){
+    document.body.setAttribute('data-variant', key);
+    document.getElementById('proto-label').textContent =
+      VARIANTS.find(v => v.key === key).name;
+    try{
+      const url = new URL(location.href);
+      url.searchParams.set('variant', key);
+      history.replaceState(null, '', url);
+    }catch(e){}
+    window.__cbProto.reset();
+  }
+
+  let idx = VARIANTS.findIndex(v => v.key === fromURL());
+  if (idx < 0) idx = 0;
+  show(VARIANTS[idx].key);
+
+  function cycle(d){ idx = (idx + d + VARIANTS.length) % VARIANTS.length; show(VARIANTS[idx].key); }
+  document.getElementById('proto-prev').addEventListener('click', () => cycle(-1));
+  document.getElementById('proto-next').addEventListener('click', () => cycle(1));
+  document.getElementById('proto-reset').addEventListener('click', () => window.__cbProto.reset());
+
+  document.querySelectorAll('.proto-bar [data-state]').forEach(b => {
+    b.addEventListener('click', () => window.__cbProto.demo(b.dataset.state));
+  });
+
+  window.addEventListener('keydown', (e) => {
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+    if (e.key === 'ArrowLeft') cycle(-1);
+    if (e.key === 'ArrowRight') cycle(1);
+  });
+})();
 </script>
 </body>
 </html>
