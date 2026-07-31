@@ -38,3 +38,17 @@ adecuadas a cualquier situación y que dependiendo de la situación me gusta pla
 que debemos hacer. No me gusta aplicar siempre al mismo proceso, creo que la metodología para hacer
 metodologías es que no sea siempre la misma, pero la estandarización se produce cuando entiendes
 cómo afecta a cada uno de los personajes a los que tener en cuenta.
+
+### 3. ¿Cómo sabes que un diseño está listo para pasar a desarrollo?
+
+Creo que de verdad hay cosas en las que se siente, no se puede explicar, pero sí que es cierto que
+hay estándares mínimos. Creo que cuando algo tiene el empaque suficiente para cumplir las
+especificaciones de una user story o o las exigencias de producto, y haberlo debatido lo suficiente
+como para que lo hayan aceptado las suficientes personas como para pasarlo al siguiente nivel de
+producción, creo que es en el momento en el que dejas de iterar. Y a partir de ese momento es en el
+que empiezas a construir. El momento en el que empiezas a construir y, sobre todo, lo empiezas a
+aplicar el sistema de diseño, la componentización, la documentación, todo lo que hay que hacer es
+aparte de que tienes las ideas completamente claras sobre la conceptualización. Y esa
+conceptualización es un trabajo colaborativo, es un momento en el que varias personas están de
+acuerdo y también las fechas que marque el sprint, porque, evidentemente, siempre hay que tener en
+cuenta las fechas.

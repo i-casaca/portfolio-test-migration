@@ -31,3 +31,13 @@ Tengo muchas a mano y decido sobre la marcha cuál pide el momento.
 No aplico siempre el mismo proceso — para mí, la metodología de hacer metodologías es precisamente
 que no sea siempre la misma. Lo que sí se estandariza es entender cómo afecta cada decisión a cada
 persona involucrada.
+
+## Cuándo dejo de iterar
+
+Hay parte de esto que se siente y no se explica del todo, pero también hay mínimos claros: cuando
+el diseño cumple lo que pide la user story, y se ha debatido lo suficiente como para que las
+personas necesarias lo hayan aceptado, ahí dejo de iterar y empiezo a construir.
+
+Ese momento es también cuando entra el sistema de diseño de verdad — componentización,
+documentación — porque la conceptualización ya está clara y acordada entre varias personas. Y, por
+supuesto, las fechas del sprint también pesan en cuándo hay que cerrarlo.
