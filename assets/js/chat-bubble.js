@@ -1,50 +1,35 @@
 /* ===========================================================================
-   chat-bubble.js — la burbuja del chatbot del portfolio.
+   chat-bubble.js — la interfaz de la burbuja del chatbot.
 
-   Forma decidida en el ticket #18 (variante "Discreta"). El comportamiento
-   viene de los tickets #16 (marco honesto, umbral, salida a contacto) y #21
-   (solo español, sin perfiles, memoria de 3 turnos).
+   Forma decidida en el ticket #18 (variante "Discreta"): círculo con anillo de
+   pulso, sin globo de saludo, y la fuente citada al pie de cada respuesta.
 
-   OJO — AQUÍ TODAVÍA NO HAY MOTOR. Las respuestas están enlatadas para poder
-   juzgar la interfaz. El motor real (recuperación léxica sobre las 6 páginas
-   leídas en vivo, según el ticket #20) es el ticket #22, y sustituye a
-   `resolve()` sin tocar el resto de este archivo.
+   El motor vive en `chat-corpus.js` (`window.CHAT_CORPUS`). Este archivo solo
+   pinta y gestiona la conversación: apertura, memoria de 3 turnos, estados.
 
-   Lo que sí es real: el texto citado y los enlaces salen del contenido que
-   está hoy en las páginas.
+   Comportamiento heredado de decisiones anteriores:
+     #16 — marco honesto ("esto es lo que documenté"), umbral, salida a contacto.
+     #20 — el corpus se carga perezosamente al abrir, no al cargar la página.
+     #21 — solo español, sin perfiles, memoria de 3 turnos.
    =========================================================================== */
 
 (function () {
   'use strict';
 
-  var CANNED = {
-    'sobre-mi': {
-      frame: 'Esto es lo que tengo escrito sobre mí:',
-      quote: 'Soy de Madrid 🇪🇸 y un entusiasta del café. Estudié arquitectura 🏛️, algo que ha contribuido enormemente a mis habilidades de diseño y a mi empatía con las personas que usan lo que diseño.',
-      cite: 'Sobre mí',
-      href: './index.html#sobre-mi'
-    },
-    'arabvision': {
-      frame: 'Esto es lo que documenté sobre Arabvision:',
-      quote: 'Analicé con detalle las preferencias de los usuarios y los matices culturales, ajustando el diseño de la aplicación a las necesidades específicas del público árabe. La supervisión continua del equipo de marca —con entrevistas y comprobaciones de contexto cultural— fue dando forma al diseño.',
-      cite: 'Arabvision · Ejecución',
-      href: './arabvision.html'
-    },
-    'experiencia': {
-      frame: 'Del apartado de experiencia:',
-      quote: 'Design System Designer en Telefónica, de 2024 a ahora. Antes, Product Designer en EPAM Systems entre 2022 y 2024.',
-      cite: 'Experiencia',
-      href: './index.html#sobre-mi'
-    }
-  };
+  var LINKEDIN = 'https://www.linkedin.com/in/ismaelcasadoc/';
+  var MEMORY_TURNS = 3;
 
+  // Preguntas de entrada. No son respuestas enlatadas: se lanzan contra el
+  // motor real, igual que si el visitante las escribiera.
   var SUGGESTIONS = [
-    { label: '¿Quién eres y de dónde vienes?', key: 'sobre-mi' },
-    { label: '¿Qué hiciste en Arabvision?', key: 'arabvision' },
-    { label: '¿Dónde trabajas ahora?', key: 'experiencia' }
+    '¿Quién eres y de dónde vienes?',
+    '¿Qué hiciste en Arabvision?',
+    '¿Dónde trabajas ahora?'
   ];
 
-  var LINKEDIN = 'https://www.linkedin.com/in/ismaelcasadoc/';
+  // Las rutas del sitio son relativas, y la burbuja vive en las 6 páginas, que
+  // están todas en la raíz — así que `./` vale igual en todas.
+  var CV = './assets/cv/isma-casado-cv-es.pdf';
 
   // ---- montaje --------------------------------------------------------------
 
@@ -64,7 +49,7 @@
     '    </div>',
     '    <button class="cb-close" id="cb-close" aria-label="Cerrar el chat">×</button>',
     '  </div>',
-    '  <div class="cb-log" id="cb-log"></div>',
+    '  <div class="cb-log" id="cb-log" aria-live="polite"></div>',
     '  <div class="cb-foot">',
     '    <form class="cb-form" id="cb-form">',
     '      <input type="text" id="cb-input" placeholder="Escribe tu pregunta…" autocomplete="off" />',
@@ -72,7 +57,7 @@
     '    </form>',
     '    <div class="cb-contact">',
     '      <a href="' + LINKEDIN + '" target="_blank" rel="noopener">Escríbeme por LinkedIn</a>',
-    '      <a href="./assets/cv/isma-casado-cv-es.pdf" download>Descargar CV</a>',
+    '      <a href="' + CV + '" download>Descargar CV</a>',
     '    </div>',
     '  </div>',
     '</div>'
@@ -85,7 +70,26 @@
   var form = document.getElementById('cb-form');
   var input = document.getElementById('cb-input');
 
-  // ---- pintado de mensajes ---------------------------------------------------
+  // ---- memoria acotada (ticket #21) -----------------------------------------
+
+  // Ventana deslizante de 3 turnos. Lo único que se guarda de cada turno es de
+  // qué proyecto se habló, que es lo que necesita la búsqueda para resolver
+  // seguimientos cortos ("¿y el resultado?").
+  var turns = [];
+
+  function remember(fragment) {
+    turns.push({ project: fragment ? fragment.project : null });
+    while (turns.length > MEMORY_TURNS) turns.shift();
+  }
+
+  function memory() {
+    for (var i = turns.length - 1; i >= 0; i--) {
+      if (turns[i].project) return { lastProject: turns[i].project };
+    }
+    return { lastProject: null };
+  }
+
+  // ---- pintado ---------------------------------------------------------------
 
   function scrollDown() { log.scrollTop = log.scrollHeight; }
 
@@ -97,22 +101,26 @@
     scrollDown();
   }
 
+  function addSuggestions(parent, labels) {
+    var box = document.createElement('div');
+    box.className = 'cb-suggest';
+    labels.forEach(function (label) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = label;
+      b.addEventListener('click', function () { ask(label); });
+      box.appendChild(b);
+    });
+    parent.appendChild(box);
+  }
+
   function addEmptyState() {
     var el = document.createElement('div');
     el.className = 'cb-msg cb-msg-bot';
     var p = document.createElement('p');
     p.textContent = 'Puedo contarte lo que hay documentado en este portfolio. Por ejemplo:';
     el.appendChild(p);
-    var box = document.createElement('div');
-    box.className = 'cb-suggest';
-    SUGGESTIONS.forEach(function (s) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.textContent = s.label;
-      b.addEventListener('click', function () { ask(s.label, s.key); });
-      box.appendChild(b);
-    });
-    el.appendChild(box);
+    addSuggestions(el, SUGGESTIONS);
     log.appendChild(el);
     scrollDown();
   }
@@ -126,22 +134,34 @@
     return el;
   }
 
-  function addAnswer(data) {
+  // El marco de una línea decidido en el ticket #16: deja claro que lo que
+  // viene es documentación citada, no una frase improvisada.
+  function frameFor(fragment) {
+    if (fragment.project && fragment.section !== fragment.project) {
+      return 'Esto es lo que documenté sobre ' + fragment.project + ':';
+    }
+    if (fragment.section === 'Sobre mí') return 'Esto es lo que tengo escrito sobre mí:';
+    if (fragment.section === 'Experiencia') return 'Del apartado de experiencia:';
+    if (fragment.section === 'Formación') return 'De mi formación:';
+    return 'Esto es lo que hay escrito en el sitio:';
+  }
+
+  function addAnswer(fragment) {
     var el = document.createElement('div');
     el.className = 'cb-msg cb-msg-bot';
 
     var frame = document.createElement('p');
-    frame.textContent = data.frame;
+    frame.textContent = frameFor(fragment);
     el.appendChild(frame);
 
     var body = document.createElement('p');
-    body.textContent = data.quote;
+    body.textContent = fragment.text;
     el.appendChild(body);
 
     var cite = document.createElement('a');
     cite.className = 'cb-cite';
-    cite.href = data.href;
-    cite.textContent = '↳ ' + data.cite;
+    cite.href = fragment.href;
+    cite.textContent = '↳ ' + fragment.cite;
     el.appendChild(cite);
 
     log.appendChild(el);
@@ -159,44 +179,91 @@
     scrollDown();
   }
 
-  // ---- "motor" enlatado — lo sustituye el ticket #22 --------------------------
+  // ---- idioma (ticket #21) ---------------------------------------------------
 
-  function resolve(text) {
-    var t = text.toLowerCase();
-    if (t.indexOf('arabvision') > -1) return CANNED.arabvision;
-    if (t.indexOf('trabaj') > -1 || t.indexOf('telef') > -1 || t.indexOf('experiencia') > -1) return CANNED.experiencia;
-    if (t.indexOf('quién') > -1 || t.indexOf('quien') > -1 || t.indexOf('madrid') > -1 || t.indexOf('arquitect') > -1) return CANNED['sobre-mi'];
-    return null;
+  // Solo español, dicho abiertamente. La detección es deliberadamente tosca:
+  // busca palabras funcionales inglesas, que es la señal más barata y menos
+  // propensa a falsos positivos con nombres propios del portfolio.
+  var EN = /\b(what|who|where|when|why|how|your|you|the|did|do|does|can|could|tell|about|are|is|was|were|have|has|work|project)\b/gi;
+
+  function looksEnglish(text) {
+    var hits = (text.match(EN) || []).length;
+    return hits >= 2;
   }
 
-  function ask(text, forcedKey) {
+  // ---- conversación ----------------------------------------------------------
+
+  function ask(text) {
     addUser(text);
+
+    if (looksEnglish(text)) {
+      addNote('Sorry — I can only answer in Spanish: everything in this portfolio is written in Spanish. ' +
+              '<br><br>Solo puedo responderte en español, porque el contenido de este portfolio está en español. ' +
+              'Si lo prefieres, <a href="' + LINKEDIN + '" target="_blank" rel="noopener">escríbeme por LinkedIn</a>.');
+      return;
+    }
+
     var typing = addTyping();
+
+    // Latencia mínima deliberada: con el aviso de honestidad puesto en la
+    // cabecera, esto es pulido de UX y no un engaño (ticket #16). La búsqueda
+    // es instantánea, y una respuesta que aparece de golpe se lee como error.
+    var started = Date.now();
+    var result = window.CHAT_CORPUS.search(text, memory());
+    var wait = Math.max(0, 420 - (Date.now() - started));
+
     setTimeout(function () {
       typing.remove();
-      var data = forcedKey && CANNED[forcedKey] ? CANNED[forcedKey] : resolve(text);
-      if (data) {
-        addAnswer(data);
-      } else {
-        addNote('Eso no lo tengo documentado. Puedo contarte de <strong>Arabvision</strong>, <strong>mi experiencia</strong> o <strong>de dónde vengo</strong> — o puedes <a href="' + LINKEDIN + '" target="_blank" rel="noopener">escribirme por LinkedIn</a>.');
+      if (result.hit) {
+        addAnswer(result.hit);
+        remember(result.hit);
+        return;
       }
-    }, 620);
+      // Por debajo del umbral: se admite el límite y se ofrece salida
+      // (ticket #16). Los temas salen del corpus real, no de una lista escrita.
+      remember(null);
+      var list = window.CHAT_CORPUS.topics().slice(0, 6);
+      addNote('Eso no lo tengo documentado. Puedo contarte de <strong>' +
+              list.join('</strong>, <strong>') + '</strong> — o puedes ' +
+              '<a href="' + LINKEDIN + '" target="_blank" rel="noopener">escribirme por LinkedIn</a>.');
+    }, wait);
   }
 
   // ---- apertura y cierre -----------------------------------------------------
 
-  var opened = false;
+  var started = false;
 
   function openPanel() {
     panel.classList.add('is-open');
     launcher.setAttribute('aria-expanded', 'true');
-    if (!opened) { opened = true; addEmptyState(); }
+    if (!started) {
+      started = true;
+      boot();
+    }
     input.focus();
   }
+
   function closePanel() {
     panel.classList.remove('is-open');
     launcher.setAttribute('aria-expanded', 'false');
     launcher.focus();
+  }
+
+  // El corpus se carga aquí y no al cargar la página (ticket #20): quien nunca
+  // abra la burbuja no paga ninguna petición.
+  function boot() {
+    var typing = addTyping();
+    window.CHAT_CORPUS.load().then(function () {
+      typing.remove();
+      addEmptyState();
+      input.disabled = false;
+    }).catch(function (e) {
+      console.warn('[chat] no se pudo cargar el corpus', e);
+      typing.remove();
+      addNote('No he podido leer el contenido del sitio, así que ahora mismo no puedo responder. ' +
+              'Prueba a recargar la página, o <a href="' + LINKEDIN + '" target="_blank" rel="noopener">escríbeme por LinkedIn</a>.');
+      input.disabled = true;
+    });
   }
 
   launcher.addEventListener('click', function () {

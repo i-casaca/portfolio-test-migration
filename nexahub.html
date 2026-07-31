@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,500&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./assets/css/site.css">
+<link rel="stylesheet" href="./assets/css/chat-bubble.css">
 <!-- Marca puesta por la página anterior: si venimos de una transición, entrar
      tapados. Va inline y en el <head> porque tiene que correr antes del primer
      pintado; si falla, simplemente no hay panel. -->
@@ -169,5 +170,10 @@
     }
   });
 </script>
+
+<!-- El chatbot: etiquetas, motor e interfaz, en ese orden. -->
+<script src="./assets/js/chat-corpus-tags.js"></script>
+<script src="./assets/js/chat-corpus.js"></script>
+<script src="./assets/js/chat-bubble.js"></script>
 </body>
 </html>
