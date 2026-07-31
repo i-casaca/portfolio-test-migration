@@ -21,7 +21,7 @@ lo digo explícitamente en vez de rellenar el hueco.
 
 ## Estado de este documento
 
-En progreso — se escribe sección por sección, con commits incrementales.
+Completo — partes 1 a 5.
 
 ---
 
@@ -339,6 +339,189 @@ recomienda combinar capas:
 4. Límite de longitud de conversación / turnos por sesión en el propio diseño del chatbot (esto no
    es una protección de plataforma, es un límite de producto: cuantos menos turnos y más corto el
    contexto, menor el coste máximo por conversación).
+
+---
+
+## 5. Verificación de precios y prompt caching de `claude-haiku-4-5`
+
+Esta sección se hizo invocando el skill `/claude-api` (que mantiene una tabla de modelos y precios
+cacheada y verificada) y complementando con `WebFetch` directo a la documentación oficial vigente
+de Anthropic — las dos fuentes coinciden en cada cifra.
+
+### Precio vigente
+
+Confirmado contra `platform.claude.com/docs/en/about-claude/pricing.md` (tabla "Model pricing")
+y contra `platform.claude.com/docs/en/about-claude/models/overview.md` (tabla comparativa de
+modelos):
+
+| Concepto | Precio |
+|---|---|
+| Entrada base (Base Input Tokens) | **$1 / MTok** |
+| Salida (Output Tokens) | **$5 / MTok** |
+| Escritura de caché, TTL 5 minutos | $1.25 / MTok |
+| Escritura de caché, TTL 1 hora | $2 / MTok |
+| Lectura de caché (cache hit) | $0.10 / MTok |
+
+Esto coincide exactamente con lo que ya tenía anotado el mapa #15 ($1/$5 por MTok). Además:
+ventana de contexto **200K tokens** (de sobra para un corpus de ~12K), salida máxima **64K
+tokens** (el modelo con el tope más bajo de toda la familia Claude 4 actual, pero irrelevante aquí
+— una respuesta de chat no se acerca a 64K tokens).
+
+Fuentes: [platform.claude.com/docs/en/about-claude/pricing](https://platform.claude.com/docs/en/about-claude/pricing.md),
+[platform.claude.com/docs/en/about-claude/models/overview](https://platform.claude.com/docs/en/about-claude/models/overview.md)
+
+### Mecánica de prompt caching para este modelo concreto
+
+- **Mínimo cacheable para `claude-haiku-4-5`: 4096 tokens.** Confirmado textualmente contra
+  `platform.claude.com/docs/en/build-with-claude/prompt-caching.md`: *"4,096 tokens for Claude
+  Haiku 4.5"*. Este es, de hecho, el mínimo más alto de toda la familia de modelos actual (los
+  modelos Opus/Sonnet más nuevos bajan a 512-1024 tokens) — pero el corpus del portfolio, con
+  ~12.000 tokens, lo supera cómodamente, así que no es un problema práctico aquí. Sí es relevante
+  si en el futuro alguien decide cachear un fragmento más pequeño (por ejemplo, solo las
+  instrucciones de comportamiento sin el corpus): por debajo de 4096 tokens, Haiku 4.5
+  simplemente no cachea ese bloque — sin error, solo `cache_creation_input_tokens: 0` en la
+  respuesta.
+- **TTLs disponibles: 5 minutos (por defecto) o 1 hora (explícito).** Se activa con
+  `"cache_control": {"type": "ephemeral"}` (5 min) o
+  `"cache_control": {"type": "ephemeral", "ttl": "1h"}` (1 hora). No hay más opciones de TTL.
+- **Multiplicador de escritura:** 1,25× el precio base de entrada para TTL de 5 minutos; 2× para
+  TTL de 1 hora.
+- **Multiplicador de lectura:** 0,1× el precio base de entrada, en ambos casos.
+
+Fuente primaria para todo este bloque:
+[platform.claude.com/docs/en/build-with-claude/prompt-caching](https://platform.claude.com/docs/en/build-with-claude/prompt-caching.md)
+
+**Detalle importante que no estaba en el mapa:** el caché de prompts de Anthropic se indexa por
+los bytes exactos del prefijo (system + tools), **no por sesión de usuario ni por visitante**. Si
+dos visitantes distintos preguntan algo al chatbot dentro de la misma ventana de TTL, el segundo
+lee del mismo caché que escribió el primero — el caché es compartido a nivel de cuenta/workspace,
+no privado por conversación. Esto cambia la lectura de "cada visitante paga una escritura" a "se
+paga una escritura cada vez que pasa más tiempo que el TTL sin que nadie llame al endpoint con ese
+mismo prefijo".
+
+### Validación de la estimación del mapa, paso a paso
+
+Cifras del mapa a validar: ~0,017 $ la primera pregunta (escritura de caché), ~0,004 $ cada
+pregunta siguiente, ~0,04 $ una conversación de 6 turnos, ~1 $ cada 25 conversaciones. Corpus
+~12.000 tokens en el `system` (con `cache_control` al final del bloque). Asumo, porque el mapa no
+lo fija explícitamente, una respuesta típica de Haiku de ~300-500 tokens de salida por turno y
+una pregunta de visitante de ~50-150 tokens — son los tamaños razonables para un chat de
+preguntas y respuestas sobre un portfolio; lo marco como supuesto, no como dato confirmado.
+
+**Primera pregunta de un visitante** (el caché de ese prefijo de 12K tokens está frío —
+expiró o nunca se escribió):
+
+| Concepto | Cálculo | Coste |
+|---|---|---|
+| Escritura de caché del corpus (12.000 tokens, TTL 5 min, 1,25×) | 12.000 × $1,25 / 1.000.000 | 0,0150 $ |
+| Pregunta del visitante (no cacheada, ~100 tokens de entrada) | 100 × $1 / 1.000.000 | 0,0001 $ |
+| Respuesta de Haiku (~400 tokens de salida) | 400 × $5 / 1.000.000 | 0,0020 $ |
+| **Total primera pregunta** | | **≈ 0,017 $** |
+
+Esto **coincide con la cifra del mapa** (0,017 $) casi exactamente — el término dominante, con
+diferencia, es la escritura del caché (0,015 $ de los 0,017 $ totales), así que el número es
+sólido siempre que el corpus completo esté efectivamente en el bloque cacheado.
+
+**Cada pregunta siguiente en la misma conversación** (el caché sigue caliente, dentro del TTL de
+5 minutos, y se supone que cada turno añade también un breakpoint de caché al final para que la
+conversación previa se lea barata en el siguiente turno):
+
+| Concepto | Cálculo | Coste |
+|---|---|---|
+| Lectura de caché (12.000 corpus + ~500 de turno previo ≈ 12.500 tokens) | 12.500 × $0,10 / 1.000.000 | 0,0013 $ |
+| Escritura de caché del turno nuevo (~100 tokens de la pregunta) | 100 × $1,25 / 1.000.000 | 0,0001 $ |
+| Respuesta de Haiku (~400 tokens de salida) | 400 × $5 / 1.000.000 | 0,0020 $ |
+| **Total por pregunta siguiente** | | **≈ 0,0034 $** |
+
+El mapa dice ~0,004 $ — mi cálculo da ~0,0034 $, un poco por debajo pero **en el mismo orden de
+magnitud y compatible con el margen de incertidumbre** de la longitud real de las respuestas (si
+las respuestas son algo más largas, ~500-600 tokens en vez de 400, el total sube a ~0,004 $
+exactos). No corrijo esta cifra — la doy por validada dentro del margen de una estimación.
+
+**Conversación completa de 6 turnos:** primera pregunta (0,017 $) + 5 preguntas siguientes
+(5 × ~0,0034-0,004 $ ≈ 0,017-0,02 $) = **≈ 0,034-0,037 $**, redondeando, coherente con el
+"~0,04 $" del mapa. **Validado.**
+
+**25 conversaciones completas:** aquí es donde entra el matiz del párrafo anterior sobre cómo se
+comparte el caché. Si cada una de esas 25 conversaciones llega **espaciada más de 5 minutos** de
+cualquier otra (el escenario típico de un portfolio con tráfico esporádico, que es exactamente lo
+que se espera aquí), cada una paga su propia escritura de caché completa: 25 × ~0,037 $ ≈ **0,93 $
+— redondea a "~1 $"**, tal y como dice el mapa. **Validado**, con la salvedad de que esa cifra
+asume implícitamente tráfico disperso (visitantes que no se solapan dentro del TTL); si varios
+recruiters abrieran el chat casi a la vez (por ejemplo, justo después de que Ismael comparta el
+link en LinkedIn), compartirían la escritura de caché y el coste real de esas 25 conversaciones
+bajaría por debajo de 1 $.
+
+**Conclusión de la validación:** las cifras del mapa son correctas — no encontré ningún error que
+corregir. El cálculo paso a paso las reproduce dentro de un margen razonable (la única cifra que
+sale ligeramente distinta, "cada pregunta siguiente", depende de un supuesto no fijado —longitud
+de la respuesta— y el propio mapa probablemente asumió un output algo más largo que mis 400
+tokens de referencia).
+
+### ¿Compensa el TTL de 1 hora dado el tráfico esporádico del portfolio?
+
+Esta es la pregunta que el ticket pedía evaluar explícitamente, y la respuesta es: **depende del
+patrón de tráfico, y con los datos actuales no está claro que compense — no lo activaría por
+defecto.**
+
+Con TTL de 5 minutos (el que usan los cálculos de arriba), el coste de escritura es 1,25× el
+precio base. Con TTL de 1 hora, ese coste sube a 2× — un extra de aproximadamente
+12.000 × ($2 − $1,25) / 1.000.000 = **0,009 $ por escritura**, comparado con la de 5 minutos.
+
+Ese extra solo se recupera si, dentro de esa ventana de 1 hora ampliada, llega **al menos un
+visitante adicional** que de otro modo habría forzado una escritura nueva bajo el TTL corto de 5
+minutos (porque llegó más de 5 minutos después del anterior, pero menos de 60). Ese visitante
+"rescatado" paga una lectura (~0,0012 $ para 12.500 tokens) en vez de una escritura completa
+(~0,015-0,024 $) — un ahorro neto de ~0,014-0,022 $ por visitante rescatado, más que suficiente
+para justificar el extra de 0,009 $ de la escritura ampliada, **si ese visitante existe**.
+
+El problema es que, para un portfolio con tráfico verdaderamente esporádico (el escenario que el
+propio mapa asume — "nadie va a hacer 100.000 peticiones/día a la web de Ismael"), es poco
+probable que dos visitantes distintos lleguen dentro de la misma ventana de una hora la mayoría
+de las veces. En ese caso, el TTL de 1 hora **solo añade coste** (el extra de escritura de 0,009 $
+en cada conversación) **sin ahorrar nada**, porque no hay un segundo visitante que aproveche el
+caché más largo.
+
+Mi recomendación, con la información disponible (no verificada contra datos reales de tráfico del
+sitio, que no existen todavía): **quedarse con el TTL por defecto de 5 minutos**, salvo que Ismael
+anticipe ráfagas de tráfico concentradas (por ejemplo, justo después de compartir el link del
+portfolio en LinkedIn o en una entrevista donde varias personas lo abren casi a la vez) — en ese
+escenario específico, sí compensaría cambiar a 1 hora para esas ráfagas. Como el propio corpus no
+cambia entre visitantes, una alternativa más simple que ajustar el TTL sería **pre-calentar el
+caché** (`max_tokens: 0` con el breakpoint del corpus, ver la referencia de prompt caching) justo
+después de compartir el link, si se quiere garantizar que la primera persona que abra el chat no
+pague la escritura completa — pero esto añade complejidad operativa que probablemente no vale la
+pena para el volumen de tráfico esperado.
+
+---
+
+## Resumen y recomendación
+
+1. **Plataforma:** Cloudflare Workers, por el modelo de arranque en frío basado en isolates V8
+   (sin el modelo contenedor-por-invocación de AWS Lambda que usan Vercel y Netlify por debajo),
+   por encajar bien con un proxy ligero de solo reenvío de bytes, y porque Turnstile (su propio
+   captcha, gratuito) resuelve la capa de anti-abuso sin salir del mismo proveedor. Vercel es la
+   alternativa razonable si el frontend se reescribe algún día con un framework.
+2. **Streaming y CORS:** las tres plataformas soportan streaming real de la respuesta de Anthropic
+   con el patrón `ReadableStream`/`Response`, y CORS se resuelve con las cabeceras HTTP estándar
+   (`Access-Control-Allow-Origin` fijado a `https://i-casaca.github.io`, no a `*`).
+3. **Secretos:** las tres plataformas resuelven el problema igual de bien — la clave nunca toca el
+   repo, se guarda como variable de entorno de solo escritura.
+4. **Anti-abuso:** ninguna protección nativa sola basta; se recomienda combinar límite por IP +
+   captcha (Turnstile) + un tope de gasto fijado en la propia cuenta de Anthropic, que es la
+   última red de seguridad real en dólares.
+5. **Precios y caching de `claude-haiku-4-5`:** confirmados contra documentación primaria
+   ($1/$5 por MTok, mínimo cacheable de 4096 tokens para este modelo concreto, TTLs de 5 min/1 h
+   con multiplicadores 1,25×/2× en escritura y 0,1× en lectura). **La estimación de coste del mapa
+   #15 es correcta** — validada paso a paso, sin errores que corregir. El TTL de 1 hora no está
+   claramente justificado para tráfico esporádico; el de 5 minutos (por defecto) es la opción más
+   simple y probablemente suficiente.
+
+**Lo que no pude verificar contra fuente primaria** (señalado explícitamente en el cuerpo del
+documento en vez de rellenado): cifras exactas de arranque en frío en milisegundos para Vercel y
+Netlify; el detalle exacto de la llamada `siteverify` de Turnstile; si Netlify escanea
+automáticamente sus logs de build/función en busca de secretos filtrados; un ejemplo oficial que
+combine streaming y CORS en la misma respuesta para Vercel o Netlify (sí existe para Cloudflare).
 
 
 
