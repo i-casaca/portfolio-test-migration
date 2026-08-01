@@ -52,3 +52,19 @@ aparte de que tienes las ideas completamente claras sobre la conceptualización.
 conceptualización es un trabajo colaborativo, es un momento en el que varias personas están de
 acuerdo y también las fechas que marque el sprint, porque, evidentemente, siempre hay que tener en
 cuenta las fechas.
+
+### 4. Una decisión de diseño donde tuvieras que elegir entre lo que pedía el cliente y lo que tú creías mejor para el usuario
+
+Pues, por ejemplo, en una de las peticiones, el cliente pedía algo que, en este caso, vulneraba la
+usabilidad del producto. A pesar de tener que negociar sobre cuál era la mejor versión de lo que
+pudiéramos hacer, tuvimos que buscar la forma en la que consiguiéramos otorgar la solución que el
+cliente aportaba, quería y necesitaba con una usabilidad lo más cercana posible a algo que fuera de
+una interacción normal. En pocas palabras. En algún momento existe la necesidad de perder el
+concepto principal de la usabilidad, por lo que el cliente pide. Siempre hay que plantear
+alternativas y siempre hay que decir cuáles son las consecuencias de lo que se va a poner. Pero sí
+que es cierto que en una cadena de producto en la que el cliente tiene algo que decir, es cierto
+que depende de las exigencias de la normativa de negocio, de lo que se quiera exigir, que tendremos
+que pasar por soluciones que no son las más usables, incluso poder caer en dark patterns a pesar de
+que sean algo que tenemos que evitar a toda costa en cuestiones que los clientes a veces deciden y
+no nos queda otra que tener que pasar por ellos. Simplemente hay que ser diplomático, buscar
+alternativas y tratar de encontrar el punto medio.

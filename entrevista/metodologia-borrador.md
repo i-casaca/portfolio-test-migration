@@ -41,3 +41,14 @@ personas necesarias lo hayan aceptado, ahí dejo de iterar y empiezo a construir
 Ese momento es también cuando entra el sistema de diseño de verdad — componentización,
 documentación — porque la conceptualización ya está clara y acordada entre varias personas. Y, por
 supuesto, las fechas del sprint también pesan en cuándo hay que cerrarlo.
+
+## Cuando el cliente pide algo que va contra la usabilidad
+
+Me ha pasado: un cliente pedía algo que iba contra la usabilidad del producto. En esos casos negocio
+buscando la forma de dar lo que el cliente necesita de verdad, pero acercándolo lo más posible a una
+interacción normal — planteo alternativas y explico las consecuencias de cada camino.
+
+Con eso dicho, soy realista: en una cadena de producto donde el cliente tiene algo que decir, a
+veces las exigencias de negocio ganan y acabas en soluciones menos usables — incluso rozando dark
+patterns, que son algo que intento evitar siempre. Cuando toca pasar por ahí, no queda otra. Lo que
+hago es ser diplomático, seguir planteando alternativas y buscar el punto medio.
