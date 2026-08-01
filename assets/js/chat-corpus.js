@@ -75,7 +75,12 @@
   function stem(w) {
     if (w.length <= 4) return w;
     return w
-      .replace(/(aste|iste|ando|iendo|aron|ieron|amos|emos|imos|aba|ias|cion|ciones)$/, '')
+      // `ia` va después de `ias` a propósito: la alternancia elige la primera
+      // que casa, y sin `ia` el condicional se parte en dos cubos distintos —
+      // "harías" → "har" pero "haría" → "hari", que no se encuentran. Lo
+      // destapó el ticket #25 al montar la sección "Mirándolo hoy", donde la
+      // pregunta natural es justo "¿qué harías/haría distinto?".
+      .replace(/(aste|iste|ando|iendo|aron|ieron|amos|emos|imos|aba|ias|ia|cion|ciones)$/, '')
       .replace(/(es|s)$/, '')
       // La vocal final se recorta también, y por eso "estudiaste" (pregunta) y
       // "estudié" (texto del sitio) acaban en el mismo cubo. Es agresivo, pero
@@ -241,9 +246,14 @@
       }
     }
 
-    // Contexto / Ejecución / Resultado: un párrafo cada una, verificado en las
-    // 5 páginas. NDA se deriva de si la sección vive dentro del muro.
-    ['contexto', 'ejecucion', 'resultado'].forEach(function (anchor) {
+    // Contexto / Ejecución / Resultado / Mirándolo hoy: un fragmento por párrafo.
+    // NDA se deriva de si la sección vive dentro del muro.
+    //
+    // "Mirándolo hoy" sale de la entrevista del ticket #17 y se montó en el #25.
+    // Va como sección aparte porque Resultado cuenta cómo acabó el proyecto y
+    // esto es la lectura de años después: mezclarlas haría que una pregunta por
+    // el desenlace devolviera la reflexión, y al revés.
+    ['contexto', 'ejecucion', 'resultado', 'mirandolo-hoy'].forEach(function (anchor) {
       var sec = doc.getElementById(anchor);
       if (!sec) return;
       var h2 = sec.querySelector('h2');

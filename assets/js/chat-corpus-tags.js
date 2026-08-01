@@ -47,26 +47,40 @@ window.CHAT_CORPUS_TAGS = {
   'arabvision.html#contexto/0': 'streaming bajo demanda, mercado árabe, RTL, accesibilidad',
   'arabvision.html#ejecucion/0': 'que hiciste, tu papel, tu rol, tu aportación, research cultural, i18n, RTL, entrevistas, trabajo con equipo de marca',
   'arabvision.html#resultado/0': 'resultado, al final, como acabo, que paso, se detuvo, conflicto, qué salió mal',
+  'arabvision.html#mirandolo-hoy/0': 'que aprendiste, aprendizaje, RTL, derecha a izquierda, cultura arabe, sesiones colaborativas, stakeholders, incertidumbre',
+  'arabvision.html#mirandolo-hoy/1': 'que harias distinto, cambiarias algo, mirando atras, cancelacion, decision del cliente, nada cambiaria',
 
   'adrenaline.html#ficha/0': 'app deportiva, whitelabel, cliente, 2023, UX designer',
   'adrenaline.html#contexto/0': 'eventos deportivos, backend flexible, proveedores externos, MVP',
   'adrenaline.html#ejecucion/0': 'que hiciste, tu papel, tu rol, tu aportación, estadísticas, TV en vivo, VOD, diseño de interfaz deportiva',
+  'adrenaline.html#ejecucion/1': 'que hiciste, tu papel, tu aportacion, UI kit, componentes reutilizables, Figma, white label, estandarizacion, tokens',
   'adrenaline.html#resultado/0': 'resultado, al final, como acabo, que paso, aprendizajes, clientes premium',
+  'adrenaline.html#mirandolo-hoy/0': 'que harias distinto, por que se paro, por que acabo, mirando atras, no lo tengo claro',
+  'adrenaline.html#mirandolo-hoy/1': 'hacia donde iba, que venia despues, escalar a mas deportes, tenis, futbol, formatos de puntuacion, MVP',
 
   'nexahub.html#ficha/0': 'CMS, herramienta interna, cliente, 2022, UI designer',
   'nexahub.html#contexto/0': 'JIRA, gestión de incidencias, QA, eficiencia interna',
   'nexahub.html#ejecucion/0': 'que hiciste, tu papel, tu rol, tu aportación, diseño de CMS, flujo de tickets, herramienta para QA',
+  'nexahub.html#ejecucion/1': 'que hiciste, tu papel, tu aportacion, shadowing, QA engineers, wireframing, observar al usuario',
   'nexahub.html#resultado/0': 'resultado, al final, como acabo, que paso, adopción, herramienta global',
+  'nexahub.html#mirandolo-hoy/0': 'que aprendiste, que aprende, aprendemos, hallazgo, descubrimiento, calendarizar, adjuntar archivos, datos del backend, necesidades no contempladas',
+  'nexahub.html#mirandolo-hoy/1': 'que aprendiste, que aprende, aprendemos, observar en vez de preguntar, investigacion de usuarios, mirando atras',
 
   'el-paraguas.html#ficha/0': 'app de viajes, bootcamp, trabajo final de carrera, 2021, UX designer',
   'el-paraguas.html#contexto/0': 'pandemia, COVID, free tours, turismo, aglomeraciones',
   'el-paraguas.html#ejecucion/0': 'que hiciste, tu papel, tu rol, tu aportación, proceso de bootcamp, investigación de usuarios, diseño de app de viajes',
   'el-paraguas.html#resultado/0': 'resultado, al final, como acabo, que paso, aprendizajes del bootcamp',
+  'el-paraguas.html#mirandolo-hoy/0': 'que harias distinto, retomar el proyecto, cambiarias algo, mirando atras',
+  'el-paraguas.html#mirandolo-hoy/1': 'prototipo funcional, modelo de negocio, ingresos de los guias, panel de gestion, flujos sin cerrar',
+  'el-paraguas.html#mirandolo-hoy/2': 'inteligencia artificial, IA, modelo conversacional, geolocalizacion, sistema de diseño, 2020',
 
   'manu-cardiel.html#ficha/0': 'web de artista, proyecto personal, 2024, web designer',
   'manu-cardiel.html#contexto/0': 'Kit Digital, coste de mantenimiento, arte urbano, identidad de artista',
   'manu-cardiel.html#ejecucion/0': 'que hiciste, tu papel, tu rol, tu aportación, rediseño web, CMS para el cliente, autonomía del artista',
+  'manu-cardiel.html#ejecucion/1': 'que hiciste, tu papel, tu aportacion, decision tuya, decision propia, decision mia, que decidiste tu, que fue tuyo, vista de detalle, carruseles, mosaicos, navegacion, encargo de un amigo',
   'manu-cardiel.html#resultado/0': 'resultado, al final, como acabo, que paso, web publicada, gestión del contenido',
+  'manu-cardiel.html#mirandolo-hoy/0': 'que harias distinto, Framer, limites de la herramienta, mirando atras',
+  'manu-cardiel.html#mirandolo-hoy/1': 'viralidad, picos de trafico, rendimiento, precarga de imagenes, hosting gratuito, migrar, decision consciente de coste',
 
 
   /* ---------- índice de proyectos en la home ---------- */
