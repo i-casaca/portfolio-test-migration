@@ -177,3 +177,20 @@ creo que eso, con la capacidad que tengo, la inventiva, la ambición y las aspir
 gustan, creo que el siguiente paso es una escalera vertical hacia el siguiente nivel, un rol de
 lead, un rol de manager, algo que te que siga teniendo que ver con los sistemas de diseño, pero que
 me permita la capacidad de liderar, las decisiones que tienen que ver con eso.
+
+### 10. ¿Qué es lo que más valoras en un equipo o una empresa para hacer tu mejor trabajo?
+
+Pues personalmente creo que lo que más valoro de un equipo donde trabajar es cooperación y ganas de
+solucionar el problema cada uno desde su lugar, no hace falta que sea desde la mayor capacidad del
+mundo, no le exijo nunca a nadie que tenga una capacidad técnica que no tiene, pero creo que sí que
+necesito que mi equipo tenga ganas. Y esas ganas se demuestran ejecutando en el día a día,
+preguntando, estando ahí. Personalmente yo querría que mi equipo Quiera que las cosas salgan bien,
+pero no porque tengan una ambición de que las cosas salgan bien como de manera mal estática, sino
+que estén con ganas de que las cosas se hagan y que ellos tengan algo que decir y que la gente tenga
+algo que decir. A mí me gusta que existan reuniones en las que la gente tenga algo que decir. Para
+mí, personalmente, una empresa que aporta y que hace que el trabajo salga mejor es aquella que da la
+capacidad de gobernanza, que da la capacidad de autoridad a quien tiene que tenerla, y, sobre todo,
+que le da voz a todo el mundo para tener algo que decir dentro de un proceso de diseño, porque si
+nadie puede decir nada y si todos son órdenes y todo aplica única y exclusivamente a lo que dice el
+cliente o lo que dicen las métricas o lo que dicen los números, lo siento, pero no estamos haciendo
+diseño, estamos haciendo otra cosa.

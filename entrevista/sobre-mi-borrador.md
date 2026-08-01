@@ -55,3 +55,15 @@ negociar con producto, negocio y desarrollo, de ponerme en el centro de conversa
 resuelven problemas y sacar adelante proyectos complejos. Con la IA de mi lado puedo hacer cosas hoy
 que hace seis meses eran impensables. El siguiente paso natural es un rol de lead o de manager,
 algo que siga ligado a sistemas de diseño pero con capacidad real de decisión.
+
+## Lo que valoro en un equipo
+
+Cooperación y ganas de resolver el problema, cada uno desde su sitio — no exijo a nadie una
+capacidad técnica que no tiene, pero sí necesito que mi equipo tenga ganas de verdad, y eso se nota
+en el día a día: preguntando, estando ahí, queriendo que las cosas salgan bien porque les importa,
+no por quedar bien.
+
+Me gusta que en las reuniones la gente tenga algo que decir. Una empresa que aporta de verdad es la
+que da autoridad a quien debe tenerla y, sobre todo, le da voz a todo el mundo dentro del proceso de
+diseño. Si nadie puede decir nada y todo se reduce a lo que pide el cliente o lo que dicen los
+números, eso ya no es diseño — es otra cosa.
