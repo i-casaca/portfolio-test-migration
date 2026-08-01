@@ -243,4 +243,13 @@ personalmente, pues, creo que lo que más aporte realmente fue aceleración de p
 marketing presentación al cliente. Hay componentes que se plantearon para ver cómo funcionaban
 técnicamente dentro de Front End, que en su día ni siquiera podíamos haber tenido esa conversación.
 
-### 14. Adrenaline — El proyecto se corta ahí, ¿por qué, y qué habría venido después? [PENDIENTE]
+### 14. Adrenaline — El proyecto se corta ahí, ¿por qué, y qué habría venido después?
+
+Pues, realmente hace muchísimo que escribí esto y no lo tengo muy claro. Esta parte realmente, yo
+creo que lo que habría venido después es hacer una estandarización muchísimo más potente del
+proyecto. Era una propuesta que especializaba la plataforma de vídeo en en las plataformas de
+deportes. Contemplabamos un MVP de una serie de deportes, como tenis o fútbol, competiciones que
+pudiéramos mostrar marcadores como fútbol, ligas y cosas que ya teníamos asumidas, pero realmente
+podíamos haber seguido escalando a más y más y más deportes. realmente por poder podía haber
+escalado muchísimo más, lo que pasa que no llegó a hacerse porque tampoco había nada más que
+aportar.
