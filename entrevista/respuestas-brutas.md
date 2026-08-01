@@ -253,3 +253,18 @@ pudiéramos mostrar marcadores como fútbol, ligas y cosas que ya teníamos asum
 podíamos haber seguido escalando a más y más y más deportes. realmente por poder podía haber
 escalado muchísimo más, lo que pasa que no llegó a hacerse porque tampoco había nada más que
 aportar.
+
+### 15-16. Arabvision — ¿Cómo fue vivir desde dentro que el proyecto se detuviera por el conflicto en Israel? ¿Qué harías distinto sabiendo cómo terminó?
+
+Sinceramente, no tiene especial relevancia para comentar a nivel del proyecto. Simplemente, el
+proyecto se tuvo que cancelar, fue un varapalo y al final, pues estábamos en unas conversaciones con
+su equipo de diseño, donde pudimos aprender muchísimo sobre la interacción RTL que se usa dentro de
+las comunidades árabes para la lectura sistémica que tienen ellos. Eso hacía, pues, tener que
+plantear toda la arquitectura y la ui en ese panorama. Más allá de eso, tuvimos sesiones
+colaborativas en las que nosotros trabajábamos con su equipo de diseño para plantear cuáles eran las
+situaciones, y tuvimos que trabajar de una manera muy elegante con estos stakeholders en una
+situación de conflicto en la que no teníamos claro qué iba a pasar con el proyecto. Manejamos esto
+de la manera más profesional posible, simplemente al final, pues, debido a la situación, la
+dedicación del proyecto, pues, por su parte, por parte del cliente, se tuvo que cancelar. Nosotros
+no podíamos haber hecho nada más. ¿Qué podíamos haber hecho distintos sabiendo cómo terminó? Nada,
+realmente hicimos lo mejor que podíamos, no tenía nada más que aportarse.
