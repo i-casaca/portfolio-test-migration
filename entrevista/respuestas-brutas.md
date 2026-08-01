@@ -268,3 +268,22 @@ de la manera más profesional posible, simplemente al final, pues, debido a la s
 dedicación del proyecto, pues, por su parte, por parte del cliente, se tuvo que cancelar. Nosotros
 no podíamos haber hecho nada más. ¿Qué podíamos haber hecho distintos sabiendo cómo terminó? Nada,
 realmente hicimos lo mejor que podíamos, no tenía nada más que aportarse.
+
+### 17-18. Nexahub — Mencionas shadowing con QA Engineers. Cuéntame un hallazgo concreto de esas sesiones que cambiara el diseño
+
+sobre Nexahub. En este proyecto, el Sadowin, pues es, fue una implementación bastante útil para
+hacer el research, entendiendo cuáles eran las las problemáticas y las implicaciones que tenían de
+cara a lo que luego realmente estos en QA engineers tenían que ver dentro de la plataforma y el
+front que nosotros mostrábamos. Esto demostraba que teníamos que trabajar a la hora de hacer el
+wireframing, teniendo muy en cuenta cuáles eran las necesidades que cubrían los dos lados. Por un
+lado, lo que exigía el QA para ver dentro de los tickets y todo lo que se trabajaba en SMS sé y lo
+que nosotros podíamos montar dentro del frontal. Finalmente, pues, algunos hallazgos que pudimos
+encontrar que cambiarán el diseño, pues, por ejemplo, a la hora de hacer los etiquetados o cómo se
+subían esos tickets, establecían que teníamos que tener en cuenta un flujo que partía desde
+calendarizar, desde elementos que no teníamos en cuenta, por ejemplo, desde la parte de diseño,
+pues agregar archivos URLs que nosotros nos manejábamos o incluso elementos que existían en el
+backend que tenían que representarse en el frontend de alguna manera, aunque fuera hardcore de
+hada, que nosotros no tuviéramos con todo lo que directamente el usuario no tuviera control ni
+pudiera sobrescribir, pero que tenía que ser mostrado y que solamente podíamos aprender a la hora
+de hacer ese reset sin tener en cuenta lo que el backend nos contaba y veíamos que se tenía que
+transportar a un dato visual.
