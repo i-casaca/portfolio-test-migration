@@ -100,3 +100,34 @@ cuánta es la reducción en porcentaje de bugs entre sprints, la adopción de si
 cuanto a componentes publicados en en el front versus en la librería de diseño, Esas son las
 métricas con las que tenemos que contar, y esas métricas se pueden traducir a reducción de costes,
 productividad y etc que se cruzan con negocio.
+
+### 6. ¿Por qué diseño? ¿Qué te trajo hasta aquí?
+
+Siempre he sido una persona inquieta. Me ha gustado hacer de todo. Nunca he sido capaz de encontrar
+mi nicho, y era una cosa que me atormentaba. Llegué a arquitectura, entendiendo que era una carrera
+que cubría tantos aspectos que encontraría mi camino dentro de ella. Me gustaba mucho la
+arquitectura. Hacía proyectos de todo tipo. Llegué a involucrarme en avances tecnológicos dentro de
+la carrera, como los modelados tres d, la realidad virtual, un montón de tecnologías que se
+aplicaban a la arquitectura que empecé a sentir que yo tenía una visión más acelerada de las
+necesidades técnicas de los proyectos de lo que el mundo estaba aceptando. Eso me hacía entender que
+yo no terminaba de encajar tampoco en ese mundo, y acabé la carrera y trabajé de arquitecto. Y,
+finalmente, una de las cosas que me hizo ya totalmente tomar el camino hacia producto UX y todo este
+ámbito fue comprender que, además, la arquitectura se veía como de una manera elitista y perdía de
+de vista a los usuarios finales que son los que usan los edificios. No solo los que los habitan,
+sino también los que lo transitan. Me acuerdo de la anécdota de que en un estudio de arquitectura
+donde yo trabajé, yo estaba pensando en cómo tenía que limpiar la persona encargada una fachada de
+cristal, y que para eso sería necesario montar unos andamiajes. La respuesta que recibí por parte
+del estudio era que si yo pensaba en cómo tenía que trabajar la señora de la limpieza nunca sería un
+buen arquitecto y decidí que nunca más quería ser un arquitecto. Así fue como transité hacia LuX, y
+dentro de LuX encontré que toda esa visión del usuario en el centro se juntaba con mi capacidad
+técnica y las cosas que a mí me gustaban dentro de los sistemas de diseño. Ahí es donde por fin
+encontré mi nicho. Ha sido un camino largo y he aprendido muchísimo por el camino, pero he de
+reconocer que toda la base que he construido de arquitectura me ha ayudado tantísimo a comprender
+los flujos de trabajo, las exigencias de documentación, las necesidades de muchas partes en un
+proyecto, entender un roadmap completo en el que todas las participantes tienen algo que decir, cómo
+al final sí falla una parte, la siguiente no funciona, entender un scoop completo de un proyecto en
+todo su en todo su espectro. Y, por supuesto, ya estandarizar estandarizar normativas, todo lo que
+aplica, siento que en este mundo El diseño siempre ha sido algo más naif y muy dedicado al arte, y yo
+vengo de un mundo más técnico, pero a la vez creo que tengo tanto que aportar en la visión técnica de
+los sistemas de diseño que por fin creo que a partir de, después de muchos años, he encontrado algo
+que decir y algo que hacer.
