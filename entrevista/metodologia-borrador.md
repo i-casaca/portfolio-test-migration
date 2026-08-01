@@ -73,3 +73,12 @@ Miro: adopción del sistema de diseño (componentes publicados en el front frent
 librería), si se completan los sprints, deuda técnica, porcentaje de tareas completadas, y cuánto
 bajan los bugs de un sprint a otro. Todo eso se traduce en algo que negocio entiende: reducción de
 costes y productividad.
+
+*(Nota: esta respuesta salió de una pregunta que no está en el guion original — se guarda igual,
+como cierre de esta sección, pero no cuenta entre las 20.)*
+
+## En una frase
+
+Perseverancia aplicada al día a día. Cada día aporto un poco más, aprendo algo de la gente con la
+que trabajo y del mundo que me rodea, y lo aplico a lo que hago. Eso es lo que hace que las cosas
+que construyo sigan creciendo.

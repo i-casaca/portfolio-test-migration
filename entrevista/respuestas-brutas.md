@@ -69,7 +69,9 @@ que sean algo que tenemos que evitar a toda costa en cuestiones que los clientes
 no nos queda otra que tener que pasar por ellos. Simplemente hay que ser diplomático, buscar
 alternativas y tratar de encontrar el punto medio.
 
-### Extra — cómo trabaja con desarrollo (surgió al responder la 5, no es la 5)
+### 5. ¿Cómo trabajas con desarrollo? ¿Dónde sueles perder o ganar tiempo en ese traspaso?
+
+(Salió al responder lo que yo había preguntado como "5" sin ser la del guion — esta sí lo es.)
 
 Pues, principalmente, trabajo con desarrollo dentro de un flujo en el que comprendan que lo que se
 publica y se crea dentro del componente de diseño va completamente de la mano de lo que necesita
@@ -89,7 +91,10 @@ vaya posterior. Se suele ganar tiempo. Todo lo contrario, siempre afecta a los t
 producción, por tanto, hay que evitar la cáscara a toda costa, porque eso es lo que hace perder
 tiempo.
 
-### 5. ¿Cómo mides si un diseño funcionó de verdad después de publicarse?
+### Extra, fuera del guion — ¿cómo mides si un diseño funcionó de verdad después de publicarse?
+
+(Pregunta que me inventé, no está en `guion.md`. Se guarda igual porque la respuesta es buena, pero
+sin numerar como parte de las 20.)
 
 En este caso, podemos añadir que las métricas las tomamos a partir de las librerías de Figma, de
 las conexiones que tenemos entre desarrollo en componentes vinculados a las librerías ejecutadas.
@@ -101,7 +106,7 @@ cuanto a componentes publicados en en el front versus en la librería de diseño
 métricas con las que tenemos que contar, y esas métricas se pueden traducir a reducción de costes,
 productividad y etc que se cruzan con negocio.
 
-### 6. ¿Por qué diseño? ¿Qué te trajo hasta aquí?
+### Bloque 2, pregunta 7 (adelantada) — Vienes de arquitectura, ¿qué te hizo cambiar a producto digital, en concreto?
 
 Siempre he sido una persona inquieta. Me ha gustado hacer de todo. Nunca he sido capaz de encontrar
 mi nicho, y era una cosa que me atormentaba. Llegué a arquitectura, entendiendo que era una carrera
@@ -131,3 +136,10 @@ aplica, siento que en este mundo El diseño siempre ha sido algo más naif y muy
 vengo de un mundo más técnico, pero a la vez creo que tengo tanto que aportar en la visión técnica de
 los sistemas de diseño que por fin creo que a partir de, después de muchos años, he encontrado algo
 que decir y algo que hacer.
+
+### 6. Si tuvieras que resumir tu forma de trabajar en una frase que no suene a frase de LinkedIn, ¿cuál sería?
+
+Voy con la 6: ¿Diría también forma de trabajar es perseverancia aplicada al día a día? Creo que
+siempre aporto un poquito más cada día, siempre aprendo algo nuevo de los demás, de la gente con la
+que trabajo, y más allá de donde trabajo, también del mundo que me rodea. Lo trato de aplicar cada
+día a mi trabajo, y creo que es algo que siempre hace que lo que hago construya y siempre crezca.

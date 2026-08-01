@@ -4,6 +4,9 @@ Esto no es metodología, es origen: por qué diseño. Va aparte de `metodologia-
 es una pieza distinta — pensada para ampliar la sección "Sobre mí" de `index.html`, no para una
 sección nueva. Todavía no está ensamblada en el sitio.
 
+Responde a la pregunta 7 del **Bloque 2** de `guion.md` ("vienes de arquitectura, ¿qué te hizo
+cambiar a producto digital?"), adelantada mientras aún estábamos en el Bloque 1.
+
 ## De arquitectura a producto
 
 Siempre he sido una persona inquieta — me ha costado encontrar mi nicho, y durante mucho tiempo eso
