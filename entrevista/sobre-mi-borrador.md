@@ -46,3 +46,12 @@ También la documentación: una memoria constructiva o un pliego de condiciones 
 que documentar un producto bien. Roadmaps, presupuestos, ver un proyecto de principio a fin — un
 proyecto de arquitectura no es tan distinto de un producto. Lo que cambia es quién ejecuta y quién
 está dentro. Se nota en cómo trabajo, todos los días.
+
+## Lo que busco ahora
+
+Ahora mismo quiero crecer en vertical: un rol con más liderazgo, donde no solo ejecute sino que
+también decida y planee — liderar un sistema de diseño, no solo construirlo. Tengo la capacidad de
+negociar con producto, negocio y desarrollo, de ponerme en el centro de conversaciones donde se
+resuelven problemas y sacar adelante proyectos complejos. Con la IA de mi lado puedo hacer cosas hoy
+que hace seis meses eran impensables. El siguiente paso natural es un rol de lead o de manager,
+algo que siga ligado a sistemas de diseño pero con capacidad real de decisión.

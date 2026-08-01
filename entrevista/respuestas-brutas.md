@@ -162,3 +162,18 @@ del del proyecto de fin a fin, es algo que también afecta, o sea, un proyecto d
 deja de ser tan diferente de un producto. La diferencia es la ejecución, quién actúa, quién las
 personas que están dentro. Creo que hay muchísimo que me traigo de arquitectura y que va a producto,
 y creo que se ve día a día en mis proyectos y en todo lo que hago.
+
+### 9. ¿Qué tipo de proyecto o problema te gustaría que te llegara ahora mismo, que no te haya llegado todavía?
+
+Pues creo que actualmente me apetece muchísimo seguir creciendo en vertical. Quiero asumir un rol
+más competitivo y de mayor liderazgo. Quiero conseguir entrar en un sistema de diseño donde pueda
+afrontar las las decisiones yo, no simplemente ejecutar, también planear. Conseguir liderar un
+sistema de diseño de alguna manera, y conseguir también tener algo que decir, porque creo que
+realmente tengo la capacidad de poder hacer una negociación, tanto con producto, negocio,
+desarrollo, ponerme en el centro de conversaciones en las que creo que puedo solucionar problemas,
+y, sobre todo, creo que puedo sacar adelante proyectos muy complejos. Ahora que tenemos la IA de
+nuestro lado, me parece que puedo hacer cosas que hace seis meses eran impensables, y personalmente
+creo que eso, con la capacidad que tengo, la inventiva, la ambición y las aspiraciones que me
+gustan, creo que el siguiente paso es una escalera vertical hacia el siguiente nivel, un rol de
+lead, un rol de manager, algo que te que siga teniendo que ver con los sistemas de diseño, pero que
+me permita la capacidad de liderar, las decisiones que tienen que ver con eso.
