@@ -287,3 +287,30 @@ hada, que nosotros no tuviéramos con todo lo que directamente el usuario no tuv
 pudiera sobrescribir, pero que tenía que ser mostrado y que solamente podíamos aprender a la hora
 de hacer ese reset sin tener en cuenta lo que el backend nos contaba y veíamos que se tenía que
 transportar a un dato visual.
+
+### 19-20. El Paraguas — Es tu proyecto de bootcamp, el único sin cliente real. ¿Qué harías distinto ahora, con la experiencia que tienes hoy y no tenías entonces?
+
+Pues esta es una muy buena pregunta porque es una de las cosas que quiero retomar próximamente.
+Actualmente estoy investigando cómo puedo acercarme a este proyecto con todo el conocimiento que
+tengo ahora. Hay muchas cosas que cambiaría, principalmente, por ejemplo, la UI producida.
+Actualmente podría producir algo de mucho más alto nivel, interactivo, sacar un prototipo de
+plataforma mucho más útil, incluso convertirlo en una aplicación maqueta que ya pudiera funcionar. E
+incluso, quién sabe, a lo mejor plantear un modelo de negocio que pudiera circular alrededor de esa
+aplicación y generar una aplicación interesante que funcione a futuro. Más allá de eso, creo que
+también es interesante que ahora con la fuerza, el músculo y la capacidad técnica que tengo podría
+abordar este proyecto contemplando prácticamente todos los flujos que necesitaba en su día y que no
+pude terminar. Establecer una Internet que no pude realizar en su día, trabajar sobre el modelo de
+revenue que tenían los guías en un panel dashboard trasero donde aportara toda la información de
+todas sus ganancias y todo lo que tuvieran que hacer. Más allá de eso, también explorar todo lo
+posible cómo cambiaría el modelo conversacional que se estableció en dos mil veinte. En aquel
+momento, no existía todavía una IA que pudiéramos utilizar de manera general y que ahora cambia
+completamente el modelo de conversacional que se estableció en la primera versión de esta
+aplicación. Esto haría rotar completamente el modelo técnico de cómo estaba esta aplicación,
+pudiera cambiar completamente el modelo de de curado de esas guías, la geolocalización, un montón
+de cosas que creo que pudieran hacerse muchísimo mejores, incluso apurar técnicamente todo eso.
+Cambiaría completamente el sistema de diseño porque no existía, realmente eran unos componentes que
+funcionaban dentro de un prototipo que se entregó y ya está. Cambiaría completamente el scope de
+proyecto. Podría agrandarse, convertirse en algo mucho más sólido, convertirse en librerías
+muchísimo más completas, y hacer un proyecto muchísimo más sólido. Personalmente, creo que hay
+muchas cosas que se pudieran que se podrían valorar, que a día de hoy tienen sentido y que me
+encantaría revisar próximamente. Incluso, a nivel modelo de negocio de la propia aplicación.
