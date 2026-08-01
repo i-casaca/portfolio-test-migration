@@ -227,3 +227,20 @@ pasar por pago, que sea porque lo necesitamos de verdad, no porque el muro de pa
 ello, porque como usuarios tenemos que hacerlo. Así que realmente podemos tener una conversación
 pendiente sobre ello, mejorarla en el futuro e incluso transportarla e inmigrarla a otro lugar que a
 día de hoy no es muy difícil con la IA tal y como estamos haciendo con este proyecto.
+
+### 13. Adrenaline — El texto dice "nuestro enfoque". ¿Qué fue lo tuyo específicamente, frente a lo que decidió el resto del equipo o el backend?
+
+Sobre el proyecto de adrenalin. A ver, es una muestra del proyecto white label en el que realmente
+trabajábamos. En este caso, era la versión deportiva de la aplicación que nosotros hacíamos. ¿Qué
+fue mío específicamente en este proyecto? pues, personalmente, la la estandarización de un UI kit,
+la consideración De hacer el trabajo más rápido y efectivo, construir componentes que podamos
+avanzar, ponerle propiedades que pudiéramos utilizar, todavía no trabajábamos en tokens en aquella
+época, pero ya estábamos haciendo estilos, ya podíamos evolucionar los proyectos de una manera más
+ágil. Permitíamos que dentro de Figma pudiéramos cambiar los colores y las marcas de una manera
+muchísimo más efectiva, cosa que no podían hacerse antes. Es un proyecto que realmente la parte que
+evolucionó fue más técnica que visual. Existió un producto white label que se vendía, y
+personalmente, pues, creo que lo que más aporte realmente fue aceleración de proyecto y talento
+marketing presentación al cliente. Hay componentes que se plantearon para ver cómo funcionaban
+técnicamente dentro de Front End, que en su día ni siquiera podíamos haber tenido esa conversación.
+
+### 14. Adrenaline — El proyecto se corta ahí, ¿por qué, y qué habría venido después? [PENDIENTE]
