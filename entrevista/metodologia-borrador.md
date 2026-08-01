@@ -52,3 +52,24 @@ Con eso dicho, soy realista: en una cadena de producto donde el cliente tiene al
 veces las exigencias de negocio ganan y acabas en soluciones menos usables — incluso rozando dark
 patterns, que son algo que intento evitar siempre. Cuando toca pasar por ahí, no queda otra. Lo que
 hago es ser diplomático, seguir planteando alternativas y buscar el punto medio.
+
+## Cómo trabajo con desarrollo
+
+Trabajo con desarrollo dentro del mismo flujo, no como una entrega que les llega después. Adecúo el
+diseño a las exigencias reales del framework con el que va a construirse — sus mínimos técnicos, sus
+límites de interacción — desde el principio, no al final.
+
+Cuando lo hago así, lo que entrego conecta directamente con lo que desarrollo publica en su
+Storybook, y eso se nota en el sprint: menos idas y vueltas, menos producción de más, mejor time to
+market. Meter a desarrollo tarde en la cadena no ahorra tiempo — lo cuesta. Evitar esa fricción es
+justo lo que hace que no se pierda tiempo.
+
+## Cómo mido si un diseño funcionó después de publicarse
+
+Las métricas salen de las librerías de Figma conectadas a los componentes que desarrollo publica —
+esa vinculación es la que me deja ver adopción real, no solo intención de diseño.
+
+Miro: adopción del sistema de diseño (componentes publicados en el front frente a los que hay en la
+librería), si se completan los sprints, deuda técnica, porcentaje de tareas completadas, y cuánto
+bajan los bugs de un sprint a otro. Todo eso se traduce en algo que negocio entiende: reducción de
+costes y productividad.

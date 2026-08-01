@@ -68,3 +68,35 @@ que pasar por soluciones que no son las más usables, incluso poder caer en dark
 que sean algo que tenemos que evitar a toda costa en cuestiones que los clientes a veces deciden y
 no nos queda otra que tener que pasar por ellos. Simplemente hay que ser diplomático, buscar
 alternativas y tratar de encontrar el punto medio.
+
+### Extra — cómo trabaja con desarrollo (surgió al responder la 5, no es la 5)
+
+Pues, principalmente, trabajo con desarrollo dentro de un flujo en el que comprendan que lo que se
+publica y se crea dentro del componente de diseño va completamente de la mano de lo que necesita
+desarrollo. Nosotros tratamos de adecuar el diseño gráfico que se ha hecho en producto a las
+necesidades y las exigencias que luego tiene que tener el framework de desarrollo que nosotros
+estamos trabajando. Es decir, si contemplo que tengo que trabajar sobre una tecnología que me
+exige, que tengo que tener unos mínimos estándares tecnológicos para hacer un diseño o la
+interacción se completa de una de una manera concreta, yo atiendo a las exigencias de desarrollo. Y
+cuando las atiendo y las aplico dentro de mi flujo de trabajo, hace que cuando yo entregue ese
+material a desarrollo y lo consigamos conectar tanto del sistema de diseño a lo que está publicado
+dentro de su storybook o en el trabajo que ellos están haciendo, reducimos los books y conseguimos
+que el sprint sea muchísimo más nítido. Es decir, podemos lograr una reducción al time to market,
+podemos podemos hacer una reducción de la producción, podemos hacer una reducción de los books,
+podemos hacer una reducción de los tiempos. Es algo que impera y es necesario trabajar con
+desarrollo dentro del flujo de trabajo del sistema de diseño. Siempre no puede ser una cadena que
+vaya posterior. Se suele ganar tiempo. Todo lo contrario, siempre afecta a los tiempos y a la
+producción, por tanto, hay que evitar la cáscara a toda costa, porque eso es lo que hace perder
+tiempo.
+
+### 5. ¿Cómo mides si un diseño funcionó de verdad después de publicarse?
+
+En este caso, podemos añadir que las métricas las tomamos a partir de las librerías de Figma, de
+las conexiones que tenemos entre desarrollo en componentes vinculados a las librerías ejecutadas.
+Entonces, las métricas que nosotros tomamos es adopción dentro de la parte de diseño, ver si no
+tenemos detalles. y esas métricas ver cómo afectan a los tiempos de entregas si los sprints se
+completan, si no tenemos deuda técnica, si qué porcentaje tenemos de de completación de tareas,
+cuánta es la reducción en porcentaje de bugs entre sprints, la adopción de sistema de diseño en
+cuanto a componentes publicados en en el front versus en la librería de diseño, Esas son las
+métricas con las que tenemos que contar, y esas métricas se pueden traducir a reducción de costes,
+productividad y etc que se cruzan con negocio.
