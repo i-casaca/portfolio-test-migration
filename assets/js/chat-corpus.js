@@ -163,6 +163,25 @@
       });
     });
 
+    // Contacto. El sitio ya tiene la franja del pie con sus canales, así que el
+    // corpus la lee como cualquier otra sección en vez de llevar una respuesta
+    // escrita aparte. Sin esto, "¿cómo te contacto?" no encontraba nada suyo y
+    // caía en la sección de metodología por compartir la palabra "cómo".
+    var footer = doc.querySelector('#contacto');
+    if (footer) {
+      var canales = [];
+      Array.prototype.forEach.call(footer.querySelectorAll('.footer-links a'), function (a) {
+        // La descarga del CV vive en la misma franja pero no es un canal por el
+        // que escribirle; colarla haría decir "escríbeme por Descargar CV".
+        if (a.hasAttribute('download')) return;
+        canales.push(clean(a));
+      });
+      if (canales.length) {
+        out.push(makeFragment(page, 'contacto', 0, 'Contacto',
+          'Puedes escribirme por ' + canales.join(', ') + '.', false));
+      }
+    }
+
     // El índice de proyectos: la descripción de una línea de cada tarjeta. Es
     // lo que responde "¿qué proyectos tienes?" sin abrir cada página.
     var rows = doc.querySelectorAll('#trabajo .work-row');
@@ -354,23 +373,35 @@
       if (!namesProject) carried = tokenize(memory.lastProject);
     }
 
-    var best = null, bestScore = 0;
+    var best = null, bestCombined = 0, bestOwn = 0;
     // El denominador es solo lo que preguntó el visitante: si los términos
     // arrastrados contaran, una pregunta corta parecería peor respondida de lo
     // que está.
     var maxPossible = terms.reduce(function (a, t) { return a + maxWeight(t); }, 0) || 1;
 
     fragments.forEach(function (f) {
-      var score = 0;
-      terms.forEach(function (t) { score += f.weight[t] || 0; });
-      carried.forEach(function (t) { score += (f.weight[t] || 0) * 0.7; });
-      var norm = score / maxPossible;
-      if (norm > bestScore) { bestScore = norm; best = f; }
+      var own = 0;
+      terms.forEach(function (t) { own += f.weight[t] || 0; });
+      var combined = own;
+      carried.forEach(function (t) { combined += (f.weight[t] || 0) * 0.7; });
+
+      if (own / maxPossible > bestOwn) bestOwn = own / maxPossible;
+      if (combined / maxPossible > bestCombined) {
+        bestCombined = combined / maxPossible;
+        best = f;
+      }
     });
 
-    return bestScore >= THRESHOLD
-      ? { hit: best, score: bestScore }
-      : { hit: null, score: bestScore };
+    // El arrastre de la memoria solo **desempata** entre candidatos; nunca crea
+    // una respuesta por sí solo. El umbral se mide contra lo que preguntó el
+    // visitante, no contra el total: como los términos arrastrados suman al
+    // numerador y no al denominador, una pregunta cuyos términos no puntúan
+    // nada ("¿cuál es tu comida favorita?") alcanzaría el umbral solo por el
+    // peso del último proyecto citado, y contestaría con él. Eso rompería el
+    // fallback honesto del ticket #16, que manda sobre la memoria del #21.
+    return bestOwn >= THRESHOLD
+      ? { hit: best, score: bestOwn }
+      : { hit: null, score: bestOwn };
   }
 
   var maxWeightCache = null;
@@ -391,14 +422,22 @@
 
   // Temas que sí se pueden responder — alimenta el "puedes preguntarme sobre
   // X, Y, Z" del ticket #16. Se sacan del corpus, no de una lista escrita.
+  //
+  // Los proyectos van primero y las secciones del sitio después. Recorriendo
+  // los fragmentos en orden, la home los copa todos —sale antes que las páginas
+  // de proyecto— y quien lee el aviso de "esto no lo tengo" se queda sin saber
+  // que puede preguntar por Arabvision o Nexahub, que es lo que de verdad viene
+  // a mirar un técnico de selección.
   function topics() {
     if (!fragments) return [];
-    var seen = {}, out = [];
+    var vistos = {}, proyectos = [], secciones = [];
     fragments.forEach(function (f) {
       var key = f.project || f.section;
-      if (key && !seen[key]) { seen[key] = true; out.push(key); }
+      if (!key || vistos[key]) return;
+      vistos[key] = true;
+      (f.project ? proyectos : secciones).push(key);
     });
-    return out;
+    return proyectos.concat(secciones);
   }
 
   window.CHAT_CORPUS = {

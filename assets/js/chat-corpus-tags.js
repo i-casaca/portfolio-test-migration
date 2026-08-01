@@ -40,6 +40,8 @@ window.CHAT_CORPUS_TAGS = {
   'index.html#formacion/4': 'que estudiaste, estudios, bootcamp, cómo entré en UX, reconversión',
   'index.html#formacion/5': 'que estudiaste, estudios, carrera universitaria, arquitectura, UPM',
 
+  'index.html#contacto/0': 'contacto, como te contacto, escribirte, email, correo, LinkedIn, Medium, hablar contigo, disponibilidad',
+
   /* ---------- páginas de proyecto ---------- */
   'arabvision.html#ficha/0': 'streaming OTT, cliente, 2023, UX designer',
   'arabvision.html#contexto/0': 'streaming bajo demanda, mercado árabe, RTL, accesibilidad',
