@@ -137,6 +137,7 @@
   // El marco de una línea decidido en el ticket #16: deja claro que lo que
   // viene es documentación citada, no una frase improvisada.
   function frameFor(fragment) {
+    if (fragment.kind === 'metodologia') return 'Sobre cómo trabajo, esto es lo que tengo escrito:';
     if (fragment.project && fragment.section !== fragment.project) {
       return 'Esto es lo que documenté sobre ' + fragment.project + ':';
     }

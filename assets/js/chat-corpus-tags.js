@@ -73,5 +73,15 @@ window.CHAT_CORPUS_TAGS = {
   'index.html#trabajo/1': 'proyectos, portfolio, trabajos, Adrenaline, app deportiva',
   'index.html#trabajo/2': 'proyectos, portfolio, trabajos, Arabvision, streaming',
   'index.html#trabajo/3': 'proyectos, portfolio, trabajos, Nexahub, CMS',
-  'index.html#trabajo/4': 'proyectos, portfolio, trabajos, El Paraguas, app de viajes'
+  'index.html#trabajo/4': 'proyectos, portfolio, trabajos, El Paraguas, app de viajes',
+
+  /* ---------- metodología (entrevista del ticket #17) ---------- */
+  'index.html#met-primer-paso/0': 'como trabajas, metodologia, primer paso, proyecto nuevo, design ops, adopcion, equipo',
+  'index.html#met-primer-paso/1': 'sistema de diseño, design system, componentes, storybook, para que sirve',
+  'index.html#met-primer-paso/2': 'primera semana, mapear el equipo, quien es quien, arranque',
+  'index.html#met-herramientas/0': 'como trabajas, metodologia, frameworks, design thinking, shadowing, buenas practicas',
+  'index.html#met-herramientas/1': 'que herramientas usas, research, workshop, sesion colaborativa, investigacion',
+  'index.html#met-herramientas/2': 'proceso, estandarizacion, metodologia propia, no siempre el mismo proceso',
+  'index.html#met-iterar/0': 'cuando dejas de iterar, listo para desarrollo, user story, criterios, handoff',
+  'index.html#met-iterar/1': 'componentizacion, documentacion, sprint, fechas, entrega a desarrollo'
 };

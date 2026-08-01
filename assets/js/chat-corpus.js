@@ -143,6 +143,26 @@
       });
     });
 
+    // Metodología: lo que sale de la entrevista del ticket #17. Se recorre de
+    // forma genérica —cada bloque con `id` dentro de `.method`, un fragmento
+    // por párrafo— para que las respuestas que falten se recojan solas al
+    // publicarse, sin tocar este archivo.
+    var blocks = doc.querySelectorAll('#metodologia .method > div[id]');
+    Array.prototype.forEach.call(blocks, function (block) {
+      var h3 = block.querySelector('h3');
+      var name = h3 ? clean(h3) : 'Cómo trabajo';
+      Array.prototype.forEach.call(block.querySelectorAll('p'), function (p, i) {
+        var t = clean(p);
+        if (!t) return;
+        var f = makeFragment(page, block.id, i, name, t, false);
+        // La cita dice "Cómo trabajo · <bloque>" en vez de solo el bloque:
+        // suelto, un titular como "Cuándo dejo de iterar" no dice de dónde sale.
+        f.cite = 'Cómo trabajo · ' + name;
+        f.kind = 'metodologia';
+        out.push(f);
+      });
+    });
+
     // El índice de proyectos: la descripción de una línea de cada tarjeta. Es
     // lo que responde "¿qué proyectos tienes?" sin abrir cada página.
     var rows = doc.querySelectorAll('#trabajo .work-row');
