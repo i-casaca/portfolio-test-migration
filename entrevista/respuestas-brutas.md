@@ -143,3 +143,22 @@ Voy con la 6: ¿Diría también forma de trabajar es perseverancia aplicada al d
 siempre aporto un poquito más cada día, siempre aprendo algo nuevo de los demás, de la gente con la
 que trabajo, y más allá de donde trabajo, también del mundo que me rodea. Lo trato de aplicar cada
 día a mi trabajo, y creo que es algo que siempre hace que lo que hago construya y siempre crezca.
+
+## Bloque 2 — Trayectoria y dirección
+
+### 8. De arquitecto a Product Designer en Telefónica: ¿qué se lleva de un mundo a otro y qué hay que desaprender?
+
+Pues personalmente creo que de la arquitectura al product design se llevan muchas cosas. He
+desaprendido muchísimas manías en cuanto a necesidades, perfeccionismo, elementos que tener sí o sí
+atados para poder seguir adelante, metodologías de trabajo, completamente caducas. Pero, sin
+embargo, la visión completa de un proyecto, la transversalidad de la ejecución de cualquier cosa,
+hacer un bloque en AutoCAD es prácticamente similar a hacer un componente en Figma. La diferencia es
+que yo en AutoCAD solo trabajaba para mí y para hacer un plano, pero aquí lo publico, se construye,
+tiene un fin, acaba en una producción, es algo muy interesante y a mí me parece impresionante. La
+documentación, las memorias que yo trabajaba dentro de los proyectos de arquitectura, una memoria
+constructiva, un pliego de condiciones, es algo que completamente queda aplicado dentro de una
+documentación efectiva en un producto. La aplicación de un roadmap presupuestos, entender la visión
+del del proyecto de fin a fin, es algo que también afecta, o sea, un proyecto de arquitectura no
+deja de ser tan diferente de un producto. La diferencia es la ejecución, quién actúa, quién las
+personas que están dentro. Creo que hay muchísimo que me traigo de arquitectura y que va a producto,
+y creo que se ve día a día en mis proyectos y en todo lo que hago.

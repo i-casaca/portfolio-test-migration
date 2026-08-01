@@ -33,3 +33,16 @@ trabajo, exigencias de documentación, cómo un roadmap conecta a todas las part
 fallo de una pieza afecta a la siguiente, ver el alcance completo de un proyecto, normativas y
 estandarización. El diseño viene de un mundo más ligado al arte; yo llego desde uno más técnico, y
 creo que ahí es donde tengo algo propio que aportar.
+
+## Qué me llevo de arquitectura, y qué desaprendí
+
+De arquitectura desaprendí manías: un perfeccionismo que no ayuda, la necesidad de tener todo atado
+antes de avanzar, metodologías ya caducas. Pero me traje la visión completa de un proyecto, la
+transversalidad de la ejecución — hacer un bloque en AutoCAD no es tan distinto de hacer un
+componente en Figma. La diferencia es que en AutoCAD trabajaba solo para mí, para un plano; aquí lo
+que hago se publica, se construye, tiene un fin real.
+
+También la documentación: una memoria constructiva o un pliego de condiciones son la misma lógica
+que documentar un producto bien. Roadmaps, presupuestos, ver un proyecto de principio a fin — un
+proyecto de arquitectura no es tan distinto de un producto. Lo que cambia es quién ejecuta y quién
+está dentro. Se nota en cómo trabajo, todos los días.
