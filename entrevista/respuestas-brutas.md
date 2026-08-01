@@ -194,3 +194,36 @@ que le da voz a todo el mundo para tener algo que decir dentro de un proceso de 
 nadie puede decir nada y si todos son órdenes y todo aplica única y exclusivamente a lo que dice el
 cliente o lo que dicen las métricas o lo que dicen los números, lo siento, pero no estamos haciendo
 diseño, estamos haciendo otra cosa.
+
+## Bloque 3 — Por proyecto
+
+### 11-12. Manu Cardiel — ¿Qué decisiones fueron solo tuyas? ¿Qué le dirías a Manu hoy que harías distinto?
+
+Sobre el proyecto de manucardial. La propuesta vino por Manu. Manu es un amigo muralista, artista
+gráfico, que necesitaba tener una plataforma donde pudiera realmente trabajar y mostrar su trabajo
+de una manera mucho más eficiente que la página web que tenía y que le habían hecho antes. En este
+caso, realmente, el aspecto de la página ya venía muy dado por algunas de las referencias que Manu
+me daba. ¿Qué decisiones fueron mías solo mías, en este caso? Pues, por ejemplo, alguna de las
+maneras por las con las que se podía ver el detalle de la imagen, algo por lo que yo fui y construí
+fue los apartados de cada una de las imágenes y proyectos que mostraba Manu. Es decir, la vista de
+detalle, la vista de de pantalla completa, los carruseles y los mosaicos de imágenes para poder
+navegar dentro de todo su proyecto, que fuera usable, que que tuviera algo más allá que no sea
+simplemente una colección de imágenes, que tuviera un lugar donde escribir, que pudiera dar algo de
+datos a nivel fechas, lugar, donde estaba construido la organización de la información. Y algo que
+haría distinto respecto al CMS que construimos, pues no demasiado, porque también es cierto que es
+a lo que nosotros nos teníamos que acoplar respecto a lo que nos otorgaba Framer, que es la la
+plataforma en la que en la que está construida. A día de hoy. ¿Pudiéramos cambiar algo? Pues es una
+conversación pendiente. Es algo que seguimos en contacto. A día de hoy, por ejemplo, la página,
+pues, funciona para lo que necesita, pero sí que es cierto que en algunos momentos en los que Manu
+ha tenido viralidad, la página ya no sabéis, ¿sabe qué? no tiene la capacidad para poder sobrellevar
+el tráfico que ha recibido. Es un tráfico de imágenes que, por ejemplo, la precarga de esas imágenes
+hace que ocupe un bando de ansia muy grande, y es un componente técnico que en su día no teníamos
+contemplado. Y ahora, por ejemplo, pues tendríamos que ver si es algo que tenemos que tener en
+cuenta para pagar un hosting que en su día no queríamos pagar. Es una página web planteada desde la
+versión premium. Es una página web planteada desde desde la desde la visión de una de un modelo
+gratis en el que podemos enseñar todo lo que estamos enseñando, llegar a los límites que no sé qué
+nos da un modelo gratuito, y en si en el momento en que tenemos que hacerla grande, tenemos que
+pasar por pago, que sea porque lo necesitamos de verdad, no porque el muro de pago nos obligue a
+ello, porque como usuarios tenemos que hacerlo. Así que realmente podemos tener una conversación
+pendiente sobre ello, mejorarla en el futuro e incluso transportarla e inmigrarla a otro lugar que a
+día de hoy no es muy difícil con la IA tal y como estamos haciendo con este proyecto.
