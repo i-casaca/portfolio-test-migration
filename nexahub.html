@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,500&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./assets/css/site.css">
+<link rel="stylesheet" href="./assets/css/chat-bubble.css">
 <!-- Marca puesta por la página anterior: si venimos de una transición, entrar
      tapados. Va inline y en el <head> porque tiene que correr antes del primer
      pintado; si falla, simplemente no hay panel. -->
@@ -62,7 +63,7 @@
   <div class="navlinks"><a href="./index.html#trabajo">Trabajo</a><a href="./index.html#sobre-mi">Sobre mí</a><a href="#contacto">Contacto</a><a href="./assets/cv/isma-casado-cv-es.pdf" download>Descargar CV</a></div>
 </div>
 
-<div class="project-header project-wrap">
+<div class="project-header project-wrap" id="ficha">
   <span class="eyebrow">Cliente · 2022</span>
   <h1>Nexahub</h1>
   <div class="meta-row">
@@ -79,13 +80,14 @@
   </figure>
 
   <div class="text-cols">
-    <section>
+    <section id="contexto">
       <h2>↳ Contexto</h2>
       <p>Nexahub identificó la necesidad de mejorar la eficiencia en la gestión de incidencias de JIRA entre sus usuarios FUT. Aunque inicialmente no era prioritario, el objetivo a largo plazo era convertir este CMS en una herramienta esencial a nivel global — respondiendo a la estrategia de invertir en mejoras técnicas y de diseño.</p>
     </section>
-    <section>
+    <section id="ejecucion">
       <h2>↳ Ejecución</h2>
       <p>Junto con mi equipo, centramos la estrategia en entender con detalle las necesidades y el flujo de trabajo de los QA Engineers en cada paso. Mediante técnicas de shadowing, buscamos comprender a fondo estos aspectos y traducirlos en una interfaz efectiva e intuitiva. Para lograrlo, propusimos una serie de flujos de usuario, incorporando las interacciones necesarias en cada paso, capturando a la vez los elementos clave de la marca de Nexahub — todo ello mediante componentes e iconos iterables que contribuyeron a construir un design system.</p>
+      <p>El shadowing con los QA Engineers fue lo que de verdad ordenó el proyecto: entender qué necesitaban ver dentro de la plataforma, frente a lo que nosotros montábamos en el frontend. Eso obligó a diseñar el wireframing pensando en dos lados a la vez — lo que exigía QA para trabajar los tickets en JIRA, y lo que nosotros podíamos construir.</p>
     </section>
   </div>
 
@@ -96,9 +98,18 @@
     <img src="./assets/images/nexahub/mockup-2.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups adicionales de Nexahub" />
   </figure>
 
-  <section class="text-end">
+  <section class="text-end" id="resultado">
     <h2>↳ Resultado</h2>
     <p>El resultado fue el lanzamiento exitoso del nuevo CMS en la intranet de Nexahub. El proyecto no solo cumplió sus objetivos, sino que mejoró la eficiencia de comunicación y la trazabilidad de las incidencias de JIRA. La nueva interfaz ofreció una experiencia más fluida, intuitiva y agradable, reforzando su lugar dentro de la marca de Nexahub.</p>
+  </section>
+
+  <!-- Sale de la entrevista del ticket #17. Sección propia y no un párrafo más en
+       Resultado: Resultado cuenta cómo acabó el proyecto y esto es la lectura de años
+       después. El chatbot las cita por separado (ticket #25). -->
+  <section class="text-end" id="mirandolo-hoy">
+    <h2>↳ Mirándolo hoy</h2>
+    <p>El hallazgo concreto llegó observándolos: al verlos etiquetar y subir tickets aparecieron necesidades que no habíamos contemplado desde diseño — poder calendarizar, adjuntar archivos y URLs, o mostrar datos que venían directamente del backend, que el usuario no podía tocar ni sobrescribir pero sí tenían que ser visibles en el frontend.</p>
+    <p>Son cosas que solo salieron a la luz mirando el proceso real, no preguntando qué necesitaban.</p>
   </section>
 
   <figure class="media">
@@ -157,11 +168,24 @@
   const input = document.getElementById('gate-input');
   const error = document.getElementById('gate-error');
 
+  // Marca de sesión: las tres páginas con muro comparten contraseña, así que
+  // acertarla una vez abre las tres mientras dure la pestaña. El chatbot lee
+  // esta misma marca para decidir si puede contar contenido bajo NDA — sin
+  // ella, respondería de estos proyectos aunque su página siga tapada.
+  const NDA_KEY = 'nda-ok';
+
+  function unlock(){
+    gateWrap.classList.remove('locked');
+    try { sessionStorage.setItem(NDA_KEY, '1'); } catch(e){}
+  }
+
+  try { if (sessionStorage.getItem(NDA_KEY) === '1') gateWrap.classList.remove('locked'); } catch(e){}
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const hash = await sha256Hex(input.value.trim());
     if (hash === PASSWORD_HASH){
-      gateWrap.classList.remove('locked');
+      unlock();
     } else {
       error.textContent = 'Contraseña incorrecta.';
       input.value = '';
@@ -169,5 +193,10 @@
     }
   });
 </script>
+
+<!-- El chatbot: etiquetas, motor e interfaz, en ese orden. -->
+<script src="./assets/js/chat-corpus-tags.js"></script>
+<script src="./assets/js/chat-corpus.js"></script>
+<script src="./assets/js/chat-bubble.js"></script>
 </body>
 </html>

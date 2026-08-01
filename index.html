@@ -193,6 +193,15 @@
     font-size:.72rem;letter-spacing:.06em;opacity:.5;padding-left:1.5rem;
   }
 
+  /* ---------- metodología: cómo trabaja, en su voz ---------- */
+  /* Sale de la entrevista del ticket #17. Va publicada en el sitio, no en un
+     archivo aparte que solo lea el chatbot: así el corpus la hereda sin nada
+     que mantener por duplicado (ticket #20). */
+  .method{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:3rem 5vw;margin-top:2.5rem;}
+  .method h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;margin:0 0 1rem;}
+  .method p{font-size:1rem;line-height:1.65;margin:0 0 1rem;max-width:56ch;opacity:.85;}
+  .method p:last-child{margin-bottom:0;}
+
   @media (max-width: 760px){
     .work-row, .work-row:nth-child(even){flex-direction:column;align-items:flex-start;gap:1.5rem;}
     .work-text{flex:none;}
@@ -200,6 +209,7 @@
     .about-top{flex-direction:column;}
     .about-portrait{flex:none;width:100%;max-width:320px;}
     .about-cols{flex-direction:column;gap:3rem;}
+    .method{grid-template-columns:1fr;gap:2.5rem;}
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -359,7 +369,7 @@
   </div>
 
   <div class="about-cols">
-    <div>
+    <div id="experiencia">
       <h3>↳ Experiencia</h3>
       <ul class="cv-list">
         <li><span class="cv-role">Design System Designer</span><span class="cv-org">Telefónica</span><span class="cv-year">2024 — Ahora</span></li>
@@ -369,7 +379,7 @@
         <li><span class="cv-role">Arquitecto junior</span><span class="cv-org">Aguilera Ingenieros</span><span class="cv-year">2018</span></li>
       </ul>
     </div>
-    <div>
+    <div id="formacion">
       <h3>↳ Formación</h3>
       <ul class="cv-list">
         <li><span class="cv-role">Forward Program</span><span class="cv-org">McKinsey &amp; Company</span><span class="cv-year">2025</span></li>
@@ -379,6 +389,33 @@
         <li><span class="cv-role">Bootcamp en Diseño UX</span><span class="cv-org">Upgrade Hub</span><span class="cv-year">2021</span></li>
         <li><span class="cv-role">Grado en Arquitectura</span><span class="cv-org">UPM</span><span class="cv-year">2011 — 2018</span></li>
       </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Metodología. Sale de la entrevista del ticket #17 (bloque 1), pulida
+     conservando su voz. Cada bloque lleva su propio id porque el chatbot cita
+     al párrafo y necesita un ancla a la que saltar. Se irá ampliando conforme
+     avancen las 20 respuestas. -->
+<section class="about" id="metodologia">
+  <span class="eyebrow">↳ Cómo trabajo</span>
+  <div class="method">
+    <div id="met-primer-paso">
+      <h3>Lo primero que hago</h3>
+      <p>Lo primero que hago al llegar a un proyecto nuevo es entender la situación real del equipo: cómo está de adopción, qué problemas arrastran, qué pide realmente Design Ops. Me interesa la metodología que ya usa el equipo — no para imponer la mía encima, sino para adaptarme a lo que ese equipo concreto necesita.</p>
+      <p>Eso también define cómo entiendo un sistema de diseño: no es hacer los componentes más puros o mejor implementados en Storybook. Es que esos componentes resuelvan lo que ese equipo necesita de verdad, día a día.</p>
+      <p>En la práctica, mi primera semana es sobre todo mapear: quién es quién, qué hace cada uno, a quién acudir para cada cosa. Para cuando toca ejecutar, ya sé cómo hacerlo.</p>
+    </div>
+    <div id="met-herramientas">
+      <h3>Qué herramientas uso, y cómo elijo</h3>
+      <p>No me cierro dentro de un framework fijo. Conozco Design Thinking, uso shadowing, sigo buenas prácticas — pero no las trato como un procedimiento que hay que seguir al pie de la letra. Sigo normas básicas y sentido común, y dejo sitio a la improvisación de cada situación concreta.</p>
+      <p>Qué herramienta uso depende de la persona, de la situación, de lo que quiero investigar en ese momento: no es lo mismo tomar notas textuales que montar un workshop o una sesión colaborativa. Tengo muchas a mano y decido sobre la marcha cuál pide el momento.</p>
+      <p>No aplico siempre el mismo proceso — para mí, la metodología de hacer metodologías es precisamente que no sea siempre la misma. Lo que sí se estandariza es entender cómo afecta cada decisión a cada persona involucrada.</p>
+    </div>
+    <div id="met-iterar">
+      <h3>Cuándo dejo de iterar</h3>
+      <p>Hay parte de esto que se siente y no se explica del todo, pero también hay mínimos claros: cuando el diseño cumple lo que pide la user story, y se ha debatido lo suficiente como para que las personas necesarias lo hayan aceptado, ahí dejo de iterar y empiezo a construir.</p>
+      <p>Ese momento es también cuando entra el sistema de diseño de verdad — componentización, documentación — porque la conceptualización ya está clara y acordada entre varias personas. Y, por supuesto, las fechas del sprint también pesan en cuándo hay que cerrarlo.</p>
     </div>
   </div>
 </section>
@@ -504,7 +541,11 @@
   }
 </script>
 
-<script src="./assets/js/chat-bubble.js"></script>
 
+
+<!-- El chatbot: etiquetas, motor e interfaz, en ese orden. -->
+<script src="./assets/js/chat-corpus-tags.js"></script>
+<script src="./assets/js/chat-corpus.js"></script>
+<script src="./assets/js/chat-bubble.js"></script>
 </body>
 </html>

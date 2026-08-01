@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,500&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./assets/css/site.css">
+<link rel="stylesheet" href="./assets/css/chat-bubble.css">
 <!-- Marca puesta por la página anterior: si venimos de una transición, entrar
      tapados. Va inline y en el <head> porque tiene que correr antes del primer
      pintado; si falla, simplemente no hay panel. -->
@@ -62,7 +63,7 @@
   <div class="navlinks"><a href="./index.html#trabajo">Trabajo</a><a href="./index.html#sobre-mi">Sobre mí</a><a href="#contacto">Contacto</a><a href="./assets/cv/isma-casado-cv-es.pdf" download>Descargar CV</a></div>
 </div>
 
-<div class="project-header project-wrap">
+<div class="project-header project-wrap" id="ficha">
   <span class="eyebrow">Cliente · 2023</span>
   <h1>Adrenaline</h1>
   <div class="meta-row">
@@ -79,13 +80,14 @@
   </figure>
 
   <div class="text-cols">
-    <section>
+    <section id="contexto">
       <h2>↳ Contexto</h2>
       <p>Adrenaline surgió de la necesidad de alinear nuestro producto insignia con el panorama cambiante de los eventos deportivos. El cliente buscaba adaptar su backend flexible, distinto para cada proveedor externo, a una interfaz que conectara con una audiencia exigente, ávida de contenido deportivo completo. El foco en un MVP buscaba resolver el reto de adaptar estadísticas y resultados de deportes muy distintos entre sí, dadas sus diferencias en sistemas de puntuación y formatos de competición.</p>
     </section>
-    <section>
+    <section id="ejecucion">
       <h2>↳ Ejecución</h2>
       <p>Nuestro enfoque partió de crear un MVP mediante dos esquemas predominantes: competiciones individuales y competiciones por partido. Esta decisión estratégica permitió abordar necesidades cambiantes y resolver retos alejándose del "camino feliz" convencional. El producto final adapta sin fricción el esquema de un servicio de streaming, incorporando funciones de referencia de servicios deportivos como DAZN en una interfaz competente y atractiva.</p>
+      <p>Lo mío concretamente fue estandarizar el UI kit: construir componentes reutilizables, con propiedades que se pudieran combinar. No trabajábamos aún con tokens, pero ya teníamos estilos consistentes que nos dejaban evolucionar el proyecto con agilidad, y conseguimos que dentro de Figma se pudiera cambiar colores y marca de forma mucho más efectiva que antes. La evolución de este proyecto fue más técnica que visual: al venderse como producto white-label, lo que más aporté fue velocidad y presentación de cara al cliente — planteamos componentes para probar cómo funcionaban a nivel de frontend, una conversación que hasta entonces ni siquiera habíamos podido tener.</p>
     </section>
   </div>
 
@@ -96,9 +98,18 @@
     <img src="./assets/images/adrenaline/mockup-2.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups adicionales de Adrenaline" />
   </figure>
 
-  <section class="text-end">
+  <section class="text-end" id="resultado">
     <h2>↳ Resultado</h2>
     <p>La flexibilidad, escalabilidad y facilidad de componetización del producto convierten a Adrenaline en una base sólida para futuros clientes del sector del streaming deportivo. Su capacidad de adaptarse a distintos deportes e iterar sin fricciones la posiciona como una solución clave, con una interfaz competitiva que marca el estándar para próximos proyectos del sector.</p>
+  </section>
+
+  <!-- Sale de la entrevista del ticket #17. Sección propia y no un párrafo más en
+       Resultado: Resultado cuenta cómo acabó el proyecto y esto es la lectura de años
+       después. El chatbot las cita por separado (ticket #25). -->
+  <section class="text-end" id="mirandolo-hoy">
+    <h2>↳ Mirándolo hoy</h2>
+    <p>Honestamente, hace tiempo de esto y no tengo del todo claro por qué se quedó donde se quedó — no hay una razón dramática que recuerde.</p>
+    <p>Lo que sí tengo claro es hacia dónde iba: el MVP cubría un esquema para competiciones individuales, como el tenis, y otro para competiciones por partido, como el fútbol. Desde ahí el camino natural era seguir escalando a más deportes, cada uno con su formato de puntuación. Simplemente no llegó a construirse más — no porque no se pudiera, sino porque no hubo más que aportar en ese momento.</p>
   </section>
 
   <figure class="media">
@@ -157,11 +168,24 @@
   const input = document.getElementById('gate-input');
   const error = document.getElementById('gate-error');
 
+  // Marca de sesión: las tres páginas con muro comparten contraseña, así que
+  // acertarla una vez abre las tres mientras dure la pestaña. El chatbot lee
+  // esta misma marca para decidir si puede contar contenido bajo NDA — sin
+  // ella, respondería de estos proyectos aunque su página siga tapada.
+  const NDA_KEY = 'nda-ok';
+
+  function unlock(){
+    gateWrap.classList.remove('locked');
+    try { sessionStorage.setItem(NDA_KEY, '1'); } catch(e){}
+  }
+
+  try { if (sessionStorage.getItem(NDA_KEY) === '1') gateWrap.classList.remove('locked'); } catch(e){}
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const hash = await sha256Hex(input.value.trim());
     if (hash === PASSWORD_HASH){
-      gateWrap.classList.remove('locked');
+      unlock();
     } else {
       error.textContent = 'Contraseña incorrecta.';
       input.value = '';
@@ -169,5 +193,10 @@
     }
   });
 </script>
+
+<!-- El chatbot: etiquetas, motor e interfaz, en ese orden. -->
+<script src="./assets/js/chat-corpus-tags.js"></script>
+<script src="./assets/js/chat-corpus.js"></script>
+<script src="./assets/js/chat-bubble.js"></script>
 </body>
 </html>

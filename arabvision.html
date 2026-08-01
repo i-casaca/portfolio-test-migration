@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,500&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./assets/css/site.css">
+<link rel="stylesheet" href="./assets/css/chat-bubble.css">
 <!-- Marca puesta por la página anterior: si venimos de una transición, entrar
      tapados. Va inline y en el <head> porque tiene que correr antes del primer
      pintado; si falla, simplemente no hay panel. -->
@@ -62,7 +63,7 @@
   <div class="navlinks"><a href="./index.html#trabajo">Trabajo</a><a href="./index.html#sobre-mi">Sobre mí</a><a href="#contacto">Contacto</a><a href="./assets/cv/isma-casado-cv-es.pdf" download>Descargar CV</a></div>
 </div>
 
-<div class="project-header project-wrap">
+<div class="project-header project-wrap" id="ficha">
   <span class="eyebrow">Cliente · 2023</span>
   <h1>Arabvision</h1>
   <div class="meta-row">
@@ -79,11 +80,11 @@
   </figure>
 
   <div class="text-cols">
-    <section>
+    <section id="contexto">
       <h2>↳ Contexto</h2>
       <p>Arabvision surgió de la necesidad de adaptarse a los tiempos actuales, refinando su oferta de producto en un mercado donde el streaming bajo demanda se ha vuelto casi obligatorio para las cadenas de televisión y productoras. El objetivo era diseñar una aplicación que no solo cumpliera con las expectativas de UI, sino que también abordara la complejidad de la estructura de lectura RTL (de derecha a izquierda) del árabe. Buscábamos crear una plataforma capaz de mostrar el producto de forma atractiva y ofrecer, a la vez, una experiencia totalmente accesible.</p>
     </section>
-    <section>
+    <section id="ejecucion">
       <h2>↳ Ejecución</h2>
       <p>Analicé con detalle las preferencias de los usuarios y los matices culturales, ajustando el diseño de la aplicación a las necesidades específicas del público árabe. El desarrollo de la interfaz se integró sin fricciones con el contenido de Arabvision, garantizando una experiencia atractiva y accesible en todos los dispositivos. La supervisión continua del equipo de marca de Arabvision —con entrevistas y comprobaciones de contexto cultural— fue dando forma al diseño. Revisiones periódicas y un proceso de refinamiento colaborativo entre ambos equipos permitieron mejoras continuas basadas en ciclos de feedback dinámicos.</p>
     </section>
@@ -96,9 +97,18 @@
     <img src="./assets/images/arabvision/mockup-2.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups adicionales de Arabvision" />
   </figure>
 
-  <section class="text-end">
+  <section class="text-end" id="resultado">
     <h2>↳ Resultado</h2>
     <p>Aunque el proyecto se detuvo lamentablemente por el conflicto en Israel, el diseño de interfaz propuesto demostró una adaptabilidad notable y una fuerte coherencia con la marca de Arabvision. La aplicación, aunque no llegó a desarrollarse por completo, mostró un compromiso claro con una experiencia de visualización atractiva y accesible, adaptada a las preferencias actuales de streaming. La colaboración continua, las mejoras iterativas de la interfaz y unos mecanismos de feedback sólidos fueron clave para lograr un diseño fiel a la visión y al público de Arabvision.</p>
+  </section>
+
+  <!-- Sale de la entrevista del ticket #17. Sección propia y no un párrafo más en
+       Resultado: Resultado cuenta cómo acabó el proyecto y esto es la lectura de años
+       después. El chatbot las cita por separado (ticket #25). -->
+  <section class="text-end" id="mirandolo-hoy">
+    <h2>↳ Mirándolo hoy</h2>
+    <p>Mientras duró, aprendimos mucho sobre interacción RTL — cómo lee una comunidad árabe de forma sistémica — y eso obligó a replantear arquitectura e interfaz enteras desde ese punto de partida. Tuvimos sesiones colaborativas con su equipo de diseño, y hubo que manejar con cuidado a los stakeholders en plena incertidumbre sobre si el proyecto seguiría.</p>
+    <p>Qué haría distinto sabiendo cómo terminó: nada. La cancelación vino del lado del cliente, por la situación, no por algo que hiciéramos mal. Se manejó de la forma más profesional posible con la información que había entonces, y no había más margen de actuación por nuestra parte.</p>
   </section>
 
   <figure class="media">
@@ -157,11 +167,24 @@
   const input = document.getElementById('gate-input');
   const error = document.getElementById('gate-error');
 
+  // Marca de sesión: las tres páginas con muro comparten contraseña, así que
+  // acertarla una vez abre las tres mientras dure la pestaña. El chatbot lee
+  // esta misma marca para decidir si puede contar contenido bajo NDA — sin
+  // ella, respondería de estos proyectos aunque su página siga tapada.
+  const NDA_KEY = 'nda-ok';
+
+  function unlock(){
+    gateWrap.classList.remove('locked');
+    try { sessionStorage.setItem(NDA_KEY, '1'); } catch(e){}
+  }
+
+  try { if (sessionStorage.getItem(NDA_KEY) === '1') gateWrap.classList.remove('locked'); } catch(e){}
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const hash = await sha256Hex(input.value.trim());
     if (hash === PASSWORD_HASH){
-      gateWrap.classList.remove('locked');
+      unlock();
     } else {
       error.textContent = 'Contraseña incorrecta.';
       input.value = '';
@@ -169,5 +192,10 @@
     }
   });
 </script>
+
+<!-- El chatbot: etiquetas, motor e interfaz, en ese orden. -->
+<script src="./assets/js/chat-corpus-tags.js"></script>
+<script src="./assets/js/chat-corpus.js"></script>
+<script src="./assets/js/chat-bubble.js"></script>
 </body>
 </html>

@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,500&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./assets/css/site.css">
+<link rel="stylesheet" href="./assets/css/chat-bubble.css">
 <!-- Marca puesta por la página anterior: si venimos de una transición, entrar
      tapados. Va inline y en el <head> porque tiene que correr antes del primer
      pintado; si falla, simplemente no hay panel. -->
@@ -30,7 +31,7 @@
   <div class="navlinks"><a href="./index.html#trabajo">Trabajo</a><a href="./index.html#sobre-mi">Sobre mí</a><a href="#contacto">Contacto</a><a href="./assets/cv/isma-casado-cv-es.pdf" download>Descargar CV</a></div>
 </div>
 
-<div class="project-header project-wrap">
+<div class="project-header project-wrap" id="ficha">
   <span class="eyebrow">Bootcamp · 2021</span>
   <h1>El Paraguas</h1>
   <div class="meta-row">
@@ -46,11 +47,11 @@
   </figure>
 
   <div class="text-cols">
-    <section>
+    <section id="contexto">
       <h2>↳ Contexto</h2>
       <p>El panorama de los viajes se transformó por la pandemia de COVID-19, subrayando la importancia de evitar aglomeraciones y temporadas altas en los destinos. Este cambio puso en valor actividades turísticas flexibles como los "free tours". Sin embargo, la vulnerabilidad económica de los "free tours" se hizo evidente, al depender de las propinas de los turistas al final del recorrido. Las plataformas de reserva imponen costes y comisiones que afectan a los guías, generando problemas económicos cuando las propinas no llegan. El reto: desarrollar una aplicación adaptable a distintas circunstancias, capaz de equilibrar estas realidades cambiantes.</p>
     </section>
-    <section>
+    <section id="ejecucion">
       <h2>↳ Ejecución</h2>
       <p>Me sumergí en un reto complejo que exigía una investigación minuciosa y una comprensión profunda de situaciones muy distintas. Aplicando Design Thinking con precisión, elaboré flujos como el canvas N&amp;N, personas de usuario y JTBD, que abordaron con eficacia los distintos retos. El resultado: una app que combina geolocalización e interfaz de voz (VUI), con guías que cobran por adelantado. El diseño de interacción está pensado para garantizar una visita sin distracciones.</p>
     </section>
@@ -63,9 +64,19 @@
     <img src="./assets/images/el-paraguas/mockup-2.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Mockups adicionales de la app El Paraguas" />
   </figure>
 
-  <section class="text-end">
+  <section class="text-end" id="resultado">
     <h2>↳ Resultado</h2>
     <p>Una app que resuelve con soltura los vaivenes del sector turístico, encontrando el punto justo entre seguridad, flexibilidad y sostenibilidad económica para los guías. Gracias a la combinación de geolocalización y una interfaz de voz (VUI) bien diseñada, los usuarios disfrutan de una experiencia fluida y mejorada. Esta solución cambia las reglas del juego, respondiendo de forma innovadora al panorama cambiante de los viajes y sentando las bases para futuras apps de turismo.</p>
+  </section>
+
+  <!-- Sale de la entrevista del ticket #17. Sección propia y no un párrafo más en
+       Resultado: Resultado cuenta cómo acabó el proyecto y esto es la lectura de años
+       después. El chatbot las cita por separado (ticket #25). -->
+  <section class="text-end" id="mirandolo-hoy">
+    <h2>↳ Mirándolo hoy</h2>
+    <p>Es de las preguntas que más me interesan, porque es un proyecto que quiero retomar de verdad — ya estoy pensando cómo acercarme a él con lo que sé ahora. Cambiaría casi todo.</p>
+    <p>La interfaz podría llevarla a un nivel mucho más alto e interactivo: un prototipo funcional de verdad, incluso una maqueta de aplicación operativa, y quizás plantear un modelo de negocio real alrededor. Terminaría los flujos que en su momento no pude cerrar, como el modelo de ingresos de los guías, con un panel trasero que mostrara sus ganancias y su gestión.</p>
+    <p>Lo más grande: en 2020, cuando se construyó, no existía una IA de uso general como la de ahora. Eso cambiaría por completo el modelo conversacional de la app, y con él el curado de guías, la geolocalización y buena parte del modelo técnico entero. El sistema de diseño también sería otra cosa — el original ni siquiera era un sistema, eran componentes sueltos que funcionaron para el prototipo que se entregó y nada más.</p>
   </section>
 
   <figure class="media">
@@ -89,5 +100,10 @@
   </div>
 </footer>
 
+
+<!-- El chatbot: etiquetas, motor e interfaz, en ese orden. -->
+<script src="./assets/js/chat-corpus-tags.js"></script>
+<script src="./assets/js/chat-corpus.js"></script>
+<script src="./assets/js/chat-bubble.js"></script>
 </body>
 </html>
