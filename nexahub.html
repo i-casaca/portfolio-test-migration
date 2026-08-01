@@ -158,11 +158,24 @@
   const input = document.getElementById('gate-input');
   const error = document.getElementById('gate-error');
 
+  // Marca de sesión: las tres páginas con muro comparten contraseña, así que
+  // acertarla una vez abre las tres mientras dure la pestaña. El chatbot lee
+  // esta misma marca para decidir si puede contar contenido bajo NDA — sin
+  // ella, respondería de estos proyectos aunque su página siga tapada.
+  const NDA_KEY = 'nda-ok';
+
+  function unlock(){
+    gateWrap.classList.remove('locked');
+    try { sessionStorage.setItem(NDA_KEY, '1'); } catch(e){}
+  }
+
+  try { if (sessionStorage.getItem(NDA_KEY) === '1') gateWrap.classList.remove('locked'); } catch(e){}
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const hash = await sha256Hex(input.value.trim());
     if (hash === PASSWORD_HASH){
-      gateWrap.classList.remove('locked');
+      unlock();
     } else {
       error.textContent = 'Contraseña incorrecta.';
       input.value = '';

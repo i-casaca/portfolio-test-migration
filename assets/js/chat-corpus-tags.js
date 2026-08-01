@@ -71,6 +71,11 @@ window.CHAT_CORPUS_TAGS = {
 
   /* ---------- índice de proyectos en la home ---------- */
   /* Responden a "¿qué proyectos tienes?" sin abrir cada página. */
+  /* Solo términos de contenido: meter aquí la pregunta entera ("qué proyectos
+     tienes") cuela palabras de relleno como "tienes", y entonces "¿tienes
+     perro?" engancha con el índice en vez de admitir el límite. */
+  'index.html#trabajo/todos': 'proyectos, portfolio, trabajos, casos, listado, indice',
+
   'index.html#trabajo/0': 'proyectos, portfolio, trabajos, Manu Cardiel, web de artista',
   'index.html#trabajo/1': 'proyectos, portfolio, trabajos, Adrenaline, app deportiva',
   'index.html#trabajo/2': 'proyectos, portfolio, trabajos, Arabvision, streaming',

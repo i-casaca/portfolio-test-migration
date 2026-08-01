@@ -220,6 +220,25 @@
         remember(result.hit);
         return;
       }
+      // Bajo NDA y sin contraseña. Se dice lo que es —existe, está escrito, no
+      // se puede enseñar— en vez de fingir que no hay nada: el muro de la
+      // página no serviría de nada si la burbuja contase lo que él tapa.
+      if (result.locked) {
+        remember(null);
+        // La tarjeta del índice de la home sí es pública, así que el resumen de
+        // una línea se puede dar. Sin él, el aviso prometería "de qué va por
+        // encima" y no cumpliría.
+        var publico = null;
+        window.CHAT_CORPUS.all().forEach(function (f) {
+          if (!f.nda && f.project === result.locked.project && f.section === 'Trabajo') publico = f;
+        });
+        addNote('<strong>' + result.locked.project + '</strong> es un proyecto de cliente y está bajo NDA.' +
+                (publico && publico.tagline ? ' Por encima: ' + publico.tagline : '') +
+                ' El detalle está tras contraseña: ' +
+                '<a href="' + result.locked.href + '">ábrelo en su página</a> si la tienes, ' +
+                'o <a href="' + LINKEDIN + '" target="_blank" rel="noopener">pídemela por LinkedIn</a>.');
+        return;
+      }
       // Por debajo del umbral: se admite el límite y se ofrece salida
       // (ticket #16). Los temas salen del corpus real, no de una lista escrita.
       remember(null);

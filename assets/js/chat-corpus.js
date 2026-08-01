@@ -185,6 +185,7 @@
     // El índice de proyectos: la descripción de una línea de cada tarjeta. Es
     // lo que responde "¿qué proyectos tienes?" sin abrir cada página.
     var rows = doc.querySelectorAll('#trabajo .work-row');
+    var nombres = [];
     Array.prototype.forEach.call(rows, function (row, i) {
       var h3 = row.querySelector('h3');
       var tag = row.querySelector('.work-tagline');
@@ -194,10 +195,25 @@
       // cita debe llevar a la página del proyecto, no de vuelta al índice.
       f.project = clean(h3);
       f.cite = clean(h3);
+      // El resumen sin el nombre delante: el aviso de NDA ya nombra el proyecto
+      // y repetirlo sale como "Arabvision: Arabvision: Streaming OTT...".
+      f.tagline = clean(tag);
       var link = row.getAttribute('href');
       if (link) f.href = link;
       out.push(f);
+      nombres.push(clean(h3));
     });
+
+    // El índice entero como un solo fragmento. "¿Qué proyectos tienes?" no la
+    // responde ninguna tarjeta suelta —son cinco piezas y el motor devuelve
+    // una— así que la pregunta acababa cayendo en metodología por compartir la
+    // palabra "proyecto". Esto la responde de una vez, y las tarjetas
+    // individuales siguen ahí para cuando se pregunta por una en concreto.
+    if (nombres.length) {
+      var indice = makeFragment(page, 'trabajo', 'todos', 'Proyectos',
+        'Tengo cinco proyectos en el portfolio: ' + nombres.join(', ') + '.', false);
+      out.push(indice);
+    }
 
     return out;
   }
@@ -356,11 +372,21 @@
   // de revisar en el mapa.
   var THRESHOLD = 0.34;
 
+  // El muro de contraseña de Adrenaline, Arabvision y Nexahub deja su marca
+  // aquí al acertar (las tres comparten contraseña). Sin ella, el chatbot no
+  // puede contar nada de esos proyectos: si no, contaría por la burbuja
+  // justo lo que la página mantiene tapado, y el muro dejaría de servir.
+  function ndaUnlocked() {
+    try { return sessionStorage.getItem('nda-ok') === '1'; } catch (e) { return false; }
+  }
+
   function search(query, memory) {
     if (!fragments) return { hit: null, score: 0 };
 
     var terms = tokenize(query);
     if (!terms.length) return { hit: null, score: 0 };
+
+    var abierto = ndaUnlocked();
 
     // Memoria de 3 turnos (ticket #21): si la pregunta es corta y no nombra
     // ningún proyecto, se arrastra el último del que se habló. Es lo que hace
@@ -374,6 +400,12 @@
     }
 
     var best = null, bestCombined = 0, bestOwn = 0;
+    // Lo mismo, pero contando solo los fragmentos bajo NDA: si el visitante no
+    // ha puesto la contraseña y su pregunta iba justo de uno de esos proyectos,
+    // hay que poder decírselo. Callar y responder "eso no lo tengo documentado"
+    // sería mentir — está documentado, y es él quien no tiene acceso.
+    var bloqueado = null, bloqueadoOwn = 0;
+
     // El denominador es solo lo que preguntó el visitante: si los términos
     // arrastrados contaran, una pregunta corta parecería peor respondida de lo
     // que está.
@@ -385,12 +417,28 @@
       var combined = own;
       carried.forEach(function (t) { combined += (f.weight[t] || 0) * 0.7; });
 
+      if (f.nda && !abierto) {
+        if (own / maxPossible > bloqueadoOwn) {
+          bloqueadoOwn = own / maxPossible;
+          bloqueado = f;
+        }
+        return;
+      }
+
       if (own / maxPossible > bestOwn) bestOwn = own / maxPossible;
       if (combined / maxPossible > bestCombined) {
         bestCombined = combined / maxPossible;
         best = f;
       }
     });
+
+    // Si lo que mejor respondía estaba bajo NDA, gana el aviso de bloqueo — aun
+    // cuando alguna sección abierta llegue también al umbral. Preguntar "¿qué
+    // hiciste en Arabvision?" y recibir la ficha pública como si fuera toda la
+    // respuesta se lee como evasiva; decir que está bajo NDA es la verdad.
+    if (bloqueadoOwn >= THRESHOLD && bloqueadoOwn >= bestOwn) {
+      return { hit: null, locked: bloqueado, score: bloqueadoOwn };
+    }
 
     // El arrastre de la memoria solo **desempata** entre candidatos; nunca crea
     // una respuesta por sí solo. El umbral se mide contra lo que preguntó el
