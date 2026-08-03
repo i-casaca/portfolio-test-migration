@@ -1,4 +1,4 @@
-# Portfolio de Isma Casaca — migración a estático
+# Migración de prueba de mi portfolio
 
 **De Framer a HTML escrito a mano, con un chatbot que responde sobre mi trabajo sin usar ningún modelo de IA.**
 
@@ -13,9 +13,11 @@
 
 ## Qué es esto
 
-Soy [Ismael Casado](https://www.linkedin.com/in/ismaelcasadoc/), Product Designer. Mi portfolio
-estaba en [Framer](https://isma-casaca.framer.website/). Este repositorio es el experimento de
-reconstruirlo **a mano**, en HTML, CSS y JavaScript planos, y publicarlo con GitHub Pages.
+Soy [Ismael Casado](https://www.linkedin.com/in/ismaelcasadoc/), Product Designer. **Mi portfolio
+está en [isma-casaca.framer.website](https://isma-casaca.framer.website/)** — ese es el bueno.
+
+Este repositorio es otra cosa: el experimento de reconstruirlo **a mano**, en HTML, CSS y
+JavaScript planos, para ver qué se aprende por el camino. No lo sustituye.
 
 No lo hice porque Framer fuera malo. Lo hice porque **quería entender qué pasa por debajo**: cómo se
 publica una web de verdad, qué es una rama, para qué sirve un Pull Request, y hasta dónde llego yo
@@ -26,9 +28,9 @@ sobre mi trabajo**. Lo interesante no es que exista, sino cómo está hecho — 
 de lenguaje detrás, y lo dice.
 
 > [!NOTE]
-> Es un experimento de aprendizaje, no una arquitectura ejemplar. Si has llegado buscando cómo
-> montar un portfolio, hay caminos más rápidos. Si has llegado buscando **cómo piensa un diseñador
-> cuando se mete en el código**, quédate.
+> Es un experimento de aprendizaje, no una arquitectura ejemplar ni mi portfolio en uso. Si has
+> llegado buscando cómo montar un portfolio, hay caminos más rápidos. Si has llegado buscando
+> **cómo piensa un diseñador cuando se mete en el código**, quédate.
 
 ---
 
@@ -216,6 +218,7 @@ Lo que **no** está previsto: conectar el chatbot a un modelo de lenguaje. Está
 
 **Ismael Casado** — Product Designer · Madrid
 
+[![Portfolio](https://img.shields.io/badge/portfolio-isma--casaca.framer.website-ff6b35)](https://isma-casaca.framer.website/)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-ismaelcasadoc-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ismaelcasadoc/)
 [![Medium](https://img.shields.io/badge/Medium-@ismael.casadoc-000000?logo=medium&logoColor=white)](https://medium.com/@ismael.casadoc)
 
