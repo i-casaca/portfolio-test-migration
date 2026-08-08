@@ -37,7 +37,8 @@ Dirección ya decidida y no negociable a partir de aquí:
 - Textura de grano sobre el fondo, para evitar el banding de las superficies oscuras planas.
 
 Sustituye a la paleta crema/menta del MVP (`--cream`, `--mint`, `--ink` en `assets/css/site.css`),
-que desaparece. Contraste de texto ≥ 4.5:1, comprobado, no estimado.
+que desaparece. El contraste de texto tiene que cumplir el umbral fijado en
+[PRODUCT.md](PRODUCT.md#accessibility--inclusion), y se comprueba midiendo, no estimando.
 
 ## Tipografía
 
@@ -72,10 +73,12 @@ gutter del nav (6vw), y medida de texto controlada por párrafo, no por contened
 Restricciones que la decisión no puede saltarse:
 
 - GSAP 3.13 y Lenis, cargados por CDN. Sin build, sin bundler.
-- `prefers-reduced-motion` necesita un camino real: la versión quieta del estado final, no la
-  ausencia de animación con el contenido a medias.
 - Ninguna aparición puede condicionar la visibilidad del contenido. Si el JS no llega a ejecutarse,
   la sección se ve igual.
+- El comportamiento con `prefers-reduced-motion` lo fija el compromiso de accesibilidad de
+  [PRODUCT.md](PRODUCT.md#accessibility--inclusion), que es donde vive ese contrato. Aquí solo se
+  traduce a movimiento concreto: la versión quieta del estado final, nunca la ausencia de animación
+  con el contenido a medias.
 
 ## Entrada del sitio
 
@@ -107,13 +110,21 @@ sin sustituto es un fallo, no una decisión de estilo.
 Decisiones de este sitio que contradicen los defaults de `/impeccable`. **No son descuidos y no se
 deben "corregir".** Si una pasada del skill propone quitar algo de esta lista, la respuesta es no.
 
-### 1. El índice numerado de proyectos
+### 1. El índice numerado de proyectos y la navegación numerada
 
 `impeccable` trata los marcadores `01 / 02 / 03` como andamiaje automático y los elimina, porque en
 la mayoría de las páginas numeran secciones que no son una secuencia.
 
 Aquí sí lo son. El índice de proyectos es una lista ordenada de verdad —un trabajo detrás de otro,
-en un orden que el visitante recorre— y la numeración es voz de marca, no relleno. **Se queda.**
+en un orden que el visitante recorre— y la numeración es voz de marca, no relleno. Lo mismo vale
+para la navegación numerada que acompaña al índice: numera los mismos elementos, en el mismo orden,
+y sirve para saber por dónde vas. **Las dos se quedan.**
+
+Ninguna de las dos existe todavía: hoy la home lleva una rejilla de seis celdas con etiqueta y sin
+números. Las construye el ticket
+[#41](https://github.com/i-casaca/portfolio-test-migration/issues/41). Esta excepción se escribe
+por adelantado a propósito — si no está puesta antes, la primera pasada del skill que las vea las
+tratará como andamiaje y las quitará.
 
 ### 2. El hueso como tinta, no como superficie
 

@@ -4,6 +4,10 @@ Contexto estratégico del sitio. Responde a quién, qué y por qué; el cómo se
 [DESIGN.md](DESIGN.md). Lo escribió `/impeccable init` a partir de una entrevista con Ismael, y
 cualquier pasada de diseño posterior lo lee antes de tocar nada.
 
+> Los títulos de sección van en inglés y el contenido en español. No es un descuido: son el esquema
+> que la herramienta lee para saber en qué registro y plataforma está. Traducirlos la devuelve al
+> modo degradado que este archivo existe para evitar.
+
 ## Register
 
 brand
