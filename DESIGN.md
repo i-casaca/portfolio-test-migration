@@ -215,18 +215,85 @@ gutter del nav (6vw), y medida de texto controlada por párrafo, no por contened
 
 ## Motion
 
-**Pendiente** — la fija el ticket
-[#39](https://github.com/i-casaca/portfolio-test-migration/issues/39).
+Decidido en el ticket
+[Cimientos de motion: GSAP y Lenis por CDN, y la tabla de eases](https://github.com/i-casaca/portfolio-test-migration/issues/39).
+Este ticket no diseña ningún movimiento nuevo — pone la base sobre la que se construyen la entrada
+([#40](https://github.com/i-casaca/portfolio-test-migration/issues/40)) y las transiciones de página
+([#42](https://github.com/i-casaca/portfolio-test-migration/issues/42)).
 
-Restricciones que la decisión no puede saltarse:
+### La carga
 
-- GSAP 3.13 y Lenis, cargados por CDN. Sin build, sin bundler.
-- Ninguna aparición puede condicionar la visibilidad del contenido. Si el JS no llega a ejecutarse,
-  la sección se ve igual.
-- El comportamiento con `prefers-reduced-motion` lo fija el compromiso de accesibilidad de
-  [PRODUCT.md](PRODUCT.md#accessibility--inclusion), que es donde vive ese contrato. Aquí solo se
-  traduce a movimiento concreto: la versión quieta del estado final, nunca la ausencia de animación
-  con el contenido a medias.
+GSAP 3.13 (núcleo + ScrollTrigger + SplitText + TextPlugin — GSAP 3.13 liberó los plugins que antes
+eran de pago del Club GreenSock) y Lenis, servidos por CDN (`jsdelivr`), sin build ni bundler. Las
+seis páginas cargan el mismo bloque de `<script defer>`, en este orden: GSAP → ScrollTrigger →
+SplitText → TextPlugin → Lenis → `assets/js/motion.js` → `page-transition.js` → `reveal.js`. Todo
+`defer`, no bloqueante: los navegadores ejecutan los scripts `defer` en orden de documento tras el
+parseo, así que no hace falta bloquear el primer pintado para garantizar el orden.
+
+`assets/js/motion.js` es el único sitio que registra los plugins de GSAP, engancha Lenis al ticker
+de GSAP (`lenis.on('scroll', ScrollTrigger.update)` + `gsap.ticker.add(...)`, con `lagSmoothing(0)`)
+y publica `window.Motion`. Si el CDN no responde, `Motion.ready` queda en `false` y cualquier script
+que lo consulte cae a su alternativa sin animación — el sitio nunca depende de que esto cargue.
+`Motion.lenis` queda expuesto para quien necesite parar el scroll (la entrada) o saltar a un punto
+(las transiciones), en vez de que cada ticket cree su propia instancia.
+
+### La tabla de eases y duraciones
+
+```js
+Motion.ease = { enter: 'power3.out', exit: 'power3.in', move: 'power2.inOut' };
+Motion.dur  = { enter: 0.8,          exit: 0.5,          move: 0.6 };
+```
+
+`move` es para transiciones de página y cambios de tamaño, no para entradas/salidas de contenido.
+`back.out`/`elastic.out` no tienen token propio a propósito — son toques de personalidad puntuales
+que cada ticket que los use debe escribir explícitos, nunca un default que se herede sin pensarlo.
+
+### La gramática de texto
+
+Los caracteres entran desde abajo y salen por arriba, con stagger. El movimiento **siempre**
+continúa en la misma dirección — nunca se deshace hacia atrás. Es la regla que más define el
+carácter del sitio: nada de texto que "rebota" o vuelve sobre su propio recorrido.
+
+Para partirlo, SplitText con `mask:"words"` (envuelve cada palabra en un elemento con
+`visibility:clip` — no hace falta declarar ese enmascarado a mano). Lo que SplitText no cubre, y
+vive en `[data-split]`/`.char` en `site.css`:
+
+- `font-kerning:none; font-variant-ligatures:none;` en el contenedor que se parte — si no, el texto
+  cambia de anchura entre su estado entero y su partido.
+- `line-height:1.2; padding-bottom:.2em;` en cada carácter — sin ese margen, la máscara de la
+  palabra recorta los descendentes (g, j, p, q, y) por abajo.
+
+Sin uso todavía en ninguna página: lo consumen la entrada y las transiciones.
+
+### La aparición de imágenes: reveal.js sobre ScrollTrigger
+
+`assets/js/reveal.js` sustituye el `IntersectionObserver` original por un `gsap.to()` con
+`scrollTrigger:{start:'top 88%', once:true}` por cada `.media`. La ventaja sobre el observer no es
+solo estética: si la página se carga ya desplazada más allá del punto de disparo (vuelta con el
+historial, ancla directa), ScrollTrigger dispara la animación en su primer refresh en vez de esperar
+a un cruce que ya no va a llegar — el observer necesitaba una redada manual (`sweepAbove`) para ese
+caso, que ya no hace falta.
+
+Los triggers no se crean hasta que la página termina de cargar y las fuentes están listas
+(`window.load` + `document.fonts.ready`, en paralelo). Es la corrección a un fallo real encontrado
+construyendo este ticket: si un trigger `once:true` se crea contra un documento que aún no ha
+asentado su alto (fuentes con `display=swap` sin aplicar todavía), ScrollTrigger puede calcular una
+posición corta, darla por "ya cruzada", disparar la animación entera de golpe y autodestruirse —
+y un refresh posterior no revive un trigger `once` que ya se mató. Esperar a que asiente antes de
+crear ninguno evita la clase entera de fallo, en vez de corregirlo después.
+
+`site.css` ya no lleva una `transition` CSS sobre `.media`: la anima GSAP directamente, y una
+transición CSS sobre las mismas propiedades competiría con ella en vez de sustituirla. `.is-visible`
+sigue existiendo solo para las alternativas sin animación (sin GSAP, o con menos movimiento), que
+revelan de golpe con un cambio de clase.
+
+### `prefers-reduced-motion`
+
+El compromiso de accesibilidad vive en
+[PRODUCT.md](PRODUCT.md#accessibility--inclusion); aquí se traduce a movimiento concreto. Con
+`Motion.reduced`, Lenis no se inicializa (scroll nativo) y `reveal.js` muestra todas las `.media` de
+golpe por clase, sin crear ningún trigger ni tween. No es la ausencia de animación con el contenido
+a medias: es la versión quieta del estado final.
 
 ## Entrada del sitio
 

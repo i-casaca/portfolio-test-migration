@@ -33,6 +33,19 @@
      tapados. Va inline y en el <head> porque tiene que correr antes del primer
      pintado; si falla, simplemente no hay panel. -->
 <script>document.documentElement.className+=' js';try{if(sessionStorage.getItem('pt-nav')){sessionStorage.removeItem('pt-nav');document.documentElement.className+=' pt-cover';}}catch(e){}</script>
+<!-- Cimientos de motion (ticket #39): GSAP 3.13 + Lenis por CDN, sin build.
+     `defer` en todo el bloque, en orden: los navegadores ejecutan los
+     scripts `defer` en el orden del documento tras el parseo, así que no
+     hace falta bloquear el pintado para garantizar que GSAP/Lenis estén
+     listos antes de motion.js, y motion.js antes de page-transition.js y
+     reveal.js. -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.css">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/TextPlugin.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js" defer></script>
+<script src="./assets/js/motion.js" defer></script>
 <script src="./assets/js/page-transition.js" defer></script>
 <script src="./assets/js/reveal.js" defer></script>
 <style>
