@@ -143,6 +143,9 @@ Abre <http://localhost:8000>.
 ## Estructura del repositorio
 
 ```
+PRODUCT.md                 A quién le habla el sitio, qué afirma y qué no debe parecer
+DESIGN.md                  El sistema visual: color, tipografía, layout, motion y sus excepciones
+
 index.html                 Portada: hero interactivo, índice de proyectos, sobre mí y metodología
 adrenaline.html            ─┐
 arabvision.html             │  Proyectos de cliente — bajo muro de contraseña
@@ -164,6 +167,11 @@ research/                  Investigación con fuentes: plataformas, precios, arq
 
 Las carpetas `entrevista/`, `spec/` y `research/` **no las usa el sitio**. Están porque el
 razonamiento detrás de cada decisión me parece tan parte del proyecto como el código.
+
+`PRODUCT.md` y `DESIGN.md` tampoco los usa el sitio, pero gobiernan lo que se le puede hacer: son el
+contrato de diseño. Ninguna decisión visual se considera tomada hasta que está escrita en
+[`DESIGN.md`](DESIGN.md), incluidas las que contradicen a propósito lo que recomendaría una
+herramienta de diseño automática.
 
 ---
 
