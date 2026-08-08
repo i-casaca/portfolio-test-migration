@@ -26,28 +26,73 @@ es restraint: no hay neutros de relleno alrededor. Los valores exactos los fija 
 
 ## Color
 
-**Pendiente** — la fija el ticket
-[#38](https://github.com/i-casaca/portfolio-test-migration/issues/38).
+Decidido en el ticket
+[El sistema visual oscuro: color, grano y escala tipográfica](https://github.com/i-casaca/portfolio-test-migration/issues/38),
+viendo un prototipo real contra las fotos de los proyectos — no eligiendo sobre una paleta abstracta.
 
-Dirección ya decidida y no negociable a partir de aquí:
+### Los dos tokens
 
-- Fondo: un **negro cálido**, no negro puro y no gris. Una sola superficie en todo el sitio.
-- Tinta: un **hueso cálido** para texto, bordes e iconografía.
-- Color saturado: **solo la fotografía de proyecto**. El sistema no tiene color de acento propio.
-- Textura de grano sobre el fondo, para evitar el banding de las superficies oscuras planas.
+```css
+--bg:       oklch(22% 0.014 50);   /* #201915 — fondo, toda la superficie */
+--surface1: oklch(27% 0.014 50);   /* un paso elevado: franja de contacto, tarjetas, muro NDA */
+--surface2: oklch(32% 0.014 50);   /* dos pasos: hover sobre una superficie ya elevada */
+--ink:      oklch(92% 0.018 78);   /* #EBE3D8 — texto, bordes, iconografía */
+--line:     oklch(92% 0.018 78 / .14);
+```
 
-Sustituye a la paleta crema/menta del MVP (`--cream`, `--mint`, `--ink` en `assets/css/site.css`),
-que desaparece. El contraste de texto tiene que cumplir el umbral fijado en
-[PRODUCT.md](PRODUCT.md#accessibility--inclusion), y se comprueba midiendo, no estimando.
+Contraste `--bg`/`--ink`: **13,6:1**, muy por encima del mínimo de 4.5:1. La profundidad entre
+`--bg`/`--surface1`/`--surface2` sale de subir la luminosidad manteniendo el mismo tono y croma —
+nunca de una sombra — que es como se construye elevación en un registro oscuro.
+
+**Solo dos tokens, deliberadamente.** No hay un tercer color de acento: la fotografía de proyecto es
+la única fuente de color saturado del sitio. Ver [Excepciones deliberadas](#excepciones-deliberadas).
+Sustituye por completo a la paleta crema/menta del MVP (`--cream`, `--mint`, `--ink` en
+`assets/css/site.css`), que desaparece de `:root`.
+
+**Toda opacidad usada como color de texto se fijó en ≥ 0,55.** Es el suelo real: por debajo de eso el
+hueso sobre `--bg` cae de 4,97:1 hacia abajo y dejar de cumplir AA en texto que no es grande. Un
+`.disclaimer` a 0,5 y un `cv-year` a 0,5 se detectaron así durante la implementación y se subieron a
+0,6. Antes de bajar una opacidad de texto por debajo de 0,55, hay que volver a medir.
+
+### El grano
+
+Capa fija en `position:fixed`, generada con un `<feTurbulence>` servido como SVG en un data-URI —
+cero assets nuevos que commitear. Se anima con `steps(4)` sobre un `translate` de cuatro posiciones,
+para que el ruido salte en vez de deslizarse (respeta `prefers-reduced-motion`: sin animación, la
+textura se queda fija).
+
+**Opacidad: 0,07.** Se probó primero a 0,045 (casi imperceptible) y se subió a petición explícita de
+Ismael tras ver el prototipo — "más presente". El límite superior probado antes de que empiece a
+leerse como suciedad en vez de textura está sobre 0,08; 0,07 se queda con margen deliberado por
+debajo de ese límite.
+
+**Dónde vive en el HTML**: el `<div class="grain">` va como **último hijo de `<body>`** en las seis
+páginas. Al ser `position:fixed` sin `z-index` explícito, pinta por encima del contenido que tampoco
+tiene `z-index` propio, por orden de documento — no hace falta tocar el de ninguna sección normal.
+Lo que sigue por delante a propósito, porque ya llevaba su propio `z-index` más alto: el punto de
+cursor (9999), el panel de transición entre páginas (9998/10000) y la burbuja del chat (60/61). Si
+se reordena el HTML de una página, el div hay que devolverlo al final.
+
+### Los tonos del hero (una decisión no pedida por el ticket)
+
+El `hero-grid` de la home ya tenía un tono pastel por proyecto (`data-tone`) que teñía todo el hero
+al pasar el ratón — pensado para una página clara con texto oscuro encima. Con el fondo oscuro, ese
+mismo pastel dejaba el titular hueso ilegible sobre sí mismo (texto claro sobre fondo claro).
+
+Se oscureció cada tono a los mismos hue en OKLCH pero L≈28%, manteniendo la identidad cromática por
+proyecto y devolviendo el contraste (~11,4:1 con `--ink` en los seis). No estaba en el alcance
+escrito del ticket, pero dejarlo tal cual habría roto una interacción existente — está documentado
+aquí, no en el issue, porque es una consecuencia directa de los dos tokens de arriba.
 
 ## Tipografía
 
-Las fuentes están decididas (ticket
-[#37](https://github.com/i-casaca/portfolio-test-migration/issues/37), con el informe completo y las
-mediciones en [`research/fuentes-sistema-tipografico.md`](research/fuentes-sistema-tipografico.md)).
-**La escala sigue pendiente**: la fija el
-[#38](https://github.com/i-casaca/portfolio-test-migration/issues/38), que es también quien sustituye
-los `<link>` de las seis páginas.
+Las fuentes las eligió el ticket
+[Fuentes: una familia de muchos anchos y las displays de la entrada](https://github.com/i-casaca/portfolio-test-migration/issues/37)
+(informe completo y mediciones en
+[`research/fuentes-sistema-tipografico.md`](research/fuentes-sistema-tipografico.md)). La escala la
+fijó el ticket
+[El sistema visual oscuro](https://github.com/i-casaca/portfolio-test-migration/issues/38), que
+también sustituyó los `<link>` de las seis páginas.
 
 ### La familia del sitio: Roboto Flex
 
@@ -114,13 +159,44 @@ Dos cosas que hay que respetar al tocar los `<link>`:
 Rubik Mono One **no tiene minúsculas reales**: lo que vaya en ella se verá en caja alta pase lo que
 pase. Bebas Neue y Monoton sí las tienen, en contra de lo que suele decirse de Bebas.
 
-### La escala (pendiente, #38)
+### La escala
 
-- Escala fluida que escala con el viewport de golpe, **con suelo y techo**. Sin techo se dispara en
-  monitores grandes; sin suelo se vuelve ilegible en móvil. El `clamp()` va en la variable raíz, no
-  token a token.
-- Line-height emparejado a cada paso: apretado en display, suelto en cuerpo. Sobre fondo oscuro, el
-  texto claro se lee más ligero y pide algo más de aire que el mismo paso en claro.
+Un solo `clamp()` en la raíz — no uno por token — con los pasos declarados en `rem` para que
+respiren de golpe con el viewport:
+
+```css
+:root{
+  --root-fs: clamp(16px, 1rem + 0.22vw, 18px);
+
+  --fs-micro:   0.7rem;    --lh-micro:   1.4;
+  --fs-small:   0.875rem;  --lh-small:   1.5;
+  --fs-body:    1rem;      --lh-body:    1.68;
+  --fs-lead:    1.333rem;  --lh-lead:    1.45;
+  --fs-h3:      1.777rem;  --lh-h3:      1.25;
+  --fs-h2:      2.369rem;  --lh-h2:      1.15;
+  --fs-h1:      3.16rem;   --lh-h1:      1.08;
+  --fs-display: 4.6rem;    --lh-display: 0.95;
+}
+html{ font-size: var(--root-fs); }
+```
+
+**El suelo (16px) protege la accesibilidad, no solo la legibilidad**: por debajo de eso el cuerpo
+falla el mínimo de 16px que pide WCAG en móvil. El techo (18px) es deliberadamente estrecho — el
+cuerpo apenas respira entre extremos — porque el peso de la fluidez lo llevan los pasos grandes: al
+ser múltiplos del mismo root, un `--fs-display` de 4,6rem se mueve ~9px entre suelo y techo mientras
+el cuerpo se mueve ~2px. Es la corrección directa a la trampa que traía la referencia original: sin
+suelo ni techo, una escala así se dispara en monitores grandes y se vuelve ilegible en móvil.
+
+**El paso `--fs-display` tiene techo propio.** El límite general de impeccable para titulares es
+6rem/96px. El hero-title de la home multiplica `--fs-display` por un `--sz` de hasta 1,15 según el
+proyecto — `4.6 × 1.15 × 18px ≈ 95px`, justo bajo el límite incluso en el caso más ancho a viewport
+máximo. Antes de este ticket, ese mismo elemento llegaba a 8rem/128px sin techo real.
+
+Line-height emparejado a cada paso: apretado en display (0,95, cerca del ~90% de referencia), suelto
+en cuerpo (1,68). Ese 1,68 se sale incluso de lo que esta misma sección llama "lo típico" (1,5-1,6):
+se aceptó el exceso porque los tres ejes de compensación —peso, tracking e interlineado— se subieron
+juntos y a ojo contra las capturas del prototipo, no se derivaron de una fórmula. Si en una pasada
+futura el cuerpo se lee suelto en vez de solo aireado, este es el primer valor a bajar, hacia 1,55-1,6.
 
 ### Fundiciones descartadas
 

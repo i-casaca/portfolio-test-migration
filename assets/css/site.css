@@ -6,15 +6,71 @@
    =========================================================================== */
 
 :root{
-  --cream:#F6F1E7; --mint:#A7DBCB; --ink:#1C1B19; --line:rgba(28,27,25,.12);
-  --chrome-bg:#1C1B19; --chrome-fg:#F6F1E7; --chrome-accent:#A7DBCB;
-  --pt-bg:#141312; /* casi negro del panel de transición */
+  /* Los dos tokens del sistema: fondo negro cálido y tinta hueso cálido. La
+     fotografía de proyecto es la única fuente de color saturado del sitio —
+     no hay un tercer token de acento. Ver DESIGN.md > Color. */
+  --bg:       oklch(22% 0.014 50);   /* #201915 */
+  --surface1: oklch(27% 0.014 50);   /* un paso elevado: franja de contacto, tarjetas, muro NDA */
+  --surface2: oklch(32% 0.014 50);   /* dos pasos: estados de hover sobre una superficie ya elevada */
+  --ink:      oklch(92% 0.018 78);   /* #EBE3D8 */
+  --line:     oklch(92% 0.018 78 / .14);
+  --pt-bg:    var(--bg);
+
+  /* Escala tipográfica: un solo clamp() en la raíz (suelo y techo), y cada
+     paso declarado en rem para que respire de golpe con el viewport. Ver
+     DESIGN.md > Tipografía. */
+  --root-fs: clamp(16px, 1rem + 0.22vw, 18px);
+  --f: "Roboto Flex", "Helvetica Neue", Arial, sans-serif;
+
+  --fs-micro:   0.7rem;
+  --fs-small:   0.875rem;
+  --fs-body:    1rem;
+  --fs-lead:    1.333rem;
+  --fs-h3:      1.777rem;
+  --fs-h2:      2.369rem;
+  --fs-h1:      3.16rem;
+  --fs-display: 4.6rem;
+
+  --lh-micro:   1.4;
+  --lh-small:   1.5;
+  --lh-body:    1.68;
+  --lh-lead:    1.45;
+  --lh-h3:      1.25;
+  --lh-h2:      1.15;
+  --lh-h1:      1.08;
+  --lh-display: 0.95;
 }
 
 *{box-sizing:border-box;}
-html{scroll-behavior:smooth;}
-html,body{margin:0;padding:0;font-family:'Inter',sans-serif;color:var(--ink);background:var(--cream);}
+html{scroll-behavior:smooth;font-size:var(--root-fs);}
+html,body{margin:0;padding:0;font-family:var(--f);color:var(--ink);background:var(--bg);}
+/* Texto claro sobre fondo oscuro se percibe más fino de lo que es: se
+   compensa subiendo el peso un escalón, el interlineado y el tracking. */
+body{font-weight:420;letter-spacing:.012em;}
 a{color:inherit;text-decoration:none;}
+
+/* ---------- grano: quita el banding del negro plano sin un asset nuevo ----------
+   El <div class="grain"> va como último hijo de <body> en cada página. Al ser
+   `position:fixed` sin z-index explícito, pinta por encima del contenido sin
+   z-index propio por orden de documento — no hace falta tocarles el z-index a
+   las secciones normales. Lo que SÍ sigue por delante, porque lleva su propio
+   z-index más alto y así conviene: el punto de cursor (9999), el panel de
+   transición entre páginas (9998/10000) y la burbuja del chat (60/61). Si
+   algún día se mueve el div de sitio en el HTML, hay que devolverlo al final. */
+.grain{
+  position:fixed;inset:-25%;width:150%;height:150%;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:.07;mix-blend-mode:overlay;
+  animation:grain-shift 1s steps(4) infinite;
+}
+@keyframes grain-shift{
+  0%{transform:translate(0,0);}
+  25%{transform:translate(-2%,1%);}
+  50%{transform:translate(1%,-2%);}
+  75%{transform:translate(-1%,-1%);}
+  100%{transform:translate(0,0);}
+}
+@media (prefers-reduced-motion: reduce){ .grain{animation:none;} }
 
 /* Los enlaces del nav apuntan a anclas de la home; sin este margen el título
    de la sección queda tapado al saltar. */
@@ -23,12 +79,15 @@ a{color:inherit;text-decoration:none;}
 /* ---------- barra superior ---------- */
 .nav{
   display:flex;justify-content:space-between;align-items:center;padding:22px 6vw;
-  font-size:.8rem;letter-spacing:.06em;
+  font-size:var(--fs-small);letter-spacing:.06em;
 }
-.wordmark{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:1.15rem;}
-.navlinks{display:flex;gap:2rem;text-transform:uppercase;letter-spacing:.1em;opacity:.7;font-size:.72rem;}
-.navlinks a{transition:opacity .2s ease;}
-.navlinks a:hover{opacity:.55;}
+.wordmark{font-family:var(--f);font-weight:600;font-stretch:115%;font-size:var(--fs-lead);}
+/* La opacidad va en cada enlace, no en el contenedor: si estuviera en
+   `.navlinks`, el `:hover` de abajo compondría sobre ella (.7 × .55 = .385,
+   ~3,1:1 — muy por debajo del mínimo de 4.5:1) en vez de sustituirla. */
+.navlinks{display:flex;gap:2rem;text-transform:uppercase;letter-spacing:.1em;font-size:var(--fs-micro);}
+.navlinks a{opacity:.7;transition:opacity .2s ease;}
+.navlinks a:hover{opacity:1;}
 
 @media (max-width: 620px){
   .nav{flex-direction:column;align-items:flex-start;gap:.9rem;}
@@ -74,7 +133,7 @@ html.pt-cover::after{
 .pt-spinner span:nth-child(3n){border-right:none;}
 .pt-spinner span:nth-child(n+4){border-bottom:none;}
 .pt-spinner span::before{
-  content:"";width:5px;height:5px;border-radius:50%;background:var(--cream);
+  content:"";width:5px;height:5px;border-radius:50%;background:var(--ink);
   opacity:.2;transform:scale(.65);
   animation:pt-blink 1.15s ease-in-out infinite;
 }
@@ -103,7 +162,10 @@ html.pt-cover::after{
 }
 
 /* ---------- tipografía compartida ---------- */
-.eyebrow{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.55;display:block;margin-bottom:.6rem;}
+.eyebrow{
+  font-size:var(--fs-micro);line-height:var(--lh-micro);letter-spacing:.1em;
+  text-transform:uppercase;opacity:.62;display:block;margin-bottom:.6rem;
+}
 
 /* ---------- páginas de proyecto ---------- */
 
@@ -112,8 +174,11 @@ html.pt-cover::after{
 .project-wrap{width:min(88vw,1440px);margin-inline:auto;}
 
 .project-body{padding-bottom:10vh;}
-.project-body h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.35rem;margin:0 0 .9rem;}
-.project-body p{font-size:1rem;line-height:1.65;margin:0 0 1rem;max-width:52ch;}
+.project-body h2{
+  font-family:var(--f);font-weight:500;font-stretch:110%;
+  font-size:var(--fs-h3);line-height:var(--lh-h3);margin:0 0 .9rem;
+}
+.project-body p{font-size:var(--fs-body);line-height:var(--lh-body);margin:0 0 1rem;max-width:52ch;}
 
 /* Contexto y Ejecución van en paralelo: aprovechan el ancho sin que ninguna
    línea pase de una medida cómoda de leer. */
@@ -124,7 +189,9 @@ html.pt-cover::after{
 /* Resultado cierra en un solo bloque. */
 .text-end{margin:7vh 0;max-width:56ch;}
 
-.disclaimer{opacity:.5;font-size:.85rem;}
+/* .5 de opacidad daba 4,34:1 sobre --bg — por debajo del mínimo de 4.5:1 para
+   texto que no es grande. .6 sube a ~5,7:1. */
+.disclaimer{opacity:.6;font-size:var(--fs-small);}
 
 /* Las imágenes van centradas y anchas, pero nunca a sangre: llegan hasta el
    contenedor (88vw) y ahí paran. Comparten eje con el texto y con el nav a
@@ -153,32 +220,35 @@ html.js .media.is-visible{opacity:1;transform:none;}
 }
 
 .project-header{padding:5vh 0 3vh;}
-.project-header h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2.2rem,5vw,3.4rem);margin:0 0 1.2rem;line-height:1.05;}
-.meta-row{display:flex;gap:2.5rem;flex-wrap:wrap;font-size:.85rem;border-top:1px solid var(--line);padding-top:1rem;}
-.meta-row div span{display:block;opacity:.5;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem;}
+.project-header h1{
+  font-family:var(--f);font-weight:500;font-stretch:114%;
+  font-size:var(--fs-h1);line-height:var(--lh-h1);margin:0 0 1.2rem;letter-spacing:-.01em;
+}
+.meta-row{display:flex;gap:2.5rem;flex-wrap:wrap;font-size:var(--fs-small);border-top:1px solid var(--line);padding-top:1rem;}
+.meta-row div span{display:block;opacity:.58;font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem;}
 .meta-row a{text-decoration:underline;}
 
 .next-project{
-  display:inline-block;margin-top:1rem;font-size:.85rem;border-top:1px solid var(--line);padding-top:1rem;
+  display:inline-block;margin-top:1rem;font-size:var(--fs-small);border-top:1px solid var(--line);padding-top:1rem;
 }
-.next-project span{opacity:.5;display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;}
+.next-project span{opacity:.58;display:block;font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;}
 
-/* ---------- franja negra de contacto: el único contraste fuerte del sitio ---------- */
-.site-footer{background:var(--ink);color:var(--cream);padding:9vh 6vw 2.2rem;}
-.site-footer .eyebrow{opacity:.5;}
+/* ---------- franja de contacto: un paso elevado, el remate del sitio ---------- */
+.site-footer{background:var(--surface1);color:var(--ink);padding:9vh 6vw 2.2rem;}
+.site-footer .eyebrow{opacity:.58;}
 .footer-lead{
-  font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2rem,5.5vw,3.4rem);
-  line-height:1.05;margin:0 0 1.8rem;max-width:16ch;
+  font-family:var(--f);font-weight:500;font-stretch:118%;
+  font-size:var(--fs-h1);line-height:var(--lh-h1);margin:0 0 1.8rem;max-width:16ch;letter-spacing:-.01em;
 }
-.footer-lead em{font-style:italic;font-weight:500;color:var(--mint);}
-.footer-links{display:flex;flex-wrap:wrap;gap:1.8rem;font-size:.92rem;}
+.footer-lead em{font-style:normal;font-weight:400;font-stretch:100%;opacity:.72;}
+.footer-links{display:flex;flex-wrap:wrap;gap:1.8rem;font-size:var(--fs-body);}
 .footer-links a{
-  border-bottom:1px solid rgba(246,241,231,.3);padding-bottom:.2rem;
-  transition:color .2s ease, border-color .2s ease;
+  border-bottom:1px solid var(--line);padding-bottom:.2rem;
+  transition:opacity .2s ease, border-color .2s ease;
 }
-.footer-links a:hover{color:var(--mint);border-color:var(--mint);}
+.footer-links a:hover{opacity:.65;border-color:var(--ink);}
 .footer-base{
   display:flex;justify-content:space-between;gap:.8rem;flex-wrap:wrap;
-  margin-top:7vh;padding-top:1.2rem;border-top:1px solid rgba(246,241,231,.18);
-  font-size:.74rem;opacity:.55;
+  margin-top:7vh;padding-top:1.2rem;border-top:1px solid var(--line);
+  font-size:var(--fs-micro);opacity:.6;
 }

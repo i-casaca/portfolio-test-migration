@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prototipo — ticket #38</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wdth,wght@25..151,100..1000&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* ---- color: negro cálido + hueso cálido, la foto es el único color ---- */
+  --bg:       oklch(22% 0.014 50);   /* #201915 */
+  --surface1: oklch(27% 0.014 50);   /* un paso elevado: tarjetas, muro NDA */
+  --surface2: oklch(32% 0.014 50);   /* dos pasos: hover de superficie */
+  --ink:      oklch(92% 0.018 78);   /* #EBE3D8 */
+  --ink-dim:  oklch(92% 0.018 78 / .6);
+  --line:     oklch(92% 0.018 78 / .14);
+
+  /* ---- tipografía: escala fluida, suelo y techo en la raíz ---- */
+  --root-fs: clamp(16px, 1rem + 0.22vw, 18px);
+  --f: "Roboto Flex", "Helvetica Neue", Arial, sans-serif;
+
+  --fs-micro:   0.7rem;
+  --fs-small:   0.875rem;
+  --fs-body:    1rem;
+  --fs-lead:    1.333rem;
+  --fs-h3:      1.777rem;
+  --fs-h2:      2.369rem;
+  --fs-h1:      3.16rem;
+  --fs-display: 4.213rem;
+
+  --lh-micro:   1.4;
+  --lh-small:   1.5;
+  --lh-body:    1.68;
+  --lh-lead:    1.45;
+  --lh-h3:      1.25;
+  --lh-h2:      1.15;
+  --lh-h1:      1.08;
+  --lh-display: 0.95;
+}
+*{box-sizing:border-box;}
+html{font-size:var(--root-fs);}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--f);}
+body{font-weight:400;letter-spacing:.012em;position:relative;}
+a{color:inherit;text-decoration:none;}
+
+/* ---- grano: SVG feTurbulence como data-URI, cero assets nuevos ---- */
+.grain{
+  position:fixed;inset:-25%;width:150%;height:150%;z-index:1;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:.045;mix-blend-mode:overlay;
+  animation:grain-shift 1s steps(4) infinite;
+}
+@keyframes grain-shift{
+  0%{transform:translate(0,0);}
+  25%{transform:translate(-2%,1%);}
+  50%{transform:translate(1%,-2%);}
+  75%{transform:translate(-1%,-1%);}
+  100%{transform:translate(0,0);}
+}
+@media (prefers-reduced-motion: reduce){ .grain{animation:none;} }
+
+.doc-head{position:relative;z-index:2;padding:5vh 6vw 3vh;border-bottom:1px solid var(--line);}
+.doc-head h1{font-size:var(--fs-h2);line-height:var(--lh-h2);font-weight:500;font-stretch:110%;margin:0 0 .6rem;}
+.doc-head p{font-size:var(--fs-body);line-height:var(--lh-body);opacity:.7;max-width:60ch;margin:0;font-weight:300;}
+.tag{display:inline-block;font-size:var(--fs-micro);letter-spacing:.08em;opacity:.55;margin-top:1rem;}
+
+/* ---- nav ---- */
+.nav{
+  position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;
+  padding:22px 6vw;font-size:var(--fs-small);letter-spacing:.06em;
+}
+.wordmark{font-weight:600;font-stretch:115%;font-size:var(--fs-lead);}
+.navlinks{display:flex;gap:2rem;text-transform:uppercase;letter-spacing:.1em;opacity:.65;font-size:var(--fs-micro);}
+.navlinks a:hover{opacity:.5;}
+
+/* ---- hero: rejilla de proyectos sobre foto ---- */
+.hero{position:relative;z-index:2;min-height:70vh;display:flex;align-items:flex-end;padding:0 6vw 3rem;}
+.hero-eyebrow{font-size:var(--fs-small);letter-spacing:.08em;line-height:var(--lh-small);}
+.hero-grid{
+  position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);
+  width:min(60vw,680px);aspect-ratio:3/2;display:grid;
+  grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);
+}
+.grid-cell{position:relative;display:grid;place-items:center;border:1px solid var(--line);}
+.grid-cell .lbl{font-size:var(--fs-small);opacity:.8;}
+.grid-cell:hover{background:var(--surface1);border-color:transparent;}
+
+/* ---- índice de trabajo: fila con foto real ---- */
+.works-section{position:relative;z-index:2;padding:8vh 6vw;}
+.eyebrow{font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;opacity:.55;display:block;margin-bottom:1.4rem;}
+.works{display:flex;flex-direction:column;gap:6vh;margin-top:1rem;}
+.work-row{display:flex;align-items:center;gap:4vw;}
+.work-row:nth-child(even){flex-direction:row-reverse;}
+.work-text{flex:0 0 34%;}
+.work-row h3{font-size:var(--fs-h3);line-height:var(--lh-h3);font-weight:500;font-stretch:112%;margin:0 0 .8rem;}
+.work-tagline{font-size:var(--fs-body);line-height:var(--lh-body);opacity:.68;margin:0 0 1.2rem;max-width:32ch;font-weight:300;}
+.work-meta{font-size:var(--fs-micro);letter-spacing:.06em;opacity:.5;display:block;margin-bottom:.6rem;text-transform:uppercase;}
+.arrow{
+  width:42px;height:42px;border-radius:50%;border:1px solid var(--line);display:flex;
+  align-items:center;justify-content:center;font-size:1.1rem;
+}
+.work-media{flex:1;position:relative;overflow:hidden;border-radius:4px;aspect-ratio:16/9;background:var(--surface1);}
+.work-media img{width:100%;height:100%;object-fit:cover;display:block;}
+
+/* ---- sobre mí: retrato + texto ---- */
+.about{position:relative;z-index:2;padding:9vh 6vw;border-top:1px solid var(--line);}
+.about-top{display:flex;gap:4vw;align-items:flex-start;margin-top:1.6rem;}
+.about-portrait{flex:0 0 30%;width:30%;height:auto;border-radius:4px;display:block;}
+.about-lead{font-size:var(--fs-lead);line-height:var(--lh-lead);font-weight:400;font-stretch:108%;margin:0 0 1.2rem;}
+.about-bio p{font-size:var(--fs-body);line-height:var(--lh-body);margin:0 0 1rem;max-width:58ch;opacity:.8;font-weight:300;}
+
+/* ---- footer: la única franja con contraste invertido ---- */
+.site-footer{position:relative;z-index:2;background:var(--surface1);padding:9vh 6vw 2.2rem;margin-top:4vh;}
+.footer-lead{font-size:var(--fs-h1);line-height:var(--lh-h1);font-weight:500;font-stretch:118%;margin:0 0 1.6rem;max-width:16ch;letter-spacing:-.01em;}
+
+/* ---- muro NDA sobre fondo oscuro ---- */
+.gate-demo{position:relative;z-index:2;padding:6vh 6vw;display:flex;justify-content:center;}
+.gate-card{
+  background:var(--surface1);border:1px solid var(--line);border-radius:10px;
+  padding:2.2rem 2.4rem;max-width:360px;width:100%;text-align:center;
+}
+.gate-card h3{font-size:var(--fs-h3);line-height:var(--lh-h3);font-weight:500;margin:0 0 .5rem;}
+.gate-card p{font-size:var(--fs-small);line-height:var(--lh-small);opacity:.68;margin:0 0 1.2rem;font-weight:300;}
+.gate-card input{
+  width:100%;padding:.7rem .9rem;border:1px solid var(--line);border-radius:6px;
+  font-size:var(--fs-body);font-family:var(--f);margin-bottom:.7rem;background:var(--bg);color:var(--ink);
+}
+.gate-card button{
+  width:100%;padding:.75rem;border:none;border-radius:6px;background:var(--ink);color:var(--bg);
+  font-family:var(--f);font-weight:600;font-size:var(--fs-small);cursor:pointer;
+}
+
+.swatch-row{position:relative;z-index:2;display:flex;gap:0;margin:0 6vw 6vh;flex-wrap:wrap;}
+.swatch{flex:1;min-width:140px;padding:1.4rem;font-size:var(--fs-micro);}
+.swatch b{display:block;font-size:var(--fs-small);margin-bottom:.3rem;font-weight:600;}
+.sw-bg{background:var(--bg);border:1px solid var(--line);}
+.sw-s1{background:var(--surface1);}
+.sw-s2{background:var(--surface2);}
+.sw-ink{background:var(--ink);color:var(--bg);}
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<div class="doc-head">
+  <h1>Prototipo del sistema oscuro — ticket #38</h1>
+  <p>Home y página de proyecto reales, con las fotos de verdad. Roboto Flex ya elegido en el ticket
+  de Fuentes; lo que se juzga aquí es color, grano y la escala tipográfica fluida.</p>
+  <span class="tag">Recarga la página para ver el grano desde otra fase de su ciclo</span>
+</div>
+
+<div class="swatch-row">
+  <div class="swatch sw-bg"><b>--bg</b>oklch(22% .014 50)<br>#201915</div>
+  <div class="swatch sw-s1"><b>--surface1</b>un paso elevado</div>
+  <div class="swatch sw-s2"><b>--surface2</b>dos pasos</div>
+  <div class="swatch sw-ink"><b>--ink</b>oklch(92% .018 78)<br>#EBE3D8</div>
+</div>
+
+<div class="nav">
+  <a class="wordmark" href="#">Isma Casaca</a>
+  <div class="navlinks"><a href="#">Trabajo</a><a href="#">Sobre mí</a><a href="#">Contacto</a></div>
+</div>
+
+<div class="hero">
+  <div class="hero-grid">
+    <div class="grid-cell"><span class="lbl">Manu Cardiel</span></div>
+    <div class="grid-cell"><span class="lbl">Adrenaline</span></div>
+    <div class="grid-cell"><span class="lbl">Arabvision</span></div>
+    <div class="grid-cell"><span class="lbl">Nexahub</span></div>
+    <div class="grid-cell"><span class="lbl">El Paraguas</span></div>
+    <div class="grid-cell"><span class="lbl">Sobre mí</span></div>
+  </div>
+  <div class="hero-eyebrow">Product<br>Design &amp;<br>UX</div>
+</div>
+
+<section class="works-section">
+  <span class="eyebrow">↳ Trabajo</span>
+  <div class="works">
+    <div class="work-row">
+      <div class="work-text">
+        <span class="work-meta">Personal · 2024</span>
+        <h3>Manu Cardiel</h3>
+        <p class="work-tagline">Exposición virtual del arte de Manu Cardiel, con un sistema propio para que él gestione el contenido.</p>
+        <div class="arrow">→</div>
+      </div>
+      <div class="work-media"><img src="../../assets/images/manu-cardiel/hero.jpg" alt=""></div>
+    </div>
+    <div class="work-row">
+      <div class="work-text">
+        <span class="work-meta">Cliente · 2023</span>
+        <h3>Adrenaline</h3>
+        <p class="work-tagline">App deportiva whitelabel: estadísticas, TV en vivo y VOD para clientes premium.</p>
+        <div class="arrow">🔒</div>
+      </div>
+      <div class="work-media"><img src="../../assets/images/adrenaline/hero.jpg" alt=""></div>
+    </div>
+    <div class="work-row">
+      <div class="work-text">
+        <span class="work-meta">Cliente · 2023</span>
+        <h3>Arabvision</h3>
+        <p class="work-tagline">Streaming OTT para móvil y Android TV: Live TV y VOD en cualquier dispositivo.</p>
+        <div class="arrow">🔒</div>
+      </div>
+      <div class="work-media"><img src="../../assets/images/arabvision/hero.jpg" alt=""></div>
+    </div>
+  </div>
+</section>
+
+<section class="about">
+  <span class="eyebrow">↳ Sobre mí</span>
+  <div class="about-top">
+    <img class="about-portrait" src="../../assets/images/about/retrato-azul.jpg" alt="">
+    <div class="about-bio">
+      <p class="about-lead">Hola 👋🏻, me llamo Ismael Casado y soy Product Designer.</p>
+      <p>Soy de Madrid 🇪🇸 y un entusiasta del café. Estudié arquitectura 🏛️, algo que ha contribuido enormemente a mis habilidades de diseño y a mi empatía con las personas que usan lo que diseño.</p>
+      <p>Como Product Designer he tenido la oportunidad de trabajar en proyectos muy variados, grandes y pequeños, en plataformas que van desde la Smart TV hasta la realidad virtual 🥽.</p>
+    </div>
+  </div>
+</section>
+
+<div class="gate-demo">
+  <div class="gate-card">
+    <div style="font-size:1.6rem;margin-bottom:.6rem;">🔒</div>
+    <h3>Contenido bajo NDA</h3>
+    <p>Este proyecto es para un cliente y su contenido es confidencial. Introduce la contraseña para verlo.</p>
+    <input type="password" placeholder="Contraseña">
+    <button>Desbloquear</button>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <span class="eyebrow">Contacto</span>
+  <p class="footer-lead">¿Trabajamos juntos?</p>
+</footer>
+
+</body>
+</html>

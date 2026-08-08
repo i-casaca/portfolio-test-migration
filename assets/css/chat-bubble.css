@@ -5,11 +5,17 @@
    círculo con anillo de pulso, sin globo de saludo ni etiqueta de texto, y la
    fuente citada al pie de cada respuesta como una nota.
 
-   Reutiliza los tokens de site.css (--cream, --mint, --ink, --line). El único
-   token nuevo es --bubble-shadow, porque el sitio no tenía sombras hasta ahora.
+   Hasta el ticket #38, reutilizaba los tokens de site.css (--cream, --mint,
+   --ink, --line). Ese ticket sustituyó esos tokens por el sistema oscuro
+   (--bg/--ink), pero la burbuja sigue en la niebla del mapa #35 ("La burbuja
+   del chat... con la paleta nueva") — todavía no le toca su propio repintado.
+   Para no romperla mientras tanto, lleva sus propios tokens `--cb-*` con los
+   valores literales que tenía antes: un popup claro flotando sobre la home
+   oscura, hasta que su ticket decida si eso se queda o cambia.
    =========================================================================== */
 
 :root{
+  --cb-cream:#F6F1E7; --cb-mint:#A7DBCB; --cb-ink:#1C1B19; --cb-line:rgba(28,27,25,.12);
   --bubble-shadow: 0 10px 34px rgba(28,27,25,.16), 0 2px 8px rgba(28,27,25,.08);
   --bubble-radius: 14px;
 }
@@ -18,15 +24,19 @@
 
 .cb-launcher{
   position:fixed; right:clamp(16px,3vw,32px); bottom:clamp(16px,3vw,32px);
-  z-index:60; border:0; cursor:pointer; font-family:inherit;
+  z-index:60; cursor:pointer; font-family:inherit;
   width:56px; height:56px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
-  background:var(--ink); color:var(--cream);
+  background:var(--cb-ink); color:var(--cb-cream);
+  /* El ticket #38 oscureció la página; --cb-ink (#1C1B19) se funde casi del
+     todo con el nuevo fondo. Hasta que la burbuja tenga su propio ticket,
+     este borde es lo mínimo para que el lanzador se siga viendo. */
+  border:1px solid rgba(246,241,231,.22);
   box-shadow:var(--bubble-shadow);
   transition:transform .25s cubic-bezier(.2,.7,.3,1);
 }
 .cb-launcher:hover{transform:translateY(-2px);}
-.cb-launcher:focus-visible{outline:2px solid var(--mint); outline-offset:3px;}
+.cb-launcher:focus-visible{outline:2px solid var(--cb-mint); outline-offset:3px;}
 
 .cb-launcher-icon{width:22px; height:22px; display:block;}
 
@@ -34,7 +44,7 @@
    #18. No ocupa sitio ni interrumpe — solo insinúa que la burbuja está viva. */
 .cb-launcher::before{
   content:""; position:absolute; inset:0; border-radius:inherit;
-  border:1.5px solid var(--ink); opacity:0; pointer-events:none;
+  border:1.5px solid var(--cb-ink); opacity:0; pointer-events:none;
   animation:cb-pulse 3.4s cubic-bezier(.2,.7,.3,1) infinite;
 }
 @keyframes cb-pulse{
@@ -49,8 +59,8 @@
   position:fixed; right:clamp(16px,3vw,32px); bottom:calc(clamp(16px,3vw,32px) + 68px);
   z-index:61; width:min(92vw, 396px); max-height:min(76vh, 620px);
   display:flex; flex-direction:column;
-  background:var(--cream); color:var(--ink);
-  border:1px solid var(--line); border-radius:var(--bubble-radius);
+  background:var(--cb-cream); color:var(--cb-ink);
+  border:1px solid var(--cb-line); border-radius:var(--bubble-radius);
   box-shadow:var(--bubble-shadow);
   overflow:hidden;
   opacity:0; transform:translateY(12px) scale(.985); pointer-events:none;
@@ -60,10 +70,13 @@
 
 .cb-head{
   display:flex; align-items:flex-start; justify-content:space-between; gap:1rem;
-  padding:1rem 1.1rem .85rem; border-bottom:1px solid var(--line);
+  padding:1rem 1.1rem .85rem; border-bottom:1px solid var(--cb-line);
 }
 .cb-head h2{
-  font-family:'Fraunces',serif; font-weight:600; font-size:1.02rem;
+  /* Fraunces salió del <link> compartido en el ticket #38; hasta que la
+     burbuja tenga su propio repintado, hereda Roboto Flex del documento en
+     vez de quedarse sin webfont. */
+  font-weight:600; font-stretch:112%; font-size:1.02rem;
   margin:0 0 .2rem; line-height:1.2;
 }
 /* El aviso de honestidad decidido en el ticket #16. No es letra pequeña
@@ -74,7 +87,7 @@
   font-size:1.15rem; line-height:1; opacity:.45; color:inherit; flex:none;
 }
 .cb-close:hover{opacity:.85;}
-.cb-close:focus-visible{outline:2px solid var(--mint); outline-offset:2px;}
+.cb-close:focus-visible{outline:2px solid var(--cb-mint); outline-offset:2px;}
 
 .cb-log{
   flex:1; overflow-y:auto; padding:1.1rem; display:flex;
@@ -86,7 +99,7 @@
 .cb-msg{font-size:.9rem; line-height:1.6;}
 .cb-msg-user{
   align-self:flex-end; max-width:85%;
-  background:var(--ink); color:var(--cream);
+  background:var(--cb-ink); color:var(--cb-cream);
   padding:.6rem .85rem; border-radius:12px 12px 3px 12px;
 }
 .cb-msg-bot{max-width:100%;}
@@ -101,11 +114,11 @@
 .cb-cite{
   display:inline-block; margin-top:.55rem;
   font-size:.76rem; opacity:.62;
-  border-bottom:1px solid var(--line); padding-bottom:.12rem;
+  border-bottom:1px solid var(--cb-line); padding-bottom:.12rem;
   transition:opacity .2s ease, border-color .2s ease;
 }
-.cb-cite:hover{opacity:1; border-color:var(--ink);}
-.cb-cite:focus-visible{outline:2px solid var(--mint); outline-offset:2px;}
+.cb-cite:hover{opacity:1; border-color:var(--cb-ink);}
+.cb-cite:focus-visible{outline:2px solid var(--cb-mint); outline-offset:2px;}
 
 /* ---------- estados ---------- */
 
@@ -115,17 +128,17 @@
 .cb-suggest button{
   text-align:left; font-family:inherit; font-size:.83rem; line-height:1.4;
   cursor:pointer; padding:.55rem .75rem; color:inherit;
-  background:transparent; border:1px solid var(--line); border-radius:9px;
+  background:transparent; border:1px solid var(--cb-line); border-radius:9px;
   transition:background-color .2s ease, border-color .2s ease;
 }
-.cb-suggest button:hover{background:rgba(167,219,203,.28); border-color:var(--mint);}
-.cb-suggest button:focus-visible{outline:2px solid var(--mint); outline-offset:2px;}
+.cb-suggest button:hover{background:rgba(167,219,203,.28); border-color:var(--cb-mint);}
+.cb-suggest button:focus-visible{outline:2px solid var(--cb-mint); outline-offset:2px;}
 
 /* Escribiendo. Con el aviso de honestidad puesto, esto es pulido de UX y no
    un engaño — así se decidió en el ticket #16. */
 .cb-typing{display:flex; gap:.28rem; align-items:center; height:1.2rem;}
 .cb-typing span{
-  width:6px; height:6px; border-radius:50%; background:var(--ink); opacity:.35;
+  width:6px; height:6px; border-radius:50%; background:var(--cb-ink); opacity:.35;
   animation:cb-blink 1.25s ease-in-out infinite;
 }
 .cb-typing span:nth-child(2){animation-delay:.18s;}
@@ -135,26 +148,26 @@
 /* No-lo-sé y error comparten forma: un aviso sobrio, sin alarma. */
 .cb-note{
   font-size:.85rem; line-height:1.55; padding:.7rem .85rem; border-radius:9px;
-  background:rgba(28,27,25,.045); border:1px solid var(--line);
+  background:rgba(28,27,25,.045); border:1px solid var(--cb-line);
 }
 .cb-note strong{font-weight:600;}
 
 /* ---------- pie: entrada + contacto siempre visible ---------- */
 
-.cb-foot{border-top:1px solid var(--line); padding:.7rem .8rem .8rem;}
+.cb-foot{border-top:1px solid var(--cb-line); padding:.7rem .8rem .8rem;}
 .cb-form{display:flex; gap:.5rem; align-items:center;}
 .cb-form input{
   flex:1; font-family:inherit; font-size:.88rem; color:inherit;
-  padding:.62rem .75rem; border:1px solid var(--line); border-radius:9px;
+  padding:.62rem .75rem; border:1px solid var(--cb-line); border-radius:9px;
   background:rgba(255,255,255,.5);
 }
-.cb-form input:focus{outline:none; border-color:var(--ink);}
+.cb-form input:focus{outline:none; border-color:var(--cb-ink);}
 .cb-form button{
   border:0; cursor:pointer; font-family:inherit; font-size:.85rem;
   padding:.62rem .95rem; border-radius:9px;
-  background:var(--ink); color:var(--cream);
+  background:var(--cb-ink); color:var(--cb-cream);
 }
-.cb-form button:focus-visible{outline:2px solid var(--mint); outline-offset:2px;}
+.cb-form button:focus-visible{outline:2px solid var(--cb-mint); outline-offset:2px;}
 
 /* Nota trasladada desde #21: un enlace a la vista no depende de acertar la
    intención del visitante por texto. LinkedIn y CV son los dos únicos canales
@@ -163,8 +176,8 @@
   display:flex; gap:1rem; margin-top:.6rem;
   font-size:.74rem; opacity:.6;
 }
-.cb-contact a{border-bottom:1px solid var(--line); padding-bottom:.1rem;}
-.cb-contact a:hover{opacity:1; border-color:var(--ink);}
+.cb-contact a{border-bottom:1px solid var(--cb-line); padding-bottom:.1rem;}
+.cb-contact a:hover{opacity:1; border-color:var(--cb-ink);}
 
 /* ---------- móvil ---------- */
 

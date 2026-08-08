@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,500&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wdth,wght@25..151,100..1000&display=swap" rel="stylesheet">
 <!-- Una display distinta por proyecto para el hero. Cada petición lleva `text=`,
      así Google devuelve solo los caracteres de ese nombre y cada fuente pesa
      unos cientos de bytes en vez de decenas de kB. -->
@@ -23,6 +23,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@700&text=Arabvision&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700&text=Nexahub&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Yeseva+One&text=El%20Paraguas&display=swap" rel="stylesheet">
+<!-- "Sobre mí" comparte el mismo truco de display-por-nombre que los 5 proyectos,
+     así que sigue pidiendo Fraunces solo para sus propios caracteres en vez de
+     depender del <link> general, que el ticket #38 retiró. -->
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&text=Sobre%20m%C3%AD&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./assets/css/site.css">
 <link rel="stylesheet" href="./assets/css/chat-bubble.css">
 <!-- Marca puesta por la página anterior: si venimos de una transición, entrar
@@ -33,7 +37,7 @@
 <script src="./assets/js/reveal.js" defer></script>
 <style>
   .hero{
-    background:var(--hero-bg,var(--mint));min-height:78vh;position:relative;overflow:hidden;
+    background:var(--hero-bg,var(--bg));min-height:78vh;position:relative;overflow:hidden;
     display:flex;align-items:flex-end;padding:0 6vw 2.4rem;
     transition:background-color .55s cubic-bezier(.4,0,.2,1);
   }
@@ -54,9 +58,13 @@
     position:absolute;inset:0;display:grid;place-items:center;
     pointer-events:none;z-index:1;padding:0 4vw;
   }
+  /* Antes llegaba a 8rem/128px sin techo real (9.5vw se dispara en monitores
+     grandes); el ticket #38 lo trae bajo el límite de 6rem/96px de impeccable
+     incluso en el --sz más ancho (1.15), multiplicando el paso --fs-display
+     de la escala en vez de un clamp() suelto propio de este elemento. */
   .hero-title{
-    grid-area:1/1;white-space:nowrap;line-height:.95;color:var(--ink);
-    font-size:clamp(2.4rem, calc(9.5vw * var(--sz,1)), 8rem);
+    grid-area:1/1;white-space:nowrap;line-height:var(--lh-display);color:var(--ink);
+    font-size:calc(var(--fs-display) * var(--sz,1));
     opacity:0;transform:translateY(30px);
     transition:opacity .34s ease, transform .52s cubic-bezier(.2,.7,.3,1);
   }
@@ -75,13 +83,13 @@
      moviéramos la propia celda, se escaparía del cursor y el hover parpadearía. */
   .cell-inner{
     position:absolute;inset:0;display:grid;place-items:center;
-    border:1px solid rgba(28,27,25,.28);
+    border:1px solid var(--line);
     transform:translate(var(--cx,0px),var(--cy,0px));
     transition:transform .18s ease-out, background-color .28s ease, border-color .28s ease;
     will-change:transform;
   }
   .cell-dot{
-    width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.92);
+    width:7px;height:7px;border-radius:50%;background:var(--ink);
     transition:opacity .2s ease, transform .2s ease;
   }
   .cell-arrow{
@@ -90,8 +98,11 @@
     opacity:0;transform:scale(.78);
     transition:opacity .24s ease, transform .34s cubic-bezier(.2,.7,.3,1);
   }
+  /* La celda activa se eleva dos pasos de superficie en vez de saltar a un
+     chip casi blanco: el hueso del icono se queda legible en las dos fases,
+     sin que el propio hover apague el fondo oscuro del hero. */
   .grid-cell:hover .cell-inner,
-  .grid-cell:focus-visible .cell-inner{background:rgba(246,241,231,.94);border-color:transparent;}
+  .grid-cell:focus-visible .cell-inner{background:var(--surface2);border-color:transparent;}
   .grid-cell:hover .cell-dot,
   .grid-cell:focus-visible .cell-dot{opacity:0;transform:scale(.4);}
   .grid-cell:hover .cell-arrow,
@@ -116,7 +127,7 @@
     .hero-grid{width:88vw;top:44%;}
   }
 
-  .hero-eyebrow{font-size:.75rem;letter-spacing:.08em;line-height:1.5;position:relative;z-index:3;}
+  .hero-eyebrow{font-size:var(--fs-small);letter-spacing:.08em;line-height:var(--lh-small);position:relative;z-index:3;}
 
   /* ---------- cursor a medida: bolita de 24px que invierte lo que tiene detrás ---------- */
   #cursor-dot{
@@ -131,16 +142,19 @@
   .work-row{display:flex;align-items:center;gap:4vw;}
   .work-row:nth-child(even){flex-direction:row-reverse;}
   .work-text{flex:0 0 34%;}
-  .work-row h3{font-family:'Fraunces',serif;font-weight:600;font-size:2rem;margin:0 0 .8rem;line-height:1.1;}
-  .work-row .work-tagline{font-size:1rem;opacity:.7;margin:0 0 1.2rem;max-width:32ch;}
+  .work-row h3{
+    font-family:var(--f);font-weight:500;font-stretch:112%;
+    font-size:var(--fs-h2);line-height:var(--lh-h2);margin:0 0 .8rem;
+  }
+  .work-row .work-tagline{font-size:var(--fs-body);line-height:var(--lh-body);opacity:.72;margin:0 0 1.2rem;max-width:32ch;}
   .arrow{
     width:42px;height:42px;border-radius:50%;border:1px solid var(--ink);display:flex;
     align-items:center;justify-content:center;font-size:1.1rem;transition:background .2s ease, color .2s ease;
   }
-  .work-row:hover .arrow{background:var(--ink);color:var(--cream);}
+  .work-row:hover .arrow{background:var(--ink);color:var(--bg);}
   .lockbadge{
-    display:inline-flex;align-items:center;gap:.4em;font-size:.75rem;border:1px solid var(--line);
-    padding:6px 12px;border-radius:999px;opacity:.7;
+    display:inline-flex;align-items:center;gap:.4em;font-size:var(--fs-small);border:1px solid var(--line);
+    padding:6px 12px;border-radius:999px;opacity:.75;
   }
 
   /* El tono por proyecto (--tone1) queda de fondo del panel: si la imagen no cubre,
@@ -163,8 +177,8 @@
   .locked-tag{
     position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;
     display:inline-flex;align-items:center;gap:.45em;white-space:nowrap;
-    background:var(--ink);color:var(--cream);
-    font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;
+    background:var(--ink);color:var(--bg);
+    font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;
     padding:10px 18px;border-radius:999px;
   }
 
@@ -174,13 +188,13 @@
   .about-portrait{flex:0 0 34%;width:34%;height:auto;border-radius:4px;display:block;}
   .about-bio{flex:1;}
   .about-lead{
-    font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.35rem,2.5vw,1.9rem);
-    line-height:1.25;margin:0 0 1.4rem;
+    font-family:var(--f);font-weight:400;font-stretch:108%;font-size:var(--fs-lead);
+    line-height:var(--lh-lead);margin:0 0 1.4rem;
   }
-  .about-bio p{font-size:1rem;line-height:1.65;margin:0 0 1rem;max-width:60ch;opacity:.85;}
+  .about-bio p{font-size:var(--fs-body);line-height:var(--lh-body);margin:0 0 1rem;max-width:60ch;opacity:.85;}
   .about-cols{display:flex;gap:6vw;}
   .about-cols > div{flex:1;}
-  .about-cols h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;margin:0 0 1.2rem;}
+  .about-cols h3{font-family:var(--f);font-weight:500;font-stretch:110%;font-size:var(--fs-lead);margin:0 0 1.2rem;}
   .cv-list{list-style:none;margin:0;padding:0;}
   .cv-list li{
     display:grid;grid-template-columns:1fr auto;
@@ -190,7 +204,7 @@
   .cv-org{grid-column:1;grid-row:2;font-size:.85rem;opacity:.6;}
   .cv-year{
     grid-column:2;grid-row:1/3;align-self:center;text-align:right;
-    font-size:.72rem;letter-spacing:.06em;opacity:.5;padding-left:1.5rem;
+    font-size:var(--fs-micro);letter-spacing:.06em;opacity:.6;padding-left:1.5rem;
   }
 
   /* ---------- metodología: cómo trabaja, en su voz ---------- */
@@ -198,8 +212,8 @@
      archivo aparte que solo lea el chatbot: así el corpus la hereda sin nada
      que mantener por duplicado (ticket #20). */
   .method{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:3rem 5vw;margin-top:2.5rem;}
-  .method h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;margin:0 0 1rem;}
-  .method p{font-size:1rem;line-height:1.65;margin:0 0 1rem;max-width:56ch;opacity:.85;}
+  .method h3{font-family:var(--f);font-weight:500;font-stretch:110%;font-size:var(--fs-lead);margin:0 0 1rem;}
+  .method p{font-size:var(--fs-body);line-height:var(--lh-body);margin:0 0 1rem;max-width:56ch;opacity:.85;}
   .method p:last-child{margin-bottom:0;}
 
   @media (max-width: 760px){
@@ -262,28 +276,33 @@
     <span class="hero-title" style="font-family:'Fraunces',serif;font-style:italic;font-weight:500;--sz:1.1">Sobre mí</span>
   </div>
 
+  <!-- El tono de cada celda mantiene el matiz que ya tenía (misma hue en
+       OKLCH), pero se oscurece a ~28% de luminosidad: en el MVP claro
+       funcionaba como pastel de fondo con texto oscuro encima; en el
+       sistema oscuro tiene que seguir siendo oscuro para que el hueso del
+       titular del hero no pierda contraste al pasar el ratón. -->
   <nav class="hero-grid" id="hero-grid" aria-label="Índice del sitio">
-    <a class="grid-cell" href="./manu-cardiel.html" data-depth="1.4" data-tone="#E8B7A4">
+    <a class="grid-cell" href="./manu-cardiel.html" data-depth="1.4" data-tone="#3B2117">
       <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">Manu Cardiel</span></span>
       <span class="sr-only">Manu Cardiel</span>
     </a>
-    <a class="grid-cell" href="./adrenaline.html" data-depth="0.7" data-tone="#CFD8C8">
+    <a class="grid-cell" href="./adrenaline.html" data-depth="0.7" data-tone="#252B1F">
       <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">Adrenaline</span></span>
       <span class="sr-only">Adrenaline</span>
     </a>
-    <a class="grid-cell" href="./arabvision.html" data-depth="1.4" data-tone="#9FBFC9">
+    <a class="grid-cell" href="./arabvision.html" data-depth="1.4" data-tone="#102D35">
       <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">Arabvision</span></span>
       <span class="sr-only">Arabvision</span>
     </a>
-    <a class="grid-cell" href="./nexahub.html" data-depth="0.7" data-tone="#E3C98F">
+    <a class="grid-cell" href="./nexahub.html" data-depth="0.7" data-tone="#33270C">
       <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">Nexahub</span></span>
       <span class="sr-only">Nexahub</span>
     </a>
-    <a class="grid-cell" href="./el-paraguas.html" data-depth="1.4" data-tone="#A9C7DC">
+    <a class="grid-cell" href="./el-paraguas.html" data-depth="1.4" data-tone="#122C3C">
       <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">El Paraguas</span></span>
       <span class="sr-only">El Paraguas</span>
     </a>
-    <a class="grid-cell" href="#sobre-mi" data-depth="0.7" data-tone="#E0D6C8">
+    <a class="grid-cell" href="#sobre-mi" data-depth="0.7" data-tone="#2F281D">
       <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">Sobre mí</span></span>
       <span class="sr-only">Sobre mí</span>
     </a>
@@ -547,5 +566,7 @@
 <script src="./assets/js/chat-corpus-tags.js"></script>
 <script src="./assets/js/chat-corpus.js"></script>
 <script src="./assets/js/chat-bubble.js"></script>
+
+<div class="grain" aria-hidden="true"></div>
 </body>
 </html>
