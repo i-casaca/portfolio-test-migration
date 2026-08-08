@@ -42,20 +42,92 @@ que desaparece. El contraste de texto tiene que cumplir el umbral fijado en
 
 ## Tipografía
 
-**Pendiente** — las fuentes las elige el ticket
-[#37](https://github.com/i-casaca/portfolio-test-migration/issues/37) y la escala la fija el
-[#38](https://github.com/i-casaca/portfolio-test-migration/issues/38).
+Las fuentes están decididas (ticket
+[#37](https://github.com/i-casaca/portfolio-test-migration/issues/37), con el informe completo y las
+mediciones en [`research/fuentes-sistema-tipografico.md`](research/fuentes-sistema-tipografico.md)).
+**La escala sigue pendiente**: la fija el
+[#38](https://github.com/i-casaca/portfolio-test-migration/issues/38), que es también quien sustituye
+los `<link>` de las seis páginas.
 
-Dirección ya decidida:
+### La familia del sitio: Roboto Flex
 
-- **Una sola familia para todo el sitio**, recorrida a lo ancho: la variedad tipográfica sale de los
-  anchos y los pesos de una única familia, no de mezclar familias. Es una elección deliberada; ver
-  [Excepciones deliberadas](#excepciones-deliberadas).
-- **Tres o cuatro displays de carácter muy distinto entre sí**, usadas exclusivamente en la entrada
-  del sitio. La personalidad tipográfica se concentra en un único momento; el resto es sobrio.
+Una sola familia para todo, recorrida a lo ancho. La variedad tipográfica sale de cruzar el eje de
+ancho con el de peso, no de mezclar familias — es una elección deliberada, y está protegida en
+[Excepciones deliberadas](#excepciones-deliberadas).
+
+Licencia OFL 1.1, servida por Google Fonts, **59,7 kB** en el subset `latin` (que basta: `¡`, `¿` y
+las vocales acentuadas viven en U+0000–00FF, así que el castellano no necesita `latin-ext`). Ejes
+`wdth 25–151` y `wght 100–1000` — el recorrido de ancho más amplio de cualquier libre pensada para
+texto, y menos peso que alternativas con la mitad de recorrido.
+
+```html
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wdth,wght@25..151,100..1000&display=swap" rel="stylesheet">
+```
+
+Los escalones se declaran con las propiedades altas de CSS (`font-stretch` y `font-weight`), no con
+`font-variation-settings`, para que hereden y cascadeen con normalidad:
+
+```css
+:root { --f: "Roboto Flex", "Helvetica Neue", Arial, sans-serif; }
+
+.t-fino       { font-weight: 200; font-stretch: 100%; }
+.t-normal     { font-weight: 400; font-stretch: 100%; }
+.t-medio      { font-weight: 500; font-stretch: 100%; }
+.t-ancho      { font-weight: 500; font-stretch: 125%; }
+.t-fino-ancho { font-weight: 200; font-stretch: 140%; }
+.t-muy-ancho  { font-weight: 700; font-stretch: 151%; }
+.t-condensada { font-weight: 800; font-stretch:  40%; }
+```
+
+**La objeción, dicha en voz alta**: en su ajuste por defecto (`400 / 100%`) Roboto Flex se lee como
+Roboto. Se aceptó a sabiendas, porque en este sistema casi nunca está en ese ajuste y porque la
+personalidad la ponen las displays de la entrada. Si algún día sabe a poco, las suplentes son
+**Anybody** (más carácter, casi el mismo peso, pero dibujada para tamaños grandes) y **Archivo**
+(sólida en cuerpo, 90 kB, y solo llega a 125% de ancho). El cambio es una línea, porque los
+escalones se definen una sola vez.
+
+### Las cuatro displays de la entrada
+
+Se usan **solo** en la secuencia de entrada, un saludo cada una, y en ningún otro sitio del sitio.
+Están elegidas por disparidad —cada una destaca en un eje distinto— para que ninguna se parezca a la
+de al lado:
+
+| Aporta | Familia | Licencia | Peso |
+|---|---|---|---|
+| Masa | Rubik Mono One | OFL 1.1 | 916 B |
+| Gesto | Rock Salt | **Apache 2.0** | 1.576 B |
+| Proporción | Bebas Neue | OFL 1.1 | 1.072 B |
+| Estructura | Monoton | OFL 1.1 | 696 B |
+
+**4,2 kB las cuatro juntas**, porque se piden con `?text=` y solo llegan los glifos de su propia
+palabra — el mismo truco que ya usan los heroes de proyecto. Rock Salt es Apache 2.0 y no OFL: no
+cambia nada en la práctica, pero no se debe escribir "todas OFL" en ningún sitio.
+
+Dos cosas que hay que respetar al tocar los `<link>`:
+
+1. El `¡` va URL-encoded como `%C2%A1`. Sin encodear, el `<link>` es frágil.
+2. **Si cambian las palabras de los saludos, hay que cambiar el `?text=`.** Es el precio del truco:
+   una letra nueva se renderiza con la fuente de fallback y nadie se entera hasta verlo. Las
+   palabras las fija el [#40](https://github.com/i-casaca/portfolio-test-migration/issues/40), así
+   que ese ticket tiene que volver aquí.
+
+Rubik Mono One **no tiene minúsculas reales**: lo que vaya en ella se verá en caja alta pase lo que
+pase. Bebas Neue y Monoton sí las tienen, en contra de lo que suele decirse de Bebas.
+
+### La escala (pendiente, #38)
+
 - Escala fluida que escala con el viewport de golpe, **con suelo y techo**. Sin techo se dispara en
-  monitores grandes; sin suelo se vuelve ilegible en móvil.
-- Line-height emparejado a cada paso de la escala: apretado en display, suelto en cuerpo.
+  monitores grandes; sin suelo se vuelve ilegible en móvil. El `clamp()` va en la variable raíz, no
+  token a token.
+- Line-height emparejado a cada paso: apretado en display, suelto en cuerpo. Sobre fondo oscuro, el
+  texto claro se lee más ligero y pide algo más de aire que el mismo paso en claro.
+
+### Fundiciones descartadas
+
+**Fontshare queda fuera**, y por dos motivos independientes: ninguna de sus 100 familias tiene eje
+`wdth`, y su licencia prohíbe modificar la fuente sin permiso escrito — o sea, prohíbe subsetear,
+que es la técnica sobre la que se apoya todo lo de arriba. Por eso el sistema es OFL y Apache de
+principio a fin.
 
 ## Layout
 
