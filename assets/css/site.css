@@ -161,6 +161,25 @@ html.pt-cover::after{
   clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;
 }
 
+/* ---------- gramática de motion: texto partido en caracteres ----------
+   Cimiento para SplitText (GSAP), sin uso todavío en esta página: lo
+   consumen la entrada del sitio (#40) y las transiciones (#42). Se deja
+   escrito y probado aquí, no en cada ticket que lo necesite. Ver DESIGN.md
+   > Motion para la regla completa: los caracteres entran desde abajo y
+   salen por arriba, nunca al revés.
+
+   SplitText con `mask:"words"` ya envuelve cada palabra en un elemento con
+   `visibility:clip` — el enmascarado no hace falta declararlo aquí. Lo que
+   sí queda fuera de SplitText y hay que resolver a mano:
+   - Kerning y ligaduras desactivados en el contenedor que se parte: si no,
+     el texto cambia de anchura entre su estado entero y su estado partido.
+   - Espacio para los descendentes (g, j, p, q, y) en cada carácter: sin él,
+     la máscara de la palabra los recorta por abajo. */
+[data-split]{
+  font-kerning:none;font-variant-ligatures:none;text-rendering:optimizeSpeed;
+}
+[data-split] .char{line-height:1.2;padding-bottom:.2em;}
+
 /* ---------- tipografía compartida ---------- */
 .eyebrow{
   font-size:var(--fs-micro);line-height:var(--lh-micro);letter-spacing:.1em;
@@ -202,11 +221,13 @@ html.pt-cover::after{
 
 /* Aparición al entrar en pantalla. El estado oculto se aplica solo si hay JS
    (clase `js` puesta antes del primer pintado); sin él las imágenes se ven
-   siempre, en vez de quedarse invisibles para siempre. */
-html.js .media{
-  opacity:0;transform:translateY(30px) scale(.985);
-  transition:opacity .7s cubic-bezier(.2,.7,.3,1), transform .8s cubic-bezier(.2,.7,.3,1);
-}
+   siempre, en vez de quedarse invisibles para siempre. Sin `transition`
+   propia a propósito: reveal.js anima opacity/transform con GSAP+ScrollTrigger
+   (ver DESIGN.md > Motion), y una transición CSS sobre las mismas propiedades
+   competiría con esa animación en vez de sustituirla. `.is-visible` solo
+   entra en juego en las alternativas sin GSAP o con menos movimiento, que
+   revelan de golpe con un cambio de clase. */
+html.js .media{opacity:0;transform:translateY(30px) scale(.985);}
 html.js .media.is-visible{opacity:1;transform:none;}
 
 @media (max-width: 860px){
@@ -216,7 +237,7 @@ html.js .media.is-visible{opacity:1;transform:none;}
 }
 
 @media (prefers-reduced-motion: reduce){
-  html.js .media{opacity:1;transform:none;transition:none;}
+  html.js .media{opacity:1;transform:none;}
 }
 
 .project-header{padding:5vh 0 3vh;}

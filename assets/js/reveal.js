@@ -1,75 +1,61 @@
-/* Aparición de las imágenes al entrar en pantalla.
+/* Aparición de las imágenes al entrar en pantalla, sobre ScrollTrigger.
  *
  * El estado oculto lo pone el CSS bajo `html.js`, así que si este script no
  * llega a ejecutarse las imágenes se ven igual (ver site.css). Aquí solo se
- * marca cada una como visible cuando asoma por el viewport.
+ * anima la entrada de cada una cuando asoma por el viewport.
  */
 (function () {
   'use strict';
 
-  var pending = [].slice.call(document.querySelectorAll('.media'));
-  if (!pending.length) return;
-
-  function reveal(el) {
-    el.classList.add('is-visible');
-    var i = pending.indexOf(el);
-    if (i > -1) pending.splice(i, 1);
-  }
+  var els = [].slice.call(document.querySelectorAll('.media'));
+  if (!els.length) return;
 
   function revealAll() {
-    while (pending.length) reveal(pending[0]);
+    els.forEach(function (el) { el.classList.add('is-visible'); });
   }
 
-  // Sin IntersectionObserver, o si se pide menos movimiento, se muestran ya.
-  if (!('IntersectionObserver' in window) ||
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  var M = window.Motion;
+
+  // Sin Motion.js (el CDN de GSAP no respondió), o si se pide menos
+  // movimiento, se muestran ya: el sitio nunca deja una imagen invisible
+  // esperando a una librería que no ha llegado.
+  if (!M || !M.ready || M.reduced) {
     revealAll();
     return;
   }
 
-  var io = new IntersectionObserver(function (entries) {
-    for (var i = 0; i < entries.length; i++) {
-      if (!entries[i].isIntersecting) continue;
-      io.unobserve(entries[i].target);
-      reveal(entries[i].target);
-    }
-  }, {
-    // Se dispara un poco antes de que la imagen llegue al borde inferior, para
-    // que el movimiento acompañe al scroll en vez de ir por detrás.
-    rootMargin: '0px 0px -10% 0px',
-    threshold: 0.05
-  });
-
-  for (var i = 0; i < pending.length; i++) io.observe(pending[i]);
-
-  /* Red de seguridad. El observador solo avisa cuando algo ENTRA en pantalla,
-   * y hay saltos en los que una imagen pasa de estar por debajo a estar por
-   * encima sin llegar a asomar: recargar a media página (el navegador restaura
-   * el scroll después de montar el observador), o abrir la página con un ancla.
-   * Esas imágenes se quedarían invisibles para siempre, así que lo que ya ha
-   * quedado atrás se da por visto. */
-  var queued = false;
-
-  function sweepAbove() {
-    queued = false;
-    for (var i = pending.length - 1; i >= 0; i--) {
-      if (pending[i].getBoundingClientRect().bottom < 0) {
-        io.unobserve(pending[i]);
-        reveal(pending[i]);
-      }
-    }
-    if (!pending.length) {
-      window.removeEventListener('scroll', onScroll);
-      io.disconnect();
-    }
+  /* Los triggers se crean con `once:true`: si se calculan contra un
+   * documento que todavía no ha asentado su alto real (fuentes servidas con
+   * `display=swap`, imágenes `loading="lazy"` con su hueco reservado pero el
+   * layout aún recalculando), pueden darse por "ya cruzados" antes de
+   * tiempo, disparar la animación de golpe y autodestruirse — un refresh
+   * posterior no revive un trigger `once` que ya se mató. Por eso se espera
+   * a que carguen los recursos de la página Y las fuentes antes de crear
+   * ninguno, en vez de crearlos ya y corregirlos después. */
+  function createTriggers() {
+    els.forEach(function (el) {
+      gsap.to(el, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: M.dur.enter,
+        ease: M.ease.enter,
+        scrollTrigger: {
+          trigger: el,
+          // Se dispara un poco antes de que la imagen llegue al borde
+          // inferior, para que el movimiento acompañe al scroll en vez de
+          // ir por detrás.
+          start: 'top 88%',
+          once: true
+        }
+      });
+    });
   }
 
-  function onScroll() {
-    if (queued) return;
-    queued = true;
-    requestAnimationFrame(sweepAbove);
-  }
+  var loaded = document.readyState === 'complete'
+    ? Promise.resolve()
+    : new Promise(function (resolve) { window.addEventListener('load', resolve); });
+  var fontsReady = (document.fonts && document.fonts.ready) || Promise.resolve();
 
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('load', sweepAbove);
+  Promise.all([loaded, fontsReady]).then(createTriggers);
 })();
