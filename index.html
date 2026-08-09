@@ -38,13 +38,12 @@
 <!-- Marca puesta por la página anterior: si venimos de una transición, entrar
      tapados. Va inline y en el <head> porque tiene que correr antes del primer
      pintado; si falla, simplemente no hay panel. -->
-<script>document.documentElement.className+=' js';try{if(sessionStorage.getItem('pt-nav')){sessionStorage.removeItem('pt-nav');document.documentElement.className+=' pt-cover';}}catch(e){}</script>
+<script>document.documentElement.className+=' js';</script>
 <!-- Cimientos de motion (ticket #39): GSAP 3.13 + Lenis por CDN, sin build.
      `defer` en todo el bloque, en orden: los navegadores ejecutan los
      scripts `defer` en el orden del documento tras el parseo, así que no
      hace falta bloquear el pintado para garantizar que GSAP/Lenis estén
-     listos antes de motion.js, y motion.js antes de page-transition.js y
-     reveal.js. -->
+     listos antes de motion.js, y motion.js antes de reveal.js. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.css">
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js" defer></script>
@@ -52,7 +51,6 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/TextPlugin.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js" defer></script>
 <script src="./assets/js/motion.js" defer></script>
-<script src="./assets/js/page-transition.js" defer></script>
 <script src="./assets/js/reveal.js" defer></script>
 <!-- Solo en la home: la secuencia de saludos de la entrada (ticket #40). -->
 <script src="./assets/js/entry.js" defer></script>
@@ -85,10 +83,38 @@
     font-size:12vw;line-height:1;
     opacity:0;visibility:hidden;
   }
-  /* Indicador de carga: el mismo spinner de seis celdas que la transición
-     entre páginas (site.css > #pt), para que "esto está cargando" se lea
-     igual la primera vez que en cualquier otra transición del sitio. */
+  /* Indicador de carga: una rejilla de seis celdas cuyos puntos se encienden
+     por turnos. Venía de `.pt-spinner` en site.css, del panel de transición
+     entre páginas; el ticket #42 sustituyó ese panel por View Transitions
+     nativas y se llevó su CSS por delante, así que el spinner vive ahora
+     aquí — es el único sitio del sitio que lo usa. */
   .entry-loading{position:absolute;left:50%;bottom:8vh;transform:translateX(-50%);}
+  .entry-spinner{
+    display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);
+    width:54px;height:36px;
+  }
+  .entry-spinner span{
+    display:grid;place-items:center;
+    border-right:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+  }
+  .entry-spinner span:nth-child(3n){border-right:none;}
+  .entry-spinner span:nth-child(n+4){border-bottom:none;}
+  .entry-spinner span::before{
+    content:"";width:5px;height:5px;border-radius:50%;background:var(--ink);
+    opacity:.2;transform:scale(.65);
+    animation:entry-blink 1.15s ease-in-out infinite;
+  }
+  .entry-spinner span:nth-child(1)::before{animation-delay:0s;}
+  .entry-spinner span:nth-child(2)::before{animation-delay:.1s;}
+  .entry-spinner span:nth-child(3)::before{animation-delay:.2s;}
+  .entry-spinner span:nth-child(4)::before{animation-delay:.3s;}
+  .entry-spinner span:nth-child(5)::before{animation-delay:.4s;}
+  .entry-spinner span:nth-child(6)::before{animation-delay:.5s;}
+  @keyframes entry-blink{
+    0%,65%,100%{opacity:.2;transform:scale(.65);}
+    22%{opacity:1;transform:scale(1);}
+  }
 
   /* El naming vuela hasta el wordmark real del nav al terminar la entrada.
      `.entry` recorta con `overflow:hidden` (para que el colapso de altura
@@ -136,156 +162,133 @@
   /* La info del hero aparece con la llegada del naming, no está ya ahí
      esperando a que se descubra — solo cuando la entrada corre de verdad. */
   html.js-entry .hero-eyebrow,
-  html.js-entry .hero-grid{opacity:0;}
+  html.js-entry .project-index{opacity:0;}
 
   @media (prefers-reduced-motion: reduce){
     .entry{display:none !important;}
   }
 
   .hero{
-    background:var(--hero-bg,var(--bg));min-height:78vh;position:relative;overflow:hidden;
-    display:flex;align-items:flex-end;padding:0 6vw 2.4rem;
-    transition:background-color .55s cubic-bezier(.4,0,.2,1);
-  }
-  @media (hover:hover) and (pointer:fine){ .hero{cursor:none;} }
-
-  /* ---------- capa de distorsión: mancha de ruido borroso (rollo shader) que sigue al cursor ---------- */
-  .hero-distort{
-    position:absolute;width:420px;height:420px;left:0;top:0;pointer-events:none;z-index:0;
-    transform:translate3d(-9999px,-9999px,0);
-    filter:url(#hero-distort-filter);
-    -webkit-mask-image: radial-gradient(circle, black 0%, transparent 68%);
-    mask-image: radial-gradient(circle, black 0%, transparent 68%);
-    opacity:.55;
-  }
-
-  /* ---------- nombres de proyecto: uno por celda, apilados en el mismo sitio ---------- */
-  .hero-titles{
-    position:absolute;inset:0;display:grid;place-items:center;
-    pointer-events:none;z-index:1;padding:0 4vw;
-  }
-  /* Antes llegaba a 8rem/128px sin techo real (9.5vw se dispara en monitores
-     grandes); el ticket #38 lo trae bajo el límite de 6rem/96px de impeccable
-     incluso en el --sz más ancho (1.15), multiplicando el paso --fs-display
-     de la escala en vez de un clamp() suelto propio de este elemento. */
-  .hero-title{
-    grid-area:1/1;white-space:nowrap;line-height:var(--lh-display);color:var(--ink);
-    font-size:calc(var(--fs-display) * var(--sz,1));
-    opacity:0;transform:translateY(30px);
-    transition:opacity .34s ease, transform .52s cubic-bezier(.2,.7,.3,1);
-  }
-  /* El filtro solo se engancha a la pieza visible: mantenerlo siempre activo
-     obligaría al navegador a recalcular el desplazamiento de 6 titulares. */
-  .hero-title.is-on{opacity:1;transform:translateY(0);filter:url(#liquid-warp);}
-
-  /* ---------- rejilla: 6 celdas, cada una un destino ---------- */
-  .hero-grid{
-    position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
-    width:min(62vw,720px);aspect-ratio:3/2;max-height:60vh;z-index:2;
-    display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);
-  }
-  .grid-cell{position:relative;display:block;}
-  /* El área clicable se queda quieta y lo que se desplaza es el interior: si
-     moviéramos la propia celda, se escaparía del cursor y el hover parpadearía. */
-  .cell-inner{
-    position:absolute;inset:0;display:grid;place-items:center;
-    border:1px solid var(--line);
-    transform:translate(var(--cx,0px),var(--cy,0px));
-    transition:transform .18s ease-out, background-color .28s ease, border-color .28s ease;
-    will-change:transform;
-  }
-  .cell-dot{
-    width:7px;height:7px;border-radius:50%;background:var(--ink);
-    transition:opacity .2s ease, transform .2s ease;
-  }
-  .cell-arrow{
-    position:absolute;width:46px;height:46px;border-radius:50%;border:1px solid var(--ink);
-    display:grid;place-items:center;font-size:1.05rem;
-    opacity:0;transform:scale(.78);
-    transition:opacity .24s ease, transform .34s cubic-bezier(.2,.7,.3,1);
-  }
-  /* La celda activa se eleva dos pasos de superficie en vez de saltar a un
-     chip casi blanco: el hueso del icono se queda legible en las dos fases,
-     sin que el propio hover apague el fondo oscuro del hero. */
-  .grid-cell:hover .cell-inner,
-  .grid-cell:focus-visible .cell-inner{background:var(--surface2);border-color:transparent;}
-  .grid-cell:hover .cell-dot,
-  .grid-cell:focus-visible .cell-dot{opacity:0;transform:scale(.4);}
-  .grid-cell:hover .cell-arrow,
-  .grid-cell:focus-visible .cell-arrow{opacity:1;transform:scale(1);}
-  .grid-cell:focus{outline:none;}
-  .grid-cell:focus-visible .cell-inner{outline:2px solid var(--ink);outline-offset:-2px;}
-
-  .cell-label{display:none;}
-
-  /* Sin hover (móvil/táctil) no hay forma de descubrir los nombres, así que
-     cada celda los lleva escritos y los titulares grandes sobran. Se incluye
-     el ancho porque hay navegadores que declaran hover aunque sean táctiles,
-     y con la rejilla pequeña las celdas quedan por debajo del tamaño mínimo
-     para tocarlas con el dedo. */
-  @media (hover:none), (max-width: 760px){
-    .hero-titles{display:none;}
-    .cell-dot, .cell-arrow{display:none;}
-    .cell-label{
-      display:block;text-align:center;padding:.4rem;line-height:1.1;
-      font-size:clamp(.72rem,2.6vw,.95rem);
-    }
-    .hero-grid{width:88vw;top:44%;}
+    background:var(--bg);min-height:100vh;position:relative;overflow:hidden;
+    display:flex;flex-direction:column;justify-content:center;gap:3.5vh;
+    padding:9rem 6vw 4rem;
   }
 
   .hero-eyebrow{font-size:var(--fs-small);letter-spacing:.08em;line-height:var(--lh-small);position:relative;z-index:3;}
+
+  /* ---------- el índice: 5 proyectos, imagen a sangre detrás del que se apunta ----------
+     Sustituye a la rejilla de 6 celdas (ticket #6): con una foto real detrás,
+     la distorsión líquida del titular no tenía sitio claro y se retiró con
+     ella. El cursor a medida (#cursor-dot) sigue en pie, es independiente.
+     Ver DESIGN.md > Layout. */
+  .hero-preview{position:absolute;inset:0;z-index:0;}
+  .hero-preview-img{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    opacity:0;transition:opacity .7s cubic-bezier(.2,.7,.3,1);
+  }
+  /* view-transition-name solo en la foto activa, nunca en varias a la vez
+     (dos elementos con el mismo nombre en un documento invalida la
+     transición entera): al ser `.is-on` un estado exclusivo que ya
+     controla el JS de arriba, esta regla no necesita tocarlo. Ver
+     site.css > Transiciones de página para el otro lado del emparejamiento. */
+  .hero-preview-img.is-on{opacity:.5;view-transition-name:project-cover;}
+  /* Sin este velo, una foto clara detrás le quita legibilidad al índice —
+     más fuerte a la izquierda (donde vive el texto) que a la derecha. */
+  .hero-preview::after{
+    content:"";position:absolute;inset:0;
+    background:
+      linear-gradient(90deg, var(--bg) 0%, rgba(32,25,21,.55) 45%, rgba(32,25,21,.3) 100%),
+      linear-gradient(to top, var(--bg) 0%, transparent 35%);
+  }
+
+  .project-index{position:relative;z-index:1;width:100%;max-width:1040px;}
+  .index-item{
+    display:flex;align-items:baseline;gap:1.6rem;padding:1.3rem 0;
+    border-top:1px solid var(--line);text-decoration:none;color:var(--ink);
+  }
+  .index-item:last-child{border-bottom:1px solid var(--line);}
+  .index-num{font-size:var(--fs-small);opacity:.5;font-variant-numeric:tabular-nums;flex:0 0 2.4ch;}
+  .index-name{
+    font-family:var(--f);font-weight:500;font-stretch:120%;
+    font-size:clamp(2.1rem,6vw,4.2rem);line-height:1;
+    transition:opacity .3s ease;
+  }
+  .index-meta{
+    margin-left:auto;display:flex;align-items:center;gap:.9rem;
+    font-size:var(--fs-small);opacity:.6;white-space:nowrap;align-self:center;
+  }
+  .index-lock{
+    display:inline-flex;align-items:center;gap:.4em;font-size:var(--fs-micro);
+    border:1px solid var(--line);padding:4px 10px;border-radius:999px;opacity:.85;
+  }
+
+  /* ---------- coreografía de salida hacia la página de proyecto (ticket #42) ----------
+     Los ítems salen hacia arriba en cascada corta y el eyebrow barre con
+     ellos, mientras la foto (project-cover, en site.css) se queda quieta y
+     se convierte en la de la página nueva. Solo hace falta el lado "old":
+     las páginas de proyecto no tienen índice con el que emparejar una
+     entrada, así que al volver estos nombres reaparecen solos, sin salida
+     previa que deshacer — la propia asimetría del old/new ya da "la vuelta
+     es el espejo exacto" sin escribirlo dos veces. */
+  .hero-eyebrow{view-transition-name:hero-eyebrow;}
+  .index-item:nth-child(1){view-transition-name:index-item-1;}
+  .index-item:nth-child(2){view-transition-name:index-item-2;}
+  .index-item:nth-child(3){view-transition-name:index-item-3;}
+  .index-item:nth-child(4){view-transition-name:index-item-4;}
+  .index-item:nth-child(5){view-transition-name:index-item-5;}
+
+  @keyframes index-exit{ to{transform:translateY(-2.5rem);opacity:0;} }
+  @keyframes index-enter{ from{transform:translateY(-2.5rem);opacity:0;} }
+
+  ::view-transition-old(hero-eyebrow){animation:.32s var(--ease-move) both index-exit;}
+  ::view-transition-new(hero-eyebrow){animation:.4s var(--ease-move) .1s both index-enter;}
+
+  ::view-transition-old(index-item-1){animation:.32s var(--ease-move) both index-exit;}
+  ::view-transition-old(index-item-2){animation:.32s var(--ease-move) .04s both index-exit;}
+  ::view-transition-old(index-item-3){animation:.32s var(--ease-move) .08s both index-exit;}
+  ::view-transition-old(index-item-4){animation:.32s var(--ease-move) .12s both index-exit;}
+  ::view-transition-old(index-item-5){animation:.32s var(--ease-move) .16s both index-exit;}
+
+  /* La entrada rebobina el mismo gesto: el último en salir es el primero en volver. */
+  ::view-transition-new(index-item-5){animation:.4s var(--ease-move) both index-enter;}
+  ::view-transition-new(index-item-4){animation:.4s var(--ease-move) .04s both index-enter;}
+  ::view-transition-new(index-item-3){animation:.4s var(--ease-move) .08s both index-enter;}
+  ::view-transition-new(index-item-2){animation:.4s var(--ease-move) .12s both index-enter;}
+  ::view-transition-new(index-item-1){animation:.4s var(--ease-move) .16s both index-enter;}
+  /* Oculta en escritorio (ahí la foto es la de sangre, en .hero-preview);
+     es la respuesta a "no puede ser que en móvil no se vean las imágenes". */
+  .index-thumb{display:none;}
+
+  @media (hover:hover) and (pointer:fine){
+    .hero{cursor:none;}
+    .index-item:hover .index-name, .index-item:focus-visible .index-name{font-style:italic;}
+    .project-index:has(.index-item:hover) .index-item:not(:hover) .index-name,
+    .project-index:has(.index-item:hover) .index-item:not(:hover) .index-meta{opacity:.32;}
+    .index-item:focus-visible{outline:none;}
+    .index-item:focus-visible .index-name{text-decoration:underline;text-underline-offset:.15em;}
+  }
+
+  /* Sin hover no hay forma de descubrir las fotos a sangre, así que cada
+     ítem lleva su propia miniatura fija en su lugar. */
+  @media (hover:none), (max-width:760px){
+    .hero-preview{display:none;}
+    .hero{padding:7rem 6vw 3rem;min-height:auto;}
+    .index-item{flex-wrap:wrap;align-items:center;}
+    .index-thumb{
+      display:block;width:56px;height:56px;object-fit:cover;border-radius:4px;
+      order:1;
+    }
+    .index-num{order:0;}
+    .index-name{order:2;font-size:clamp(1.4rem,7vw,2rem);}
+    .index-item.is-locked .index-thumb{filter:blur(5px) saturate(.9);}
+    .index-meta{margin-left:0;flex:1 0 100%;order:3;}
+  }
 
   /* ---------- cursor a medida: bolita de 24px que invierte lo que tiene detrás ---------- */
   #cursor-dot{
     position:fixed;top:0;left:0;width:24px;height:24px;border-radius:50%;background:#fff;
     mix-blend-mode:difference;pointer-events:none;z-index:9999;opacity:0;
     transform:translate3d(-100px,-100px,0);
-  }
-
-  /* ---------- índice de proyectos: filas alternadas con imagen de producto ---------- */
-  .works-section{padding:8vh 6vw;}
-  .works{display:flex;flex-direction:column;gap:6vh;margin-top:2.5rem;}
-  .work-row{display:flex;align-items:center;gap:4vw;}
-  .work-row:nth-child(even){flex-direction:row-reverse;}
-  .work-text{flex:0 0 34%;}
-  .work-row h3{
-    font-family:var(--f);font-weight:500;font-stretch:112%;
-    font-size:var(--fs-h2);line-height:var(--lh-h2);margin:0 0 .8rem;
-  }
-  .work-row .work-tagline{font-size:var(--fs-body);line-height:var(--lh-body);opacity:.72;margin:0 0 1.2rem;max-width:32ch;}
-  .arrow{
-    width:42px;height:42px;border-radius:50%;border:1px solid var(--ink);display:flex;
-    align-items:center;justify-content:center;font-size:1.1rem;transition:background .2s ease, color .2s ease;
-  }
-  .work-row:hover .arrow{background:var(--ink);color:var(--bg);}
-  .lockbadge{
-    display:inline-flex;align-items:center;gap:.4em;font-size:var(--fs-small);border:1px solid var(--line);
-    padding:6px 12px;border-radius:999px;opacity:.75;
-  }
-
-  /* El tono por proyecto (--tone1) queda de fondo del panel: si la imagen no cubre,
-     el hueco mezcla con la paleta en vez de quedar en blanco. */
-  .work-media{
-    flex:1;position:relative;overflow:hidden;border-radius:4px;
-    background:var(--tone1,#e8b7a4);aspect-ratio:16/9;
-  }
-  .work-media img{
-    width:100%;height:100%;object-fit:cover;display:block;
-    transition:transform .5s cubic-bezier(.2,.7,.3,1);
-  }
-  .work-row:hover .work-media img{transform:scale(1.03);}
-
-  /* Proyectos bajo NDA: se ve la portada real difuminada, con una etiqueta que
-     explica por qué. El desbloqueo ocurre en la página del proyecto, no aquí. */
-  .work-media.is-locked img{filter:blur(11px) saturate(.9);transform:scale(1.15);}
-  .work-row:hover .work-media.is-locked img{transform:scale(1.17);}
-  .work-media.is-locked::after{content:"";position:absolute;inset:0;background:rgba(28,27,25,.14);}
-  .locked-tag{
-    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;
-    display:inline-flex;align-items:center;gap:.45em;white-space:nowrap;
-    background:var(--ink);color:var(--bg);
-    font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;
-    padding:10px 18px;border-radius:999px;
   }
 
   /* ---------- sobre mí ---------- */
@@ -323,9 +326,6 @@
   .method p:last-child{margin-bottom:0;}
 
   @media (max-width: 760px){
-    .work-row, .work-row:nth-child(even){flex-direction:column;align-items:flex-start;gap:1.5rem;}
-    .work-text{flex:none;}
-    .work-media{width:100%;}
     .about-top{flex-direction:column;}
     .about-portrait{flex:none;width:100%;max-width:320px;}
     .about-cols{flex-direction:column;gap:3rem;}
@@ -333,13 +333,7 @@
   }
 
   @media (prefers-reduced-motion: reduce){
-    .cell-inner{transition:background-color .28s ease;}
-    .hero-distort{display:none;}
-    /* Sin el filtro los nombres siguen apareciendo; lo que se va es el temblor. */
-    .hero-title{transition:opacity .25s ease;transform:none;}
-    .hero-title.is-on{transform:none;filter:none;}
-    .work-media img, .work-row:hover .work-media img{transition:none;transform:none;}
-    .work-media.is-locked img, .work-row:hover .work-media.is-locked img{transform:scale(1.15);}
+    .hero-preview-img{transition:none;}
   }
 </style>
 </head>
@@ -364,25 +358,6 @@
     <path d="M150.912 17.7491C148.169 22.6397 145.811 27.7443 143.848 32.9948C143.293 34.4788 142.773 35.9752 142.284 37.4816C142.035 38.2506 142.575 39.2019 143.366 39.381C144.215 39.5741 145.004 39.1255 145.271 38.3024C146.116 35.7003 147.057 33.1291 148.098 30.5981C148.216 30.3093 148.337 30.0213 148.458 29.7341C148.554 29.5055 148.372 29.9333 148.47 29.7055C148.499 29.6391 148.527 29.5727 148.556 29.507C148.631 29.3302 148.707 29.1542 148.784 28.9781C149.052 28.362 149.326 27.7481 149.606 27.1366C150.175 25.8927 150.768 24.6596 151.386 23.4381C152.089 22.0452 152.824 20.6685 153.588 19.3072C153.984 18.6023 153.781 17.5892 153.032 17.1947C152.301 16.8101 151.335 16.9955 150.912 17.7491H150.912Z" fill="currentColor"/>
     <path d="M142.445 24.8463C146.752 28.7733 151.058 32.6996 155.365 36.6266C155.962 37.1718 156.972 37.2598 157.555 36.6266C158.102 36.0329 158.193 35.0252 157.555 34.4431C153.248 30.516 148.942 26.5897 144.635 22.6627C144.038 22.1176 143.028 22.0295 142.445 22.6627C141.898 23.2564 141.807 24.2641 142.445 24.8463Z" fill="currentColor"/>
   </symbol>
-
-  <filter id="hero-distort-filter" x="-20%" y="-20%" width="140%" height="140%">
-    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4" result="noise"/>
-    <feColorMatrix in="noise" type="saturate" values="0" result="grain"/>
-    <feComponentTransfer in="grain" result="softGrain">
-      <feFuncA type="linear" slope="0.5" intercept="0"/>
-    </feComponentTransfer>
-    <feFlood flood-color="#8C9C97" flood-opacity="1" result="tint"/>
-    <feComposite in="tint" in2="softGrain" operator="in" result="tintedGrain"/>
-    <feGaussianBlur in="tintedGrain" stdDeviation="7"/>
-  </filter>
-
-  <!-- Distorsión líquida de los titulares. El JS mueve `baseFrequency` y `scale`
-       según dónde esté el ratón, así la onda viaja con el cursor. -->
-  <filter id="liquid-warp" x="-35%" y="-35%" width="170%" height="170%" color-interpolation-filters="sRGB">
-    <feTurbulence id="liquid-turb" type="fractalNoise" baseFrequency="0.006 0.011" numOctaves="2" seed="3" result="warp"/>
-    <feDisplacementMap id="liquid-disp" in="SourceGraphic" in2="warp" scale="0" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-
 </svg>
 
 <div class="nav nav--home">
@@ -416,120 +391,62 @@
     </span>
   </div>
   <div class="entry-loading" aria-hidden="true">
-    <div class="pt-spinner"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="entry-spinner"><span></span><span></span><span></span><span></span><span></span><span></span></div>
   </div>
 </section>
 
-<div class="hero" id="hero">
-  <div class="hero-distort" id="hero-distort"></div>
+<div class="hero" id="trabajo">
+  <div class="hero-eyebrow">Product<br>Design &amp;<br>UX</div>
 
-  <div class="hero-titles" id="hero-titles" aria-hidden="true">
-    <span class="hero-title" style="font-family:'Bungee',sans-serif;--sz:.78">Manu Cardiel</span>
-    <span class="hero-title" style="font-family:'Anton',sans-serif;--sz:1.15;letter-spacing:-.01em">Adrenaline</span>
-    <span class="hero-title" style="font-family:'Bodoni Moda',serif;font-weight:700;--sz:1">Arabvision</span>
-    <span class="hero-title" style="font-family:'Unbounded',sans-serif;font-weight:700;--sz:.88">Nexahub</span>
-    <span class="hero-title" style="font-family:'Yeseva One',serif;--sz:.95">El Paraguas</span>
-    <span class="hero-title" style="font-family:'Fraunces',serif;font-style:italic;font-weight:500;--sz:1.1">Sobre mí</span>
+  <div class="hero-preview" id="hero-preview" aria-hidden="true">
+    <img class="hero-preview-img" data-idx="0" src="./assets/images/manu-cardiel/hero.jpg" alt="" />
+    <img class="hero-preview-img" data-idx="1" src="./assets/images/adrenaline/hero.jpg" alt="" />
+    <img class="hero-preview-img" data-idx="2" src="./assets/images/arabvision/hero.jpg" alt="" />
+    <img class="hero-preview-img" data-idx="3" src="./assets/images/nexahub/hero.jpg" alt="" />
+    <img class="hero-preview-img" data-idx="4" src="./assets/images/el-paraguas/hero.jpg" alt="" />
   </div>
 
-  <!-- El tono de cada celda mantiene el matiz que ya tenía (misma hue en
-       OKLCH), pero se oscurece a ~28% de luminosidad: en el MVP claro
-       funcionaba como pastel de fondo con texto oscuro encima; en el
-       sistema oscuro tiene que seguir siendo oscuro para que el hueso del
-       titular del hero no pierda contraste al pasar el ratón. -->
-  <nav class="hero-grid" id="hero-grid" aria-label="Índice del sitio">
-    <a class="grid-cell" href="./manu-cardiel.html" data-depth="1.4" data-tone="#3B2117">
-      <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">Manu Cardiel</span></span>
-      <span class="sr-only">Manu Cardiel</span>
+  <!-- Sustituye a la rejilla de 6 celdas (decidido en el ticket #41): un
+       índice numerado, con la foto del proyecto a sangre detrás del ítem que
+       se apunta en vez de una miniatura. "Sobre mí" ya no vive aquí — el nav
+       lo cubre — y el índice se queda enfocado solo en los 5 proyectos. Es
+       ya el único listado de proyectos de la home: el works-section que
+       repetía los mismos 5 en filas alternadas se retiró por duplicado. En
+       su lugar, cada ítem lleva su propia miniatura para móvil/táctil (ver
+       .index-thumb), que es donde antes recaía esa responsabilidad. -->
+  <nav class="project-index" id="project-index" aria-label="Índice de proyectos">
+    <a class="index-item" data-idx="0" href="./manu-cardiel.html">
+      <span class="index-num">01</span>
+      <img class="index-thumb" src="./assets/images/manu-cardiel/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
+      <span class="index-name">Manu Cardiel</span>
+      <span class="index-meta">Personal · 2024</span>
     </a>
-    <a class="grid-cell" href="./adrenaline.html" data-depth="0.7" data-tone="#252B1F">
-      <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">Adrenaline</span></span>
-      <span class="sr-only">Adrenaline</span>
+    <a class="index-item is-locked" data-idx="1" href="./adrenaline.html">
+      <span class="index-num">02</span>
+      <img class="index-thumb" src="./assets/images/adrenaline/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
+      <span class="index-name">Adrenaline</span>
+      <span class="index-meta">Cliente · 2023 <span class="index-lock">🔒 NDA</span></span>
     </a>
-    <a class="grid-cell" href="./arabvision.html" data-depth="1.4" data-tone="#102D35">
-      <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">Arabvision</span></span>
-      <span class="sr-only">Arabvision</span>
+    <a class="index-item is-locked" data-idx="2" href="./arabvision.html">
+      <span class="index-num">03</span>
+      <img class="index-thumb" src="./assets/images/arabvision/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
+      <span class="index-name">Arabvision</span>
+      <span class="index-meta">Cliente · 2023 <span class="index-lock">🔒 NDA</span></span>
     </a>
-    <a class="grid-cell" href="./nexahub.html" data-depth="0.7" data-tone="#33270C">
-      <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">Nexahub</span></span>
-      <span class="sr-only">Nexahub</span>
+    <a class="index-item is-locked" data-idx="3" href="./nexahub.html">
+      <span class="index-num">04</span>
+      <img class="index-thumb" src="./assets/images/nexahub/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
+      <span class="index-name">Nexahub</span>
+      <span class="index-meta">Cliente · 2022 <span class="index-lock">🔒 NDA</span></span>
     </a>
-    <a class="grid-cell" href="./el-paraguas.html" data-depth="1.4" data-tone="#122C3C">
-      <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">El Paraguas</span></span>
-      <span class="sr-only">El Paraguas</span>
-    </a>
-    <a class="grid-cell" href="#sobre-mi" data-depth="0.7" data-tone="#2F281D">
-      <span class="cell-inner"><span class="cell-dot"></span><span class="cell-arrow" aria-hidden="true">→</span><span class="cell-label">Sobre mí</span></span>
-      <span class="sr-only">Sobre mí</span>
+    <a class="index-item" data-idx="4" href="./el-paraguas.html">
+      <span class="index-num">05</span>
+      <img class="index-thumb" src="./assets/images/el-paraguas/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
+      <span class="index-name">El Paraguas</span>
+      <span class="index-meta">Bootcamp · 2021</span>
     </a>
   </nav>
-
-  <div class="hero-eyebrow">Product<br>Design &amp;<br>UX</div>
 </div>
-
-<section class="works-section" id="trabajo">
-  <span class="eyebrow">↳ Trabajo</span>
-  <div class="works">
-    <a class="work-row" href="./manu-cardiel.html" style="--tone1:#e8b7a4;--tone2:#f6f1e7">
-      <div class="work-text">
-        <span class="eyebrow">Personal · 2024</span>
-        <h3>Manu Cardiel</h3>
-        <p class="work-tagline">Exposición virtual del arte de Manu Cardiel, con un sistema propio para que él gestione el contenido.</p>
-        <div class="arrow">→</div>
-      </div>
-      <div class="work-media">
-        <img src="./assets/images/manu-cardiel/hero.jpg" width="1400" height="787" decoding="async" alt="Portátil mostrando la web de portfolio de arte urbano de Manu Cardiel" />
-      </div>
-    </a>
-    <a class="work-row" href="./adrenaline.html" style="--tone1:#cfd8c8;--tone2:#f6f1e7">
-      <div class="work-text">
-        <span class="eyebrow">Cliente · 2023</span>
-        <h3>Adrenaline</h3>
-        <p class="work-tagline">App deportiva whitelabel: estadísticas, TV en vivo y VOD para clientes premium.</p>
-        <span class="lockbadge">🔒 Privado — bajo NDA</span>
-      </div>
-      <div class="work-media is-locked">
-        <img src="./assets/images/adrenaline/hero.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Portada difuminada del proyecto Adrenaline, bloqueada por NDA" />
-        <span class="locked-tag">🔒 Bloqueado</span>
-      </div>
-    </a>
-    <a class="work-row" href="./arabvision.html" style="--tone1:#9fbfc9;--tone2:#f6f1e7">
-      <div class="work-text">
-        <span class="eyebrow">Cliente · 2023</span>
-        <h3>Arabvision</h3>
-        <p class="work-tagline">Streaming OTT para móvil y Android TV: Live TV y VOD en cualquier dispositivo.</p>
-        <span class="lockbadge">🔒 Privado — bajo NDA</span>
-      </div>
-      <div class="work-media is-locked">
-        <img src="./assets/images/arabvision/hero.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Portada difuminada del proyecto Arabvision, bloqueada por NDA" />
-        <span class="locked-tag">🔒 Bloqueado</span>
-      </div>
-    </a>
-    <a class="work-row" href="./nexahub.html" style="--tone1:#e3c98f;--tone2:#f6f1e7">
-      <div class="work-text">
-        <span class="eyebrow">Cliente · 2022</span>
-        <h3>Nexahub</h3>
-        <p class="work-tagline">CMS para que QA gestione tickets de JIRA sin fricción dentro del ecosistema Nexahub.</p>
-        <span class="lockbadge">🔒 Privado — bajo NDA</span>
-      </div>
-      <div class="work-media is-locked">
-        <img src="./assets/images/nexahub/hero.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Portada difuminada del proyecto Nexahub, bloqueada por NDA" />
-        <span class="locked-tag">🔒 Bloqueado</span>
-      </div>
-    </a>
-    <a class="work-row" href="./el-paraguas.html" style="--tone1:#a9c7dc;--tone2:#f6f1e7">
-      <div class="work-text">
-        <span class="eyebrow">Bootcamp · 2021</span>
-        <h3>El Paraguas</h3>
-        <p class="work-tagline">Una app de viajes para la nueva normalidad post-pandemia: guías, en cualquier momento.</p>
-        <div class="arrow">→</div>
-      </div>
-      <div class="work-media">
-        <img src="./assets/images/el-paraguas/hero.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Smartphone mostrando la app de viajes El Paraguas" />
-      </div>
-    </a>
-  </div>
-</section>
 
 <section class="about" id="sobre-mi">
   <span class="eyebrow">↳ Sobre mí</span>
@@ -612,100 +529,19 @@
 <div id="cursor-dot"></div>
 
 <script>
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const hero = document.getElementById('hero');
-  const heroDistort = document.getElementById('hero-distort');
-  const cells = Array.from(document.querySelectorAll('.grid-cell'));
-  const titles = Array.from(document.querySelectorAll('.hero-title'));
   const cursorDot = document.getElementById('cursor-dot');
   const finePointer = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
 
-  // Amplitud contenida a propósito: lo que se mueve es el interior de la celda,
-  // no su área clicable, pero pasarse haría que el borde se despegue del cursor.
-  const AMP = 13; // px máximo de desplazamiento para el depth=1
-
-  const SHADER_SIZE = 420;
-
-  // Posición del ratón dentro del hero, en 0..1. La usan tanto el parallax como
-  // el shader de los titulares.
-  let mouseNX = 0.5, mouseNY = 0.5;
-
-  function onHeroMove(e){
-    const r = hero.getBoundingClientRect();
-    const mx = e.clientX - r.left;
-    const my = e.clientY - r.top;
-    mouseNX = mx / r.width;
-    mouseNY = my / r.height;
-
-    if (!reduceMotion){
-      const px = mouseNX - 0.5;
-      const py = mouseNY - 0.5;
-      cells.forEach(cell => {
-        const depth = parseFloat(cell.dataset.depth);
-        const inner = cell.firstElementChild;
-        inner.style.setProperty('--cx', (px * AMP * depth) + 'px');
-        inner.style.setProperty('--cy', (py * AMP * depth) + 'px');
-      });
-      heroDistort.style.transform =
-        `translate3d(${mx - SHADER_SIZE / 2}px, ${my - SHADER_SIZE / 2}px, 0)`;
-    }
-  }
-  hero.addEventListener('mousemove', onHeroMove);
-  hero.addEventListener('mouseleave', () => {
-    heroDistort.style.transform = 'translate3d(-9999px,-9999px,0)';
+  /* ---------- índice de proyectos: la foto del ítem apuntado, a sangre detrás ---------- */
+  document.querySelectorAll('.index-item').forEach((item) => {
+    const img = document.querySelector(`.hero-preview-img[data-idx="${item.dataset.idx}"]`);
+    const on = () => img.classList.add('is-on');
+    const off = () => img.classList.remove('is-on');
+    item.addEventListener('mouseenter', on);
+    item.addEventListener('mouseleave', off);
+    item.addEventListener('focus', on);
+    item.addEventListener('blur', off);
   });
-
-  /* ---------- hover de celda: fondo del hero + nombre del proyecto ---------- */
-
-  const turb = document.getElementById('liquid-turb');
-  const disp = document.getElementById('liquid-disp');
-  let activeIndex = -1;
-  let warpFrame = null;
-
-  // El desplazamiento arranca fuerte y se asienta: la letra "cuaja" al entrar
-  // en vez de quedarse temblando de forma constante.
-  let warpEnergy = 0;
-
-  function warpLoop(){
-    warpEnergy += (1 - warpEnergy) * 0.06;       // se asienta en ~0,8 s
-    const settle = 1 - warpEnergy;               // 1 al entrar -> 0 al reposar
-    // El nombre tiene que seguir leyéndose una vez asentado, así que el chapuzón
-    // inicial es fuerte pero el reposo se queda en una ondulación suave.
-    const band = 1 - Math.min(1, Math.abs(mouseNY - 0.5) * 2);
-    const scale = 5 + settle * 20 + band * 9;
-    // Las ondas se estiran o comprimen según dónde esté el cursor, así el
-    // líquido parece venir de donde está el ratón.
-    const fx = (0.004 + mouseNX * 0.010).toFixed(4);
-    const fy = (0.006 + mouseNY * 0.014).toFixed(4);
-    turb.setAttribute('baseFrequency', fx + ' ' + fy);
-    disp.setAttribute('scale', scale.toFixed(1));
-    warpFrame = requestAnimationFrame(warpLoop);
-  }
-
-  function activate(i){
-    if (i === activeIndex) return;
-    activeIndex = i;
-    titles.forEach((t, n) => t.classList.toggle('is-on', n === i));
-
-    if (i === -1){
-      hero.style.removeProperty('--hero-bg');
-      if (warpFrame){ cancelAnimationFrame(warpFrame); warpFrame = null; }
-      disp.setAttribute('scale', '0');
-      return;
-    }
-
-    hero.style.setProperty('--hero-bg', cells[i].dataset.tone);
-    if (reduceMotion) return;
-    warpEnergy = 0;
-    if (!warpFrame) warpFrame = requestAnimationFrame(warpLoop);
-  }
-
-  cells.forEach((cell, i) => {
-    cell.addEventListener('mouseenter', () => activate(i));
-    cell.addEventListener('focus', () => activate(i));
-    cell.addEventListener('blur', () => activate(-1));
-  });
-  document.getElementById('hero-grid').addEventListener('mouseleave', () => activate(-1));
 
   if (finePointer){
     document.addEventListener('mousemove', (e) => {

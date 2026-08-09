@@ -114,7 +114,7 @@
       // son el mismo movimiento, no dos pasos distintos.
       .to(naming, { x: flyDX, y: flyDY, scale: flyScale, duration: 0.6, ease: M.ease.move }, 'pausa')
       .to(entry, { height: 0, duration: 0.6, ease: M.ease.move }, 'pausa')
-      .to(['.hero-eyebrow', '.hero-grid'], { opacity: 1, duration: 0.5, ease: M.ease.enter }, 'pausa+=0.15')
+      .to(['.hero-eyebrow', '.project-index'], { opacity: 1, duration: 0.5, ease: M.ease.enter }, 'pausa+=0.15')
       // El scroll y los enlaces del nav vuelven a la vida a mitad del vuelo,
       // pero el wordmark real sigue oculto (`html.naming-flying`): el único
       // logo pintado en pantalla sigue siendo el volador.
