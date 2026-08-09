@@ -207,11 +207,46 @@ principio a fin.
 
 ## Layout
 
-**Pendiente** — la fija el ticket
-[#41](https://github.com/i-casaca/portfolio-test-migration/issues/41).
+Decidido en el ticket
+[El índice de proyectos y su preview a sangre](https://github.com/i-casaca/portfolio-test-migration/issues/41),
+sobre un prototipo real ([`.scratch/prototype-41-indice.html`](.scratch/prototype-41-indice.html))
+con las fotos de proyecto ya en `assets/images/`.
 
-Lo que hay hoy y sobrevive hasta entonces: contenedor `min(88vw, 1440px)` centrado, alineado con el
-gutter del nav (6vw), y medida de texto controlada por párrafo, no por contenedor.
+Contenedor general: `min(88vw, 1440px)` centrado, alineado con el gutter del nav (6vw), medida de
+texto controlada por párrafo, no por contenedor.
+
+### El índice de proyectos
+
+Sustituye a la rejilla interactiva de 6 celdas que ocupaba el hero de la home. Es una lista
+numerada (`01`–`05`), un ítem por proyecto: número, nombre a gran tamaño, y categoría/año alineados
+a la derecha. Al pasar el cursor o dar foco a un ítem, la foto de ese proyecto (`hero.jpg`) aparece
+**a sangre, ocupando todo el hero, detrás de la lista**, a un 50% de opacidad con un velo en
+gradiente (más fuerte a la izquierda, donde vive el texto) para que el índice y la meta se sigan
+leyendo encima. El ítem apuntado pasa a cursiva; el resto baja a 0,32 de opacidad — todo con
+`:has()`, sin JavaScript de por medio salvo para decidir qué foto encender.
+
+**Sin hover**: superficie oscura lisa, sin foto — no hay un proyecto "por defecto" que insinuar.
+
+**Solo 5 proyectos, no 6.** "Sobre mí" ya no vive en este índice — el nav ya enlaza a esa sección, y
+el ticket lo pedía enfocado solo en los proyectos.
+
+**El `works-section` (filas alternadas con foto) se retiró.** Vivió una primera vuelta como listado
+secundario debajo del índice, pero al verlo en vivo repetía los mismos 5 proyectos dos veces en la
+misma página — decisión revertida en cuanto se vio construida, que es exactamente para lo que sirve
+un prototipo real. El índice de arriba es ahora el único listado de proyectos de la home, y
+`#trabajo` (el ancla del nav) apunta directamente al hero.
+
+Sin el works-section como respaldo, el requisito de "que no puede ser 'no se ven las imágenes' en
+móvil" recae en el propio índice: cada `.index-item` lleva una miniatura fija (`.index-thumb`,
+56×56px) junto al número, oculta en escritorio (ahí la foto es la de sangre) y visible solo bajo
+`(hover:none), (max-width:760px)`. Los 3 proyectos con NDA la llevan difuminada (`blur(5px)`), el
+mismo lenguaje visual que ya usaba el `work-media.is-locked` retirado.
+
+**Los 3 proyectos con NDA** llevan su candado (`🔒 NDA`) como una etiqueta más dentro de la línea de
+meta, no como una marca aparte que rompa el ritmo de la lista.
+
+**Se retiró con la rejilla**: la distorsión líquida del titular (ticket #6) no tenía un sitio claro
+con una fotografía real detrás — el cursor a medida (el punto de 24px) es independiente y se queda.
 
 ## Motion
 
@@ -335,11 +370,11 @@ en un orden que el visitante recorre— y la numeración es voz de marca, no rel
 para la navegación numerada que acompaña al índice: numera los mismos elementos, en el mismo orden,
 y sirve para saber por dónde vas. **Las dos se quedan.**
 
-Ninguna de las dos existe todavía: hoy la home lleva una rejilla de seis celdas con etiqueta y sin
-números. Las construye el ticket
-[#41](https://github.com/i-casaca/portfolio-test-migration/issues/41). Esta excepción se escribe
-por adelantado a propósito — si no está puesta antes, la primera pasada del skill que las vea las
-tratará como andamiaje y las quitará.
+Construidas en el ticket
+[El índice de proyectos y su preview a sangre](https://github.com/i-casaca/portfolio-test-migration/issues/41)
+(ver [Layout](#layout)), sustituyendo a la rejilla de seis celdas que llevaba la home antes. Esta
+excepción quedó escrita antes de construirlas a propósito — si no estuviera puesta, la primera
+pasada del skill que las vea las trataría como andamiaje y las quitaría.
 
 ### 2. El hueso como tinta, no como superficie
 

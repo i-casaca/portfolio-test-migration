@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Prototipo #41 — Índice de proyectos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wdth,wght@25..151,100..1000&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/site.css">
+<style>
+  body{ padding: 0; }
+  .proto-note{
+    position:fixed; top:0; left:0; right:0; z-index:20; padding:.5rem 1rem;
+    background:#c0392b; color:#fff; font:12px/1.4 monospace; text-align:center;
+  }
+
+  /* ---------- el hero nuevo: índice numerado + preview a sangre ---------- */
+  .hero{
+    background:var(--bg); min-height:100vh; position:relative; overflow:hidden;
+    display:flex; align-items:center; padding:6rem 6vw 4rem;
+  }
+
+  .hero-preview{ position:absolute; inset:0; z-index:0; }
+  .hero-preview-img{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    opacity:0; transition:opacity .7s cubic-bezier(.2,.7,.3,1);
+  }
+  .hero-preview-img.is-on{ opacity:.5; }
+  /* Sin este velo, una foto clara detrás del índice le quita legibilidad al
+     texto, sobre todo a la meta pequeña. Sube hacia --bg desde abajo, más
+     fuerte donde no hay lista (izquierda) que donde sí (derecha), así el
+     candado y los años se leen igual con o sin imagen detrás. */
+  .hero-preview::after{
+    content:""; position:absolute; inset:0;
+    background:
+      linear-gradient(90deg, var(--bg) 0%, rgba(32,25,21,.55) 45%, rgba(32,25,21,.3) 100%),
+      linear-gradient(to top, var(--bg) 0%, transparent 35%);
+  }
+
+  .project-index{ position:relative; z-index:1; width:100%; max-width:1040px; }
+  .index-item{
+    display:flex; align-items:baseline; gap:1.6rem; padding:1.3rem 0;
+    border-top:1px solid var(--line); text-decoration:none; color:var(--ink);
+  }
+  .index-item:last-child{ border-bottom:1px solid var(--line); }
+  .index-num{
+    font-size:var(--fs-small); opacity:.5; font-variant-numeric:tabular-nums;
+    flex:0 0 2.4ch;
+  }
+  .index-name{
+    font-family:var(--f); font-weight:500; font-stretch:120%;
+    font-size:clamp(2.1rem, 6vw, 4.2rem); line-height:1;
+    transition:opacity .3s ease, color .3s ease;
+  }
+  .index-meta{
+    margin-left:auto; display:flex; align-items:center; gap:.9rem;
+    font-size:var(--fs-small); opacity:.6; white-space:nowrap; align-self:center;
+  }
+  .index-lock{
+    display:inline-flex; align-items:center; gap:.4em; font-size:var(--fs-micro);
+    border:1px solid var(--line); padding:4px 10px; border-radius:999px; opacity:.85;
+  }
+
+  @media (hover:hover) and (pointer:fine){
+    .index-item:hover .index-name, .index-item:focus-visible .index-name{ font-style:italic; }
+    .project-index:has(.index-item:hover) .index-item:not(:hover) .index-name,
+    .project-index:has(.index-item:hover) .index-item:not(:hover) .index-meta{ opacity:.32; }
+    .index-item:focus-visible{ outline:none; }
+    .index-item:focus-visible .index-name{ text-decoration:underline; text-underline-offset:.15em; }
+  }
+
+  @media (hover:none), (max-width:760px){
+    .hero-preview{ display:none; }
+    .hero{ padding:5rem 6vw 3rem; align-items:flex-start; min-height:auto; }
+    .index-name{ font-size:clamp(1.6rem, 8vw, 2.4rem); }
+    .index-item{ flex-wrap:wrap; }
+    .index-meta{ margin-left:0; flex:1 0 100%; order:3; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .hero-preview-img{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="proto-note">PROTOTIPO — ticket #41 — no es la página real</div>
+
+<div class="hero">
+  <div class="hero-preview" id="hero-preview" aria-hidden="true">
+    <img class="hero-preview-img" data-idx="0" src="../assets/images/manu-cardiel/hero.jpg" alt="" />
+    <img class="hero-preview-img" data-idx="1" src="../assets/images/adrenaline/hero.jpg" alt="" />
+    <img class="hero-preview-img" data-idx="2" src="../assets/images/arabvision/hero.jpg" alt="" />
+    <img class="hero-preview-img" data-idx="3" src="../assets/images/nexahub/hero.jpg" alt="" />
+    <img class="hero-preview-img" data-idx="4" src="../assets/images/el-paraguas/hero.jpg" alt="" />
+  </div>
+
+  <nav class="project-index" id="project-index" aria-label="Índice de proyectos">
+    <a class="index-item" data-idx="0" href="../manu-cardiel.html">
+      <span class="index-num">01</span>
+      <span class="index-name">Manu Cardiel</span>
+      <span class="index-meta">Personal · 2024</span>
+    </a>
+    <a class="index-item" data-idx="1" href="../adrenaline.html">
+      <span class="index-num">02</span>
+      <span class="index-name">Adrenaline</span>
+      <span class="index-meta">Cliente · 2023 <span class="index-lock">🔒 NDA</span></span>
+    </a>
+    <a class="index-item" data-idx="2" href="../arabvision.html">
+      <span class="index-num">03</span>
+      <span class="index-name">Arabvision</span>
+      <span class="index-meta">Cliente · 2023 <span class="index-lock">🔒 NDA</span></span>
+    </a>
+    <a class="index-item" data-idx="3" href="../nexahub.html">
+      <span class="index-num">04</span>
+      <span class="index-name">Nexahub</span>
+      <span class="index-meta">Cliente · 2022 <span class="index-lock">🔒 NDA</span></span>
+    </a>
+    <a class="index-item" data-idx="4" href="../el-paraguas.html">
+      <span class="index-num">05</span>
+      <span class="index-name">El Paraguas</span>
+      <span class="index-meta">Bootcamp · 2021</span>
+    </a>
+  </nav>
+</div>
+
+<script>
+  var items = document.querySelectorAll('.index-item');
+  var imgs = document.querySelectorAll('.hero-preview-img');
+  items.forEach(function (item) {
+    var idx = item.dataset.idx;
+    var img = document.querySelector('.hero-preview-img[data-idx="' + idx + '"]');
+    function on(){ img.classList.add('is-on'); }
+    function off(){ img.classList.remove('is-on'); }
+    item.addEventListener('mouseenter', on);
+    item.addEventListener('mouseleave', off);
+    item.addEventListener('focus', on);
+    item.addEventListener('blur', off);
+  });
+</script>
+
+</body>
+</html>
