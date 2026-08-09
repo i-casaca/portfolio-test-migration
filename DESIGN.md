@@ -230,12 +230,17 @@ leyendo encima. El ítem apuntado pasa a cursiva; el resto baja a 0,32 de opacid
 **Solo 5 proyectos, no 6.** "Sobre mí" ya no vive en este índice — el nav ya enlaza a esa sección, y
 el ticket lo pedía enfocado solo en los proyectos.
 
-**El `works-section` de más abajo (filas alternadas con foto real) se queda**, como listado
-secundario más informativo (tagline, badge de NDA con texto) y como la respuesta de facto para
-móvil/táctil: el índice nuevo esconde su preview entero bajo `(hover:none), (max-width:760px)` — sin
-foto a sangre, tap directo al proyecto — porque el works-section, unas pantallas más abajo, ya
-enseña esas fotos sin necesitar hover. No se construyó una segunda mecánica de preview para táctil;
-hacerlo habría sido resolver dos veces el mismo problema.
+**El `works-section` (filas alternadas con foto) se retiró.** Vivió una primera vuelta como listado
+secundario debajo del índice, pero al verlo en vivo repetía los mismos 5 proyectos dos veces en la
+misma página — decisión revertida en cuanto se vio construida, que es exactamente para lo que sirve
+un prototipo real. El índice de arriba es ahora el único listado de proyectos de la home, y
+`#trabajo` (el ancla del nav) apunta directamente al hero.
+
+Sin el works-section como respaldo, el requisito de "que no puede ser 'no se ven las imágenes' en
+móvil" recae en el propio índice: cada `.index-item` lleva una miniatura fija (`.index-thumb`,
+56×56px) junto al número, oculta en escritorio (ahí la foto es la de sangre) y visible solo bajo
+`(hover:none), (max-width:760px)`. Los 3 proyectos con NDA la llevan difuminada (`blur(5px)`), el
+mismo lenguaje visual que ya usaba el `work-media.is-locked` retirado.
 
 **Los 3 proyectos con NDA** llevan su candado (`🔒 NDA`) como una etiqueta más dentro de la línea de
 meta, no como una marca aparte que rompa el ritmo de la lista.

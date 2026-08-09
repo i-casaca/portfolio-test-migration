@@ -97,6 +97,9 @@
     display:inline-flex;align-items:center;gap:.4em;font-size:var(--fs-micro);
     border:1px solid var(--line);padding:4px 10px;border-radius:999px;opacity:.85;
   }
+  /* Oculta en escritorio (ahí la foto es la de sangre, en .hero-preview);
+     es la respuesta a "no puede ser que en móvil no se vean las imágenes". */
+  .index-thumb{display:none;}
 
   @media (hover:hover) and (pointer:fine){
     .hero{cursor:none;}
@@ -107,13 +110,19 @@
     .index-item:focus-visible .index-name{text-decoration:underline;text-underline-offset:.15em;}
   }
 
-  /* Sin hover no hay forma de descubrir las fotos, y el works-section de más
-     abajo ya las enseña reales — el índice se queda en lista simple. */
+  /* Sin hover no hay forma de descubrir las fotos a sangre, así que cada
+     ítem lleva su propia miniatura fija en su lugar. */
   @media (hover:none), (max-width:760px){
     .hero-preview{display:none;}
     .hero{padding:7rem 6vw 3rem;min-height:auto;}
-    .index-name{font-size:clamp(1.6rem,8vw,2.4rem);}
-    .index-item{flex-wrap:wrap;}
+    .index-item{flex-wrap:wrap;align-items:center;}
+    .index-thumb{
+      display:block;width:56px;height:56px;object-fit:cover;border-radius:4px;
+      order:1;
+    }
+    .index-num{order:0;}
+    .index-name{order:2;font-size:clamp(1.4rem,7vw,2rem);}
+    .index-item.is-locked .index-thumb{filter:blur(5px) saturate(.9);}
     .index-meta{margin-left:0;flex:1 0 100%;order:3;}
   }
 
@@ -122,52 +131,6 @@
     position:fixed;top:0;left:0;width:24px;height:24px;border-radius:50%;background:#fff;
     mix-blend-mode:difference;pointer-events:none;z-index:9999;opacity:0;
     transform:translate3d(-100px,-100px,0);
-  }
-
-  /* ---------- índice de proyectos: filas alternadas con imagen de producto ---------- */
-  .works-section{padding:8vh 6vw;}
-  .works{display:flex;flex-direction:column;gap:6vh;margin-top:2.5rem;}
-  .work-row{display:flex;align-items:center;gap:4vw;}
-  .work-row:nth-child(even){flex-direction:row-reverse;}
-  .work-text{flex:0 0 34%;}
-  .work-row h3{
-    font-family:var(--f);font-weight:500;font-stretch:112%;
-    font-size:var(--fs-h2);line-height:var(--lh-h2);margin:0 0 .8rem;
-  }
-  .work-row .work-tagline{font-size:var(--fs-body);line-height:var(--lh-body);opacity:.72;margin:0 0 1.2rem;max-width:32ch;}
-  .arrow{
-    width:42px;height:42px;border-radius:50%;border:1px solid var(--ink);display:flex;
-    align-items:center;justify-content:center;font-size:1.1rem;transition:background .2s ease, color .2s ease;
-  }
-  .work-row:hover .arrow{background:var(--ink);color:var(--bg);}
-  .lockbadge{
-    display:inline-flex;align-items:center;gap:.4em;font-size:var(--fs-small);border:1px solid var(--line);
-    padding:6px 12px;border-radius:999px;opacity:.75;
-  }
-
-  /* El tono por proyecto (--tone1) queda de fondo del panel: si la imagen no cubre,
-     el hueco mezcla con la paleta en vez de quedar en blanco. */
-  .work-media{
-    flex:1;position:relative;overflow:hidden;border-radius:4px;
-    background:var(--tone1,#e8b7a4);aspect-ratio:16/9;
-  }
-  .work-media img{
-    width:100%;height:100%;object-fit:cover;display:block;
-    transition:transform .5s cubic-bezier(.2,.7,.3,1);
-  }
-  .work-row:hover .work-media img{transform:scale(1.03);}
-
-  /* Proyectos bajo NDA: se ve la portada real difuminada, con una etiqueta que
-     explica por qué. El desbloqueo ocurre en la página del proyecto, no aquí. */
-  .work-media.is-locked img{filter:blur(11px) saturate(.9);transform:scale(1.15);}
-  .work-row:hover .work-media.is-locked img{transform:scale(1.17);}
-  .work-media.is-locked::after{content:"";position:absolute;inset:0;background:rgba(28,27,25,.14);}
-  .locked-tag{
-    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;
-    display:inline-flex;align-items:center;gap:.45em;white-space:nowrap;
-    background:var(--ink);color:var(--bg);
-    font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;
-    padding:10px 18px;border-radius:999px;
   }
 
   /* ---------- sobre mí ---------- */
@@ -205,9 +168,6 @@
   .method p:last-child{margin-bottom:0;}
 
   @media (max-width: 760px){
-    .work-row, .work-row:nth-child(even){flex-direction:column;align-items:flex-start;gap:1.5rem;}
-    .work-text{flex:none;}
-    .work-media{width:100%;}
     .about-top{flex-direction:column;}
     .about-portrait{flex:none;width:100%;max-width:320px;}
     .about-cols{flex-direction:column;gap:3rem;}
@@ -216,8 +176,6 @@
 
   @media (prefers-reduced-motion: reduce){
     .hero-preview-img{transition:none;}
-    .work-media img, .work-row:hover .work-media img{transition:none;transform:none;}
-    .work-media.is-locked img, .work-row:hover .work-media.is-locked img{transform:scale(1.15);}
   }
 </style>
 </head>
@@ -228,7 +186,7 @@
   <div class="navlinks"><a href="#trabajo">Trabajo</a><a href="#sobre-mi">Sobre mí</a><a href="#contacto">Contacto</a><a href="./assets/cv/isma-casado-cv-es.pdf" download>Descargar CV</a></div>
 </div>
 
-<div class="hero" id="hero">
+<div class="hero" id="trabajo">
   <div class="hero-eyebrow">Product<br>Design &amp;<br>UX</div>
 
   <div class="hero-preview" id="hero-preview" aria-hidden="true">
@@ -242,99 +200,44 @@
   <!-- Sustituye a la rejilla de 6 celdas (decidido en el ticket #41): un
        índice numerado, con la foto del proyecto a sangre detrás del ítem que
        se apunta en vez de una miniatura. "Sobre mí" ya no vive aquí — el nav
-       lo cubre — y el índice se queda enfocado solo en los 5 proyectos. -->
+       lo cubre — y el índice se queda enfocado solo en los 5 proyectos. Es
+       ya el único listado de proyectos de la home: el works-section que
+       repetía los mismos 5 en filas alternadas se retiró por duplicado. En
+       su lugar, cada ítem lleva su propia miniatura para móvil/táctil (ver
+       .index-thumb), que es donde antes recaía esa responsabilidad. -->
   <nav class="project-index" id="project-index" aria-label="Índice de proyectos">
     <a class="index-item" data-idx="0" href="./manu-cardiel.html">
       <span class="index-num">01</span>
+      <img class="index-thumb" src="./assets/images/manu-cardiel/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
       <span class="index-name">Manu Cardiel</span>
       <span class="index-meta">Personal · 2024</span>
     </a>
-    <a class="index-item" data-idx="1" href="./adrenaline.html">
+    <a class="index-item is-locked" data-idx="1" href="./adrenaline.html">
       <span class="index-num">02</span>
+      <img class="index-thumb" src="./assets/images/adrenaline/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
       <span class="index-name">Adrenaline</span>
       <span class="index-meta">Cliente · 2023 <span class="index-lock">🔒 NDA</span></span>
     </a>
-    <a class="index-item" data-idx="2" href="./arabvision.html">
+    <a class="index-item is-locked" data-idx="2" href="./arabvision.html">
       <span class="index-num">03</span>
+      <img class="index-thumb" src="./assets/images/arabvision/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
       <span class="index-name">Arabvision</span>
       <span class="index-meta">Cliente · 2023 <span class="index-lock">🔒 NDA</span></span>
     </a>
-    <a class="index-item" data-idx="3" href="./nexahub.html">
+    <a class="index-item is-locked" data-idx="3" href="./nexahub.html">
       <span class="index-num">04</span>
+      <img class="index-thumb" src="./assets/images/nexahub/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
       <span class="index-name">Nexahub</span>
       <span class="index-meta">Cliente · 2022 <span class="index-lock">🔒 NDA</span></span>
     </a>
     <a class="index-item" data-idx="4" href="./el-paraguas.html">
       <span class="index-num">05</span>
+      <img class="index-thumb" src="./assets/images/el-paraguas/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
       <span class="index-name">El Paraguas</span>
       <span class="index-meta">Bootcamp · 2021</span>
     </a>
   </nav>
 </div>
-
-<section class="works-section" id="trabajo">
-  <span class="eyebrow">↳ Trabajo</span>
-  <div class="works">
-    <a class="work-row" href="./manu-cardiel.html" style="--tone1:#e8b7a4;--tone2:#f6f1e7">
-      <div class="work-text">
-        <span class="eyebrow">Personal · 2024</span>
-        <h3>Manu Cardiel</h3>
-        <p class="work-tagline">Exposición virtual del arte de Manu Cardiel, con un sistema propio para que él gestione el contenido.</p>
-        <div class="arrow">→</div>
-      </div>
-      <div class="work-media">
-        <img src="./assets/images/manu-cardiel/hero.jpg" width="1400" height="787" decoding="async" alt="Portátil mostrando la web de portfolio de arte urbano de Manu Cardiel" />
-      </div>
-    </a>
-    <a class="work-row" href="./adrenaline.html" style="--tone1:#cfd8c8;--tone2:#f6f1e7">
-      <div class="work-text">
-        <span class="eyebrow">Cliente · 2023</span>
-        <h3>Adrenaline</h3>
-        <p class="work-tagline">App deportiva whitelabel: estadísticas, TV en vivo y VOD para clientes premium.</p>
-        <span class="lockbadge">🔒 Privado — bajo NDA</span>
-      </div>
-      <div class="work-media is-locked">
-        <img src="./assets/images/adrenaline/hero.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Portada difuminada del proyecto Adrenaline, bloqueada por NDA" />
-        <span class="locked-tag">🔒 Bloqueado</span>
-      </div>
-    </a>
-    <a class="work-row" href="./arabvision.html" style="--tone1:#9fbfc9;--tone2:#f6f1e7">
-      <div class="work-text">
-        <span class="eyebrow">Cliente · 2023</span>
-        <h3>Arabvision</h3>
-        <p class="work-tagline">Streaming OTT para móvil y Android TV: Live TV y VOD en cualquier dispositivo.</p>
-        <span class="lockbadge">🔒 Privado — bajo NDA</span>
-      </div>
-      <div class="work-media is-locked">
-        <img src="./assets/images/arabvision/hero.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Portada difuminada del proyecto Arabvision, bloqueada por NDA" />
-        <span class="locked-tag">🔒 Bloqueado</span>
-      </div>
-    </a>
-    <a class="work-row" href="./nexahub.html" style="--tone1:#e3c98f;--tone2:#f6f1e7">
-      <div class="work-text">
-        <span class="eyebrow">Cliente · 2022</span>
-        <h3>Nexahub</h3>
-        <p class="work-tagline">CMS para que QA gestione tickets de JIRA sin fricción dentro del ecosistema Nexahub.</p>
-        <span class="lockbadge">🔒 Privado — bajo NDA</span>
-      </div>
-      <div class="work-media is-locked">
-        <img src="./assets/images/nexahub/hero.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Portada difuminada del proyecto Nexahub, bloqueada por NDA" />
-        <span class="locked-tag">🔒 Bloqueado</span>
-      </div>
-    </a>
-    <a class="work-row" href="./el-paraguas.html" style="--tone1:#a9c7dc;--tone2:#f6f1e7">
-      <div class="work-text">
-        <span class="eyebrow">Bootcamp · 2021</span>
-        <h3>El Paraguas</h3>
-        <p class="work-tagline">Una app de viajes para la nueva normalidad post-pandemia: guías, en cualquier momento.</p>
-        <div class="arrow">→</div>
-      </div>
-      <div class="work-media">
-        <img src="./assets/images/el-paraguas/hero.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Smartphone mostrando la app de viajes El Paraguas" />
-      </div>
-    </a>
-  </div>
-</section>
 
 <section class="about" id="sobre-mi">
   <span class="eyebrow">↳ Sobre mí</span>
