@@ -297,11 +297,88 @@ a medias: es la versión quieta del estado final.
 
 ## Entrada del sitio
 
-**Pendiente** — la fija el ticket
-[#40](https://github.com/i-casaca/portfolio-test-migration/issues/40).
+Decidida en el ticket
+[La entrada del sitio: la secuencia de saludos y su fusión con el hero](https://github.com/i-casaca/portfolio-test-migration/issues/40),
+prototipando en el navegador y corrigiendo en vivo: el ritmo, el tamaño, el indicador de carga y el
+glitch se afinaron viéndolos, no describiéndolos.
 
-Dirección ya decidida: la entrada **no es un overlay**, es la primera sección de la página. Por eso
-su salida y la llegada al hero son el mismo movimiento y no hay corte.
+La entrada **no es un overlay**: es la primera sección de la página (`<section class="entry">`, a
+`100dvh`). Por eso su salida y la llegada al hero son el mismo movimiento y no hay corte.
+
+### La secuencia
+
+Cuatro saludos que trocean una frase — **"Jack of all trades, master of some"** — uno por display
+(Rubik Mono One, Rock Salt, Bebas Neue, Monoton, las que eligió el
+[#37](https://github.com/i-casaca/portfolio-test-migration/issues/37)). Entran por caracteres desde
+abajo y salen por arriba, con el siguiente ya entrando mientras el anterior sale: la gramática de
+texto de [Motion](#motion), sin huecos entre uno y otro.
+
+**Cada palabra se dimensiona por JS para llenar la pantalla** (`fitWord` en `assets/js/entry.js`):
+se mide su caja real a un tamaño de sonda y se escala hasta el 92% del ancho o el 60% del alto, lo
+que primero se cumpla. Un tamaño fijo no sirve porque las cuatro displays tienen proporciones muy
+distintas — Monoton es alto y fino, Rubik Mono One corto y macizo. Es una **excepción deliberada** al
+techo de 6rem/96px para titulares, pedida en vivo viendo el prototipo: aplica solo a este momento.
+
+Toda la secuencia dura poco más de un segundo. La primera versión rondaba los tres y se sentía como
+un peaje.
+
+### El naming y su glitch
+
+La frase desemboca en el logotipo, que **no entra por caracteres**: es la firma del sitio, no una
+palabra más del chiste. Aparece con un glitch, aguanta **1,3 s quieto** —una permanencia de verdad,
+no de pasada— y solo entonces vuela.
+
+El glitch tiene una regla por encima de las demás: **el logo nunca deja de leerse**. Se corta en 12
+bandas horizontales que entre todas lo recomponen exacto (con desplazamiento 0 son indistinguibles
+del logo entero), y en cada paso solo se desliza ~30% de ellas. Se suman dos copias en rojo y verde
+unos pocos px por detrás, que asoman por los cantos. Tres ráfagas, con un amago de recomponerse
+entre una y otra que no llega a cuajar.
+
+**Lo que se probó y se descartó**: deformar el trazo con turbulencia y `feDisplacementMap`. Rompía
+el logo de verdad, pero lo dejaba ilegible —se leía como confeti— que es lo contrario de lo que se
+busca. Los cantos limpios y el logo reconocible son la decisión, no una limitación. Si una pasada
+futura propone "mejorar" el glitch añadiendo distorsión, ya se probó.
+
+### El indicador de carga
+
+El mismo spinner de seis celdas que la transición entre páginas (`.pt-spinner` en `site.css`), no un
+elemento propio: así "esto está cargando" se lee igual la primera vez que en cualquier otra
+transición del sitio.
+
+### La entrega al hero
+
+El logotipo vuela desde el centro hasta su sitio en la cabecera mientras la entrada se recoge y el
+hero aparece debajo — un solo movimiento, no dos pasos.
+
+**El relevo entre el logo volador y el wordmark real es instantáneo y simultáneo**, nunca un
+fundido: mientras el volador está en pantalla, `html.naming-flying` mantiene oculto el wordmark del
+nav, y ambos cambian en el mismo fotograma. Un fundido es exactamente lo que delataba el artificio,
+porque durante la mezcla se leían como dos logos cruzándose. El relevo ocurre **0,5 s después de que
+el vuelo termine**, para que no se pisen las dos animaciones.
+
+### La visita repetida
+
+La secuencia completa solo la primera vez (bandera `entry-seen` en `localStorage`); después se entra
+directo al hero. Quien vuelve no paga la entrada cada vez.
+
+Para probarla sin borrar el `localStorage` a mano, `?entrada` al final de la URL la fuerza. Es una
+puerta de desarrollo: no cambia el comportamiento real.
+
+### Mejora progresiva
+
+`.entry` está `display:none` de partida y **solo** la enciende el JS cuando GSAP está listo, no se
+pide menos movimiento y es la primera visita. Sin JS, sin GSAP o con `prefers-reduced-motion`, esta
+sección no existe y el sitio entra directo por el hero. La entrada nunca es una puerta.
+
+### El logotipo
+
+Ismael aportó su logotipo como SVG. Se usa el horizontal (`assets/images/logo-full.svg`), declarado
+una vez como `<symbol id="logo-full">` por página y referenciado con `<use>` desde el wordmark del
+nav y desde el naming de la entrada — así volar de uno a otro es un cambio de tamaño del mismo
+símbolo, no una sustitución. Va en `currentColor`, de modo que hereda el hueso de la paleta.
+**Sustituye al wordmark de texto** en las seis páginas.
+
+`assets/images/logo-mark.svg` (la versión cuadrada) queda en el repo sin usar todavía.
 
 ## Transiciones de página
 

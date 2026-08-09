@@ -81,7 +81,10 @@ a{color:inherit;text-decoration:none;}
   display:flex;justify-content:space-between;align-items:center;padding:22px 6vw;
   font-size:var(--fs-small);letter-spacing:.06em;
 }
-.wordmark{font-family:var(--f);font-weight:600;font-stretch:115%;font-size:var(--fs-lead);}
+/* El wordmark es el logo real (SVG de Ismael, ver el <symbol id="logo-full">
+   al principio de cada página), no texto — `currentColor` en el SVG hereda
+   el `color` de aquí. */
+.wordmark svg{display:block;height:22px;width:auto;color:inherit;}
 /* La opacidad va en cada enlace, no en el contenedor: si estuviera en
    `.navlinks`, el `:hover` de abajo compondría sobre ella (.7 × .55 = .385,
    ~3,1:1 — muy por debajo del mínimo de 4.5:1) en vez de sustituirla. */
