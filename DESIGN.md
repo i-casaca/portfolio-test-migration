@@ -340,11 +340,75 @@ su salida y la llegada al hero son el mismo movimiento y no hay corte.
 
 ## Transiciones de página
 
-**Pendiente** — la fija el ticket
-[#42](https://github.com/i-casaca/portfolio-test-migration/issues/42).
+Decidido en el ticket
+[La transición del índice a la página de proyecto](https://github.com/i-casaca/portfolio-test-migration/issues/42),
+en conversación antes de construir. Sustituye por completo a `assets/js/page-transition.js` (el
+panel oscuro con spinner que subía y bajaba): las dos filosofías no pueden convivir — un panel que
+tapa la pantalla es justo lo que este ticket pedía no hacer.
 
-Sustituye a `assets/js/page-transition.js` (hoy: un panel que sube y baja con un spinner de seis
-celdas).
+### El mecanismo: View Transitions nativas, no JS
+
+Dos caminos posibles para un sitio estático multipágina: **View Transitions nativas**
+(`@view-transition{navigation:auto}` + `view-transition-name`, cero JavaScript, el navegador hace
+el morfismo) o **reconstruir la navegación por AJAX** (control total, pero historial, foco, scroll y
+ejecución de scripts de la página entrante hay que gestionarlos a mano).
+
+Se eligió lo primero, con este razonamiento:
+
+- El morphing de la imagen compartida —lo que pide el ticket— es exactamente lo que
+  `view-transition-name` hace por defecto: el navegador interpola tamaño y posición entre las dos
+  capturas solo. No hace falta programar "empieza a sangre y se asienta en su hueco de layout"; es
+  la animación por defecto de un elemento con nombre.
+- Comprobado en `caniuse`/MDN al decidir: Chrome, Edge y Safari (desde 18.2) ya lo soportan —
+  ~85% de cobertura global, todo Chromium y WebKit. Solo falta Firefox.
+- **Degrada sin escribir nada de más.** Si el navegador no soporta `@view-transition`, la regla se
+  ignora y la navegación es la de siempre: normal, sin JS, sin error. Firefox ve el sitio de hoy,
+  no una versión rota — al contrario que la alternativa AJAX, que habría exigido mantener dos
+  caminos de navegación en paralelo para llegar al mismo sitio.
+- Cero JavaScript encaja mejor con "sin build, sin bundler" que ya rige el sitio que programar a
+  mano lo que el navegador ya resuelve solo.
+
+### La coreografía
+
+```css
+@view-transition{ navigation:auto; }
+```
+
+en `site.css`, con tres grupos de elementos nombrados:
+
+- **`.nav` → `nav`.** Idéntica en las seis páginas: con el mismo nombre a los dos lados, el
+  navegador la trata como una sola pieza que persiste, en vez de cruzar-desvanecer dos capturas
+  casi iguales (que se leería como un parpadeo).
+- **La imagen compartida → `project-cover`.** En el índice, solo la foto que está `.is-on` la
+  lleva (nunca varias a la vez: dos elementos con el mismo nombre en un documento invalida la
+  transición entera, y `.is-on` ya es un estado exclusivo por el JS existente). En las cinco
+  páginas de proyecto, la primera `.media` dentro de `.project-body` — una sola regla en
+  `site.css`, porque esas dos clases son comunes a las cinco. Sin foto activa (llegada directa,
+  sin pasar por el índice), la imagen de la página nueva simplemente entra sola, sin réplica que
+  morfear — degradación aceptable, no error.
+- **Los ítems del índice → `index-item-1`…`index-item-5`, y `hero-eyebrow`.** Solo existen en
+  `index.html`, así que su CSS vive en el `<style>` de esa página, no en `site.css`. Salen hacia
+  arriba en cascada corta (`::view-transition-old`, 0,32s, 40ms de diferencia entre ítems) mientras
+  la foto se queda quieta. Las páginas de proyecto no tienen índice con el que emparejar una
+  entrada, así que al volver estos nombres reaparecen solos (`::view-transition-new`) sin salida
+  previa que deshacer — la propia asimetría del par old/new da "la vuelta es el espejo exacto" que
+  pedía el ticket sin escribirlo dos veces. La entrada rebobina el gesto: el último ítem en salir
+  (`index-item-5`) es el primero en volver.
+
+`--ease-move`/`--dur-move` en `site.css` traducen `Motion.ease.move`/`Motion.dur.move` (GSAP,
+`assets/js/motion.js`) a un `cubic-bezier` — las View Transitions son CSS puro y no pueden llamar a
+un ease de GSAP por nombre.
+
+### `prefers-reduced-motion`
+
+```css
+@media (prefers-reduced-motion: reduce){
+  @view-transition{ navigation:none; }
+}
+```
+
+Apaga el morfismo entero, no solo sus curvas: con menos movimiento, el salto de página tiene que
+ser eso, un salto — no una versión más lenta del mismo gesto.
 
 ## Interacción
 
