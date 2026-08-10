@@ -398,11 +398,21 @@
      site.css > Transiciones de página para el otro lado del emparejamiento. */
   .hero-preview-img.is-on{opacity:.5;view-transition-name:project-cover;}
   /* Sin este velo, una foto clara detrás le quita legibilidad al índice —
-     más fuerte a la izquierda (donde vive el texto) que a la derecha. */
+     más fuerte a la izquierda (donde vive el texto) que a la derecha.
+
+     Las paradas intermedias van con `color-mix` sobre `var(--bg)` y NO con el
+     color escrito a pelo. Estaban como `rgba(32,25,21,…)` —el negro cálido
+     deletreado para poder darle alfa— y al pasar el índice a tema claro el
+     velo degradaba de hueso a marrón: una franja gris cruzando el pivote.
+     Es el fallo típico de introducir un segundo tema, y el único literal de
+     color que quedaba en todo el sitio. */
   .hero-preview::after{
     content:"";position:absolute;inset:0;
     background:
-      linear-gradient(90deg, var(--bg) 0%, rgba(32,25,21,.55) 45%, rgba(32,25,21,.3) 100%),
+      linear-gradient(90deg,
+        var(--bg) 0%,
+        color-mix(in srgb, var(--bg) 55%, transparent) 45%,
+        color-mix(in srgb, var(--bg) 30%, transparent) 100%),
       linear-gradient(to top, var(--bg) 0%, transparent 35%);
   }
 
@@ -412,7 +422,7 @@
     border-top:1px solid var(--line);text-decoration:none;color:var(--ink);
   }
   .index-item:last-child{border-bottom:1px solid var(--line);}
-  .index-num{font-size:var(--fs-small);opacity:.5;font-variant-numeric:tabular-nums;flex:0 0 2.4ch;}
+  .index-num{font-size:var(--fs-small);opacity:var(--dim-faint);font-variant-numeric:tabular-nums;flex:0 0 2.4ch;}
   .index-name{
     font-family:var(--f);font-weight:500;font-stretch:120%;
     font-size:clamp(2.1rem,6vw,4.2rem);line-height:1;
@@ -420,7 +430,7 @@
   }
   .index-meta{
     margin-left:auto;display:flex;align-items:center;gap:.9rem;
-    font-size:var(--fs-small);opacity:.6;white-space:nowrap;align-self:center;
+    font-size:var(--fs-small);opacity:var(--dim);white-space:nowrap;align-self:center;
   }
   .index-lock{
     display:inline-flex;align-items:center;gap:.4em;font-size:var(--fs-micro);
@@ -530,10 +540,10 @@
     padding:.9rem 0;border-top:1px solid var(--line);
   }
   .cv-role{grid-column:1;grid-row:1;font-weight:600;font-size:.95rem;}
-  .cv-org{grid-column:1;grid-row:2;font-size:.85rem;opacity:.6;}
+  .cv-org{grid-column:1;grid-row:2;font-size:.85rem;opacity:var(--dim);}
   .cv-year{
     grid-column:2;grid-row:1/3;align-self:center;text-align:right;
-    font-size:var(--fs-micro);letter-spacing:.06em;opacity:.6;padding-left:1.5rem;
+    font-size:var(--fs-micro);letter-spacing:.06em;opacity:var(--dim);padding-left:1.5rem;
   }
 
   /* ---------- metodología: cómo trabaja, en su voz ---------- */
@@ -649,7 +659,10 @@
   </a>
 </section>
 
-<div class="hero" id="trabajo">
+<!-- A partir de aqui el sitio es claro: los dos tokens intercambian su papel
+     (ticket #54). El pivote cae en el borde entre el hero y el indice porque
+     eso es "de los proyectos en adelante". -->
+<div class="hero" id="trabajo" data-theme="claro">
   <div class="hero-preview" id="hero-preview" aria-hidden="true">
     <img class="hero-preview-img" data-idx="0" src="./assets/images/manu-cardiel/hero.jpg" alt="" />
     <img class="hero-preview-img" data-idx="1" src="./assets/images/adrenaline/hero.jpg" alt="" />
@@ -700,7 +713,7 @@
   </nav>
 </div>
 
-<section class="about" id="sobre-mi">
+<section class="about" id="sobre-mi" data-theme="claro">
   <span class="eyebrow">↳ Sobre mí</span>
   <div class="about-top">
     <img class="about-portrait" src="./assets/images/about/retrato-azul.jpg" width="900" height="675" loading="lazy" decoding="async" alt="Ismael Casado, con gafas, alzando la mano hacia una estructura azul iluminada" />
@@ -741,7 +754,7 @@
      conservando su voz. Cada bloque lleva su propio id porque el chatbot cita
      al párrafo y necesita un ancla a la que saltar. Se irá ampliando conforme
      avancen las 20 respuestas. -->
-<section class="about" id="metodologia">
+<section class="about" id="metodologia" data-theme="claro">
   <span class="eyebrow">↳ Cómo trabajo</span>
   <div class="method">
     <div id="met-primer-paso">
@@ -764,7 +777,7 @@
   </div>
 </section>
 
-<footer class="site-footer" id="contacto">
+<footer class="site-footer" id="contacto" data-theme="claro">
   <span class="eyebrow">Contacto</span>
   <p class="footer-lead">¿Trabajamos <em>juntos?</em></p>
   <div class="footer-links">

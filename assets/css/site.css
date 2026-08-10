@@ -5,6 +5,44 @@
    de esa página. Aquí solo va lo que se repite en todas.
    =========================================================================== */
 
+/* ---------- los dos temas ----------
+   El sitio deja de ser monotema (ticket #54): oscuro desde la entrada hasta el
+   hero, claro de los proyectos en adelante.
+
+   El tema claro NO trae colores nuevos: los dos tokens **intercambian su
+   papel**. El hueso deja de ser tinta y pasa a ser superficie; el negro cálido
+   deja de ser superficie y pasa a ser tinta. Por eso el contraste sale idéntico
+   en los dos temas (13,63:1) sin tener que calibrar una paleta nueva — es
+   literalmente el mismo par de colores.
+
+   Esto invierte la excepción deliberada nº 2 ("el hueso como tinta, no como
+   superficie"), que a partir de aquí solo describe el tema oscuro. Ver
+   DESIGN.md > Color > Los dos temas. */
+[data-theme="claro"]{
+  --bg:       oklch(92% 0.018 78);   /* #EBE3D8 — el hueso, ahora superficie */
+  --ink:      oklch(22% 0.014 50);   /* #201915 — el negro cálido, ahora tinta */
+  /* La elevación se construye igual que en oscuro —moviendo la luminosidad,
+     nunca con una sombra—, pero en sentido contrario: aquí un paso elevado es
+     un paso MÁS OSCURO. Un panel más claro que el hueso se iría a blanco y
+     rompería el registro impreso del tema. */
+  --surface1: oklch(87% 0.018 78);
+  --surface2: oklch(82% 0.018 78);
+  /* Menos alfa que en oscuro (.14): una línea oscura sobre hueso pesa más que
+     una clara sobre negro con la misma opacidad. */
+  --line:     oklch(22% 0.014 50 / .11);
+
+  /* El suelo de opacidad NO se hereda del tema oscuro, y no por poco. Medido
+     sobre el mismo par de colores: alfa 0,55 da 4,97:1 sobre negro pero solo
+     3,62:1 sobre hueso. El mínimo para AA 4,5:1 sube de 0,52 a **0,63**.
+     Por eso los dos escalones de texto secundario suben aquí — y solo aquí:
+     el tema oscuro se queda exactamente como estaba. */
+  --dim-faint: .63;   /* numeración del índice */
+  --dim:       .68;   /* metadatos, pies, notas */
+
+  background:var(--bg);
+  color:var(--ink);
+}
+
 :root{
   /* Los dos tokens del sistema: fondo negro cálido y tinta hueso cálido. La
      fotografía de proyecto es la única fuente de color saturado del sitio —
@@ -14,6 +52,11 @@
   --surface2: oklch(32% 0.014 50);   /* dos pasos: estados de hover sobre una superficie ya elevada */
   --ink:      oklch(92% 0.018 78);   /* #EBE3D8 */
   --line:     oklch(92% 0.018 78 / .14);
+
+  /* Los dos escalones de texto secundario. Sobre negro dan 4,34:1 y 5,66:1;
+     el tema claro los sube porque ahí el mismo alfa rinde bastante menos. */
+  --dim-faint: .5;
+  --dim:       .6;
 
   /* Traducción a CSS de Motion.ease.move / Motion.dur.move (assets/js/motion.js):
      las View Transitions son CSS puro y no pueden llamar a un ease de GSAP por
