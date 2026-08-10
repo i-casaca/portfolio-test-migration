@@ -35,9 +35,16 @@
    * Por qué SVG y no `blur() contrast()` de CSS: sobre un fondo transparente,
    * el `contrast()` de CSS no umbraliza el canal alfa — se probó y los
    * círculos se quedaban sueltos, como un collar de perlas. Lo que los funde
-   * es la última fila de la feColorMatrix, que multiplica el alfa por 26 y le
-   * resta 12: donde dos desenfoques se solapan el alfa sube lo suficiente
-   * para pasar el umbral, y ahí es donde nace el istmo entre dos lóbulos.
+   * es la última fila de la feColorMatrix, que multiplica el alfa: donde dos
+   * desenfoques se solapan el alfa sube lo suficiente para pasar el umbral, y
+   * ahí es donde nace el istmo entre dos lóbulos.
+   *
+   * Los dos números salen de una revisión en vivo con Ismael, sobre el sitio
+   * real y con un medidor de fps delante. Un `stdDeviation` alto (28) con un
+   * multiplicador de alfa BAJO (8) es lo que da el borde con halo en vez del
+   * canto duro: el umbral se cruza despacio, así que el filo se difumina.
+   * Con multiplicadores altos (se probó 26) la silueta salía recortada a
+   * cuchillo, y sobre el fondo cálido leía como un pegote, no como niebla.
    *
    * `color-interpolation-filters="sRGB"` no es opcional: el valor por defecto
    * (linearRGB) recalcula el desenfoque en otro espacio y devuelve un borde
@@ -50,8 +57,8 @@
   svg.setAttribute('style', 'position:absolute');
   svg.innerHTML =
     '<filter id="blob-goo" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">' +
-    '<feGaussianBlur in="SourceGraphic" stdDeviation="18" result="b"/>' +
-    '<feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -12"/>' +
+    '<feGaussianBlur in="SourceGraphic" stdDeviation="28" result="b"/>' +
+    '<feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 8 -4"/>' +
     '</filter>';
   document.body.appendChild(svg);
 
@@ -85,7 +92,11 @@
    * viva en un sitio solo. `contain:strict` recorta lo que se salga, así que
    * ningún círculo puede acercarse al borde más que su propio radio. */
   var box = parseFloat(getComputedStyle(layer).width) || 760;
-  var guard = (parseFloat(getComputedStyle(balls[0].el).width) || 132) * 0.75;
+  /* Un diámetro entero de guarda. Tiene que cubrir el radio del círculo (92)
+   * MÁS lo que se desparrama el desenfoque (unas 3 desviaciones típicas: 84).
+   * Con menos, un tirón brusco lleva un círculo al borde y `contain:strict`
+   * le corta el halo en línea recta, que canta muchísimo. */
+  var guard = parseFloat(getComputedStyle(balls[0].el).width) || 184;
 
   function clamp(v) {
     return v < guard ? guard : (v > box - guard ? box - guard : v);
@@ -181,21 +192,4 @@
     if (document.hidden) { running = false; } else if (on) { wake(); }
   });
 
-  /* Panel de ajuste en vivo, solo con ?tune en la URL. Es andamiaje de
-   * revisión: se retira antes de fusionar el ticket. El gancho expone el
-   * bucle para poder pisarlo fotograma a fotograma desde la consola, que es
-   * la única forma de inspeccionar la mancha en un navegador automatizado
-   * (ahí la pestaña se reporta como oculta y rAF no corre). */
-  if (/[?&]tune\b/.test(location.search)) {
-    window.__blob = {
-      balls: balls,
-      layer: layer,
-      to: function (x, y) { mx = x; my = y; if (!on) { on = true; layer.classList.add('is-on'); } },
-      step: function (n) { for (var k = 0; k < (n || 1); k++) { running = true; idle = 0; frame(); } }
-    };
-    var s = document.createElement('script');
-    s.src = './assets/js/backdrop-tune.js';
-    s.defer = true;
-    document.head.appendChild(s);
-  }
 })();

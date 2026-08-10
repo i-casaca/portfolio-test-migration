@@ -115,7 +115,7 @@ a{color:inherit;text-decoration:none;}
    dialoga en el navegador. Ver DESIGN.md > Interacción. */
 :root{
   --blob-box: 760px;   /* lado de la caja que viaja con la mancha */
-  --blob-r: 132px;     /* diámetro de cada círculo antes del umbral */
+  --blob-r: 184px;     /* diámetro de cada círculo antes del umbral */
 }
 /* La caja NO es la pantalla entera a propósito. Un filtro SVG cuesta en
    proporción a su región, y recalcularlo sobre 1280×720 en cada fotograma es
