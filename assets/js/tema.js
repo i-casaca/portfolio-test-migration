@@ -1,19 +1,22 @@
-/* El volteo de tema (ticket #54).
+/* La inversión de tema, conducida por el scroll (ticket #54).
  *
  * El claro no es una zona del documento: es **el mundo de los proyectos**. La
- * página entera se invierte cuando la lista de proyectos manda en pantalla, y
- * vuelve a oscuro por los dos lados — subiendo al hero o bajando a "Sobre mí".
- * Por eso el atributo va en `<html>` y no en las secciones.
+ * página entera se va invirtiendo conforme la lista de proyectos toma la
+ * pantalla, y se deshace por los dos lados — subiendo al hero o bajando a
+ * "Sobre mí".
  *
- * Umbral, no fregado: se cruza y voltea con su propia transición (ver
- * `.tema-volteando` en site.css), y se queda. Decidido con Ismael: fregar la
- * inversión contra el scroll deja la página en grises intermedios, donde el
- * contraste no está medido y el texto pierde legibilidad justo mientras se
- * mueve.
+ * Este archivo escribe UNA custom property, `--t` (0 = oscuro, 1 = claro), y
+ * nada más. Todos los colores del sitio se derivan de ella en site.css, así
+ * que se recalculan en el mismo paso de estilo y no pueden desincronizarse.
  *
- * Sin JavaScript no hay volteo y el sitio se queda oscuro de arriba abajo —
- * que es exactamente el sitio que ya se publicaba. Es una degradación honesta:
- * nada se rompe y nada se vuelve ilegible.
+ * Es la corrección de la primera versión, que disparaba un volteo con
+ * `transition` sobre cientos de elementos: cada uno arrancaba su animación en
+ * un fotograma distinto y lo que no era color saltaba de golpe, con un
+ * parpadeo escalonado bien visible. Aquí no hay ninguna transición CSS: el
+ * scroll ES la línea de tiempo.
+ *
+ * Sin JavaScript, `--t` se queda en 0 y el sitio es oscuro de arriba abajo —
+ * exactamente el que ya se publicaba. Degradación honesta: nada se rompe.
  */
 (function () {
   'use strict';
@@ -22,49 +25,89 @@
   var indice = document.getElementById('trabajo');
   if (!indice) return;
 
-  var reducido = window.Motion ? window.Motion.reduced : false;
-  var volteo = null;
+  /* Umbrales de OCUPACIÓN: qué fracción de la pantalla cubre la lista.
+   * Medir ocupación en vez de posición hace que las dos rampas —la de entrada
+   * y la de salida— salgan simétricas solas, sin escribir dos cálculos: da
+   * igual que la lista esté entrando por abajo o saliendo por arriba, lo que
+   * cuenta es cuánto manda en pantalla. */
+  var DESDE = 0.18;   /* asoma: empieza a invertir */
+  var HASTA = 0.62;   /* manda en pantalla: inversión completa */
 
-  function aplicar(claro) {
-    if ((root.dataset.tema === 'claro') === claro) return;
+  /* Dónde salta la tinta. Calculado, no elegido a ojo: es el punto donde el
+   * fondo a medio camino contrasta lo mismo con los dos extremos de tinta
+   * (3,72:1 con el hueso, 3,67:1 con el negro), así que saltar ahí maximiza el
+   * peor instante de todo el recorrido. Ver el comentario largo en site.css. */
+  var SALTO_TINTA = 0.48;
 
-    /* La clase de transición se pone ANTES de cambiar el atributo, o el
-     * navegador ya habría resuelto los colores nuevos sin nada que
-     * interpolar. */
-    if (!reducido) {
-      root.classList.add('tema-volteando');
-      clearTimeout(volteo);
-      volteo = setTimeout(function () {
-        root.classList.remove('tema-volteando');
-      }, 450);
-    }
+  var ultimo = -1;
+  var ultimoK = -1;
 
-    if (claro) root.dataset.tema = 'claro';
-    else delete root.dataset.tema;
+  function progreso() {
+    var r = indice.getBoundingClientRect();
+    var vh = window.innerHeight || 1;
+    var visible = Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0));
+    var p = (visible / vh - DESDE) / (HASTA - DESDE);
+    p = p < 0 ? 0 : (p > 1 ? 1 : p);
+    /* Smoothstep: arranca y termina despacio. Lineal, la inversión "salía" y
+     * "entraba" con un canto perceptible justo en los extremos, que es donde
+     * el ojo está mirando. */
+    return p * p * (3 - 2 * p);
   }
 
-  /* Sin GSAP no hay ScrollTrigger, y el sitio se queda en oscuro. Mismo
-   * contrato que el resto de scripts desde el #39: si el CDN no responde,
-   * nadie se cae. */
-  if (!window.Motion || !window.Motion.ready || !window.ScrollTrigger) return;
+  function pintar() {
+    var p = progreso();
+    var k = p >= SALTO_TINTA ? 1 : 0;
 
-  /* `top 40%` / `bottom 40%`: el claro vive mientras la lista cubre la pantalla
-   * de su cuarenta por ciento hacia abajo — es decir, cuando ya ocupa el grueso
-   * del viewport y apuntar un proyecto es posible sin seguir bajando. Las dos
-   * marcas son simétricas a propósito: el mismo punto geométrico decide el
-   * volteo se llegue desde el hero o desde "Sobre mí", así que subir deshace el
-   * camino exactamente por donde se hizo.
-   *
-   * ScrollTrigger da los cuatro cruces que hacen falta —entrar y salir por cada
-   * lado— sin que haya que escribir a mano ni el cálculo de solape ni la
-   * histéresis: el propio trigger no vuelve a disparar dentro de su tramo. */
-  ScrollTrigger.create({
-    trigger: indice,
-    start: 'top 40%',
-    end: 'bottom 40%',
-    onEnter:     function () { aplicar(true); },
-    onEnterBack: function () { aplicar(true); },
-    onLeave:     function () { aplicar(false); },
-    onLeaveBack: function () { aplicar(false); }
-  });
+    /* Cambiar una custom property heredada en la raíz invalida el estilo de
+     * todo el documento, así que no se escribe si el cambio no se va a ver.
+     * Menos de medio punto porcentual no lo distingue nadie. */
+    if (Math.abs(p - ultimo) < 0.005 && k === ultimoK) return;
+    ultimo = p;
+    ultimoK = k;
+
+    /* Los dos se escriben en el mismo turno, así que el navegador los resuelve
+     * en un único recálculo de estilo: fondo y tinta nunca van desfasados ni
+     * un fotograma. Ese desfase, multiplicado por cientos de elementos, era
+     * exactamente el parpadeo de la primera versión. */
+    root.style.setProperty('--t', p.toFixed(3));
+    root.style.setProperty('--tk', String(k));
+  }
+
+  /* `prefers-reduced-motion` no apaga el cambio de tema —es estado, no
+   * decoración—, pero sí lo saca del scroll: se resuelve a uno de los dos
+   * extremos y no hay nada moviéndose por el camino. */
+  var reducido = window.Motion
+    ? window.Motion.reduced
+    : window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (reducido) {
+    var fijar = function () {
+      var v = progreso() >= SALTO_TINTA ? '1' : '0';
+      root.style.setProperty('--t', v);
+      root.style.setProperty('--tk', v);
+    };
+    window.addEventListener('scroll', fijar, { passive: true });
+    window.addEventListener('resize', fijar);
+    fijar();
+    return;
+  }
+
+  /* Con GSAP presente, el scroll lo reparte ScrollTrigger, que es quien ya
+   * está sincronizado con Lenis desde el #39 — engancharse aquí evita un
+   * segundo listener compitiendo con el scroll suave. Sin GSAP, un listener
+   * propio pasivo hace el mismo trabajo. */
+  if (window.Motion && window.Motion.ready && window.ScrollTrigger) {
+    ScrollTrigger.create({
+      trigger: indice,
+      start: 'top bottom',
+      end: 'bottom top',
+      onUpdate: pintar,
+      onRefresh: pintar
+    });
+  } else {
+    window.addEventListener('scroll', pintar, { passive: true });
+    window.addEventListener('resize', pintar);
+  }
+
+  pintar();
 })();
