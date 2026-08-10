@@ -34,6 +34,7 @@
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js" defer></script>
 <script src="./assets/js/motion.js" defer></script>
 <script src="./assets/js/reveal.js" defer></script>
+<script src="./assets/js/backdrop.js" defer></script>
 </head>
 <body>
 
@@ -136,6 +137,10 @@
 <script src="./assets/js/chat-corpus.js"></script>
 <script src="./assets/js/chat-bubble.js"></script>
 
+<!-- La mancha que sigue al ratón (ticket #53). Va vacía: backdrop.js crea
+     dentro los circulos que la forman, y no la monta siquiera sin puntero
+     fino. Delante del grano y del contenido, detras de la burbuja del chat. -->
+<div id="backdrop-blob" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
 </body>
 </html>

@@ -65,18 +65,101 @@ a{color:inherit;text-decoration:none;}
    algún día se mueve el div de sitio en el HTML, hay que devolverlo al final. */
 .grain{
   position:fixed;inset:-25%;width:150%;height:150%;pointer-events:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   opacity:.07;mix-blend-mode:overlay;
-  animation:grain-shift 1s steps(4) infinite;
+  animation:grain-shift .6s steps(1,end) infinite;
 }
+
+/* Doce saltos en 0,6 s = 20 fps, que es donde el ruido deja de leerse como
+   "textura que se mueve" y empieza a leerse como estática de televisión.
+   `steps(1,end)` en vez de `steps(4)`: queremos que cada fotograma se
+   mantenga quieto y salte, no que se deslice en cuatro subpasos — el
+   deslizamiento es justo lo que delataba el bucle a 4 posiciones.
+
+   Barato a propósito: el data-URI se rasteriza UNA vez y lo único que se
+   anima es un `transform` compuesto en GPU. Reanimar la semilla del
+   feTurbulence daría estática real pero obliga al navegador a re-filtrar el
+   SVG en cada fotograma, y eso sí se nota en el ventilador.
+
+   Los desplazamientos no pasan de ±8%: la capa mide 150% con inset -25%, así
+   que hay 25% de margen por lado y nunca asoma un borde. */
 @keyframes grain-shift{
-  0%{transform:translate(0,0);}
-  25%{transform:translate(-2%,1%);}
-  50%{transform:translate(1%,-2%);}
-  75%{transform:translate(-1%,-1%);}
+  0%  {transform:translate(0,0);}
+  8%  {transform:translate(-6%,3%);}
+  16% {transform:translate(4%,-5%);}
+  25% {transform:translate(-3%,-6%);}
+  33% {transform:translate(7%,2%);}
+  41% {transform:translate(-5%,6%);}
+  50% {transform:translate(2%,-3%);}
+  58% {transform:translate(-7%,-2%);}
+  66% {transform:translate(5%,5%);}
+  75% {transform:translate(-2%,-7%);}
+  83% {transform:translate(6%,-4%);}
+  91% {transform:translate(-4%,1%);}
   100%{transform:translate(0,0);}
 }
 @media (prefers-reduced-motion: reduce){ .grain{animation:none;} }
+
+/* ---------- la mancha: distorsión ligada al ratón que invierte lo que cubre ----------
+   Misma mecánica que el #cursor-dot de la home (blanco + mix-blend-mode:
+   difference = inversión exacta del fondo), crecida y con estela. No es una
+   técnica nueva en el sitio: es la que ya llevaba el punto de cursor.
+
+   Cómo se forma la silueta orgánica: dentro van varios círculos blancos que
+   persiguen al puntero con retardos distintos; el `blur` los funde y el
+   `contrast` vuelve a endurecer el borde de esa fusión. Es la técnica de
+   metaballs — el borde ondulado sale de la suma de los círculos, no de una
+   forma dibujada a mano, así que se deforma sola con la velocidad del ratón.
+
+   Los tres números van en custom properties porque son exactamente lo que se
+   dialoga en el navegador. Ver DESIGN.md > Interacción. */
+:root{
+  --blob-box: 760px;   /* lado de la caja que viaja con la mancha */
+  --blob-r: 184px;     /* diámetro de cada círculo antes del umbral */
+}
+/* La caja NO es la pantalla entera a propósito. Un filtro SVG cuesta en
+   proporción a su región, y recalcularlo sobre 1280×720 en cada fotograma es
+   justo el gasto contra el que avisa el ticket. Viaja con la mancha, así que
+   el filtro solo toca los 760×760 donde hay algo que fundir.
+   Es también la razón de `contain:strict`: recorta y le promete al navegador
+   que nada de aquí dentro afecta al layout de fuera. */
+#backdrop-blob{
+  position:fixed;top:0;left:0;
+  width:var(--blob-box);height:var(--blob-box);
+  margin:calc(var(--blob-box) / -2);
+  pointer-events:none;z-index:40;
+  mix-blend-mode:difference;
+  filter:url(#blob-goo);
+  opacity:0;transition:opacity .45s var(--ease-move);
+  contain:strict;
+}
+#backdrop-blob.is-on{opacity:1;}
+
+/* La mancha se aparta en cuanto hay una foto de proyecto en pantalla.
+   Encontrado construyendo, no razonado: sobre el fondo plano la inversión se
+   lee como un gesto, pero sobre la fotografía la convierte en un negativo
+   azulado que parece un fallo de pintado — y el sistema reserva la foto como
+   ÚNICA fuente de color saturado del sitio (DESIGN.md > Excepciones
+   deliberadas nº 4). Invertirla contradice esa regla de frente.
+
+   Es el mismo modo de fallo por el que el #41 retiró la distorsión líquida
+   del titular. La diferencia es que aquí sí hay dónde apartarse: el efecto
+   vive en las zonas planas —entrada, hero, textos— y desaparece al apuntar
+   un proyecto. Sale por la misma transición de opacidad que ya tenía, así
+   que el relevo entre mancha y foto se lee como una cesión, no como un corte. */
+body:has(.hero-preview-img.is-on) #backdrop-blob{opacity:0;}
+/* Blanco puro: con `difference`, blanco sobre X da exactamente el negativo de
+   X. Cualquier otro color daría un tinte en vez de una inversión. */
+#backdrop-blob i{
+  position:absolute;top:0;left:0;display:block;border-radius:50%;background:#fff;
+  width:var(--blob-r);height:var(--blob-r);margin:calc(var(--blob-r) / -2);
+  will-change:transform;
+}
+/* Sin puntero fino no hay mancha que seguir, y el filtro es caro: no se monta
+   siquiera (backdrop.js comprueba lo mismo antes de crear los nodos). */
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce){
+  #backdrop-blob{display:none;}
+}
 
 /* Los enlaces del nav apuntan a anclas de la home; sin este margen el título
    de la sección queda tapado al saltar. */

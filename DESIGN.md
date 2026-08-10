@@ -57,9 +57,21 @@ hueso sobre `--bg` cae de 4,97:1 hacia abajo y dejar de cumplir AA en texto que 
 ### El grano
 
 Capa fija en `position:fixed`, generada con un `<feTurbulence>` servido como SVG en un data-URI —
-cero assets nuevos que commitear. Se anima con `steps(4)` sobre un `translate` de cuatro posiciones,
-para que el ruido salte en vez de deslizarse (respeta `prefers-reduced-motion`: sin animación, la
-textura se queda fija).
+cero assets nuevos que commitear. `baseFrequency: 1.2` con **dos** octavas: las octavas de más
+añaden frecuencias bajas, que es lo que agrupa el ruido en manchas y lo hace leer como suciedad en
+vez de como grano fino.
+
+**Cadencia: doce saltos en 0,6 s (20 fps) con `steps(1,end)`.** No es un ajuste cosmético del bucle
+original de cuatro posiciones en un segundo: `steps(4)` interpola en cuatro subpasos *dentro* de
+cada intervalo, así que el ruido se deslizaba entre posiciones, y ese deslizamiento es exactamente
+lo que delataba el bucle. Con `steps(1,end)` cada fotograma se mantiene quieto y salta. Veinte fps
+es donde deja de leerse como "textura que se mueve" y empieza a leerse como **estática de
+televisión**. Respeta `prefers-reduced-motion`: sin animación, la textura se queda fija.
+
+**Lo que NO se hace, y por qué**: reanimar la semilla del `feTurbulence` daría estática real, pero
+obliga al navegador a volver a filtrar el SVG en cada fotograma. Aquí el data-URI se rasteriza una
+sola vez y lo único que se anima es un `transform` compuesto en GPU. Los desplazamientos no pasan de
+±8%: la capa mide 150% con `inset:-25%`, así que hay 25% de margen por lado y nunca asoma un borde.
 
 **Opacidad: 0,07.** Se probó primero a 0,045 (casi imperceptible) y se subió a petición explícita de
 Ismael tras ver el prototipo — "más presente". El límite superior probado antes de que empiece a
@@ -727,12 +739,67 @@ ser eso, un salto — no una versión más lenta del mismo gesto.
 
 ## Interacción
 
-**Pendiente** — todavía en la niebla del mapa
-[#35](https://github.com/i-casaca/portfolio-test-migration/issues/35): cursor, rollovers,
-subrayados animados y estados de foco.
+**Parcialmente pendiente** — siguen en la niebla del mapa
+[#35](https://github.com/i-casaca/portfolio-test-migration/issues/35) el cursor personalizado, los
+rollovers de enlace y los subrayados animados.
 
-Lo único cerrado: el foco de teclado tiene que ser visible en todo lo navegable. Un `outline: none`
-sin sustituto es un fallo, no una decisión de estilo.
+Lo cerrado: el foco de teclado tiene que ser visible en todo lo navegable. Un `outline: none` sin
+sustituto es un fallo, no una decisión de estilo. Y la mancha del fondo, que se describe aquí.
+
+### La mancha: una silueta que sigue al ratón e invierte lo que cubre
+
+Una forma orgánica pegada al cursor que **invierte el color de lo que tiene debajo**: sobre el fondo
+oscuro se ve hueso azulado, y el texto hueso que queda dentro pasa a azul casi negro.
+
+**La mecánica no es nueva en el sitio.** Es la del `#cursor-dot` que ya existía —blanco puro con
+`mix-blend-mode: difference`, que da el negativo exacto del fondo—, crecida. Blanco puro no es un
+detalle: cualquier otro color daría un tinte en vez de una inversión. El punto de cursor sigue en
+pie y, al quedar dentro de la mancha, se lee como una pupila oscura.
+
+**Cómo se forma la silueta.** Siete círculos blancos que se persiguen en cadena, fundidos por un
+filtro SVG (`feGaussianBlur` + `feColorMatrix` que multiplica el canal alfa). Es la técnica de
+*metaballs*: el borde ondulado sale de la suma de los círculos, no de una forma dibujada, así que se
+deforma sola con la velocidad del ratón — estirada cuando corre, redonda cuando se para.
+
+Dos cosas que se descubrieron construyendo y que conviene no volver a tropezar:
+
+- **El `contrast()` de CSS no umbraliza el canal alfa sobre fondo transparente.** Con `blur()` +
+  `contrast()` los siete círculos se quedaban sueltos, como un collar de perlas. Lo que los funde es
+  la `feColorMatrix`. Y `color-interpolation-filters="sRGB"` no es opcional: el valor por defecto
+  (linearRGB) devuelve un borde lechoso.
+- **La cadena se recorre desde la cola.** Si cada círculo persigue la posición *ya actualizada* del
+  anterior, el movimiento se propaga entero en un fotograma y los siete viajan pegados: una bola,
+  nunca una estela. Recorriendo al revés, cada eslabón lee la posición del fotograma anterior, y ese
+  retraso de un fotograma por eslabón **es** la estela.
+
+**Los números (`stdDeviation: 28`, alfa `×8 −4`, círculo de 184 px) salen de una revisión en vivo**
+sobre el sitio real con un medidor de fps delante. Un fundido alto con un multiplicador de alfa
+**bajo** es lo que da el borde con halo; con multiplicadores altos (se probó ×26) la silueta salía
+recortada a cuchillo y sobre el fondo cálido leía como un pegote, no como niebla.
+
+**La mancha se aparta cuando hay una foto de proyecto en pantalla.** Sobre el fondo plano la
+inversión se lee como un gesto; sobre la fotografía la convierte en un negativo azulado que parece
+un fallo de pintado, y contradice de frente la excepción deliberada nº 4 (la foto es la única fuente
+de color saturado). Es el mismo modo de fallo por el que el
+[#41](https://github.com/i-casaca/portfolio-test-migration/issues/41) retiró la distorsión líquida
+del titular; la diferencia es que aquí sí hay dónde apartarse. Hoy el enganche es
+`body:has(.hero-preview-img.is-on)` — **y ese elemento desaparece cuando el
+[#55](https://github.com/i-casaca/portfolio-test-migration/issues/55) sustituya el preview a sangre
+por la imagen flotante al cursor. Ese ticket tiene que rehacer el enganche o la mancha volverá a
+invertir la foto.**
+
+**Coste, medido**: 120 fps sostenidos. El filtro no cubre la pantalla — vive en una caja de 760 px
+que viaja con la mancha, porque un filtro SVG cuesta en proporción a su región. `contain: strict`
+acota esa caja, y por eso el bucle mantiene un diámetro entero de guarda contra el borde: menos, y
+un tirón brusco deja el halo cortado en línea recta. El bucle además **se detiene solo** cuando la
+mancha alcanza al ratón y este no se mueve, y en pestaña oculta.
+
+**Mejora progresiva de arriba abajo**: sin puntero fino (móvil, tableta) no se monta siquiera, ni
+los nodos ni el bucle; con `prefers-reduced-motion` tampoco. Sin JavaScript, la página es
+exactamente la de antes. Nada del contenido depende de esto.
+
+**Contraste, medido en los dos lados del borde**: 13,63:1 fuera de la mancha y **13,59:1 dentro**.
+La inversión lo conserva, así que el texto cumple AA también donde la mancha lo cubre.
 
 ## Excepciones deliberadas
 
