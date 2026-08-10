@@ -6,8 +6,11 @@
    =========================================================================== */
 
 /* ---------- los dos temas ----------
-   El sitio deja de ser monotema (ticket #54): oscuro desde la entrada hasta el
-   hero, claro de los proyectos en adelante.
+   El sitio deja de ser monotema (ticket #54). El claro **no es una zona del
+   documento**: es el mundo de los proyectos. La página entera voltea a claro
+   cuando la lista de proyectos manda en pantalla, y se deshace por los dos
+   lados — subiendo al hero o bajando a "Sobre mí". Por eso el atributo vive en
+   la raíz y lo gobierna el scroll (assets/js/tema.js), no las secciones.
 
    El tema claro NO trae colores nuevos: los dos tokens **intercambian su
    papel**. El hueso deja de ser tinta y pasa a ser superficie; el negro cálido
@@ -18,7 +21,11 @@
    Esto invierte la excepción deliberada nº 2 ("el hueso como tinta, no como
    superficie"), que a partir de aquí solo describe el tema oscuro. Ver
    DESIGN.md > Color > Los dos temas. */
-[data-theme="claro"]{
+/* `:root[...]` y no `[...]` a secas: un selector de atributo pesa lo mismo que
+   `:root` (0,1,0), así que empatan y decide el orden del archivo — con este
+   bloque escrito antes, `:root` ganaba y el tema no cambiaba nunca. Atarlo a la
+   raíz lo sube a (0,2,0) y lo hace independiente de dónde esté escrito. */
+:root[data-tema="claro"]{
   --bg:       oklch(92% 0.018 78);   /* #EBE3D8 — el hueso, ahora superficie */
   --ink:      oklch(22% 0.014 50);   /* #201915 — el negro cálido, ahora tinta */
   /* La elevación se construye igual que en oscuro —moviendo la luminosidad,
@@ -38,9 +45,28 @@
      el tema oscuro se queda exactamente como estaba. */
   --dim-faint: .63;   /* numeración del índice */
   --dim:       .68;   /* metadatos, pies, notas */
+}
 
-  background:var(--bg);
-  color:var(--ink);
+/* El volteo se anima aquí y no en los tokens: una custom property no es
+   animable sin registrarla con @property, pero el color YA RESUELTO de cada
+   elemento sí. Al cambiar el atributo en la raíz, cada elemento interpola su
+   propio `background-color` / `color` / `border-color` desde el valor viejo al
+   nuevo — la inversión entera con una sola clase.
+
+   La clase se pone solo mientras dura el volteo y se quita después. Dejar una
+   transición universal permanente pondría estos 450 ms también en cada hover
+   de enlace, y el sitio se sentiría pastoso. */
+html.tema-volteando, html.tema-volteando *{
+  transition:
+    background-color var(--dur-tema) var(--ease-move),
+    color            var(--dur-tema) var(--ease-move),
+    border-color     var(--dur-tema) var(--ease-move),
+    opacity          var(--dur-tema) var(--ease-move) !important;
+}
+@media (prefers-reduced-motion: reduce){
+  /* El cambio de tema se mantiene —es estado, no decoración— pero sin
+     interpolar: se cruza el umbral y ya está. */
+  html.tema-volteando, html.tema-volteando *{transition:none !important;}
 }
 
 :root{
@@ -64,6 +90,10 @@
      DESIGN.md > Transiciones de página. */
   --ease-move: cubic-bezier(.45,0,.55,1);
   --dur-move: .6s;
+  /* El volteo de tema es más corto que --dur-move: es un cambio de estado, no
+     un desplazamiento, y a 600 ms la página se sentía indecisa a media
+     inversión. */
+  --dur-tema: .42s;
 
   /* Escala tipográfica: un solo clamp() en la raíz (suelo y techo), y cada
      paso declarado en rem para que respire de golpe con el viewport. Ver
