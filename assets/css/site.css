@@ -218,8 +218,14 @@ a{color:inherit;text-decoration:none;}
    del titular. La diferencia es que aquí sí hay dónde apartarse: el efecto
    vive en las zonas planas —entrada, hero, textos— y desaparece al apuntar
    un proyecto. Sale por la misma transición de opacidad que ya tenía, así
-   que el relevo entre mancha y foto se lee como una cesión, no como un corte. */
-body:has(.hero-preview-img.is-on) #backdrop-blob{opacity:0;}
+   que el relevo entre mancha y foto se lee como una cesión, no como un corte.
+
+   El enganche se rehízo en el ticket #55: antes era
+   `body:has(.hero-preview-img.is-on)`, y ese elemento desapareció con la foto
+   a sangre. Ahora la regla importa MÁS que antes, no menos: la imagen
+   flotante vive pegada al cursor, que es exactamente donde vive la mancha —
+   sin esto se solaparían siempre, no de vez en cuando. */
+body:has(#index-float.is-on) #backdrop-blob{opacity:0;}
 /* Blanco puro: con `difference`, blanco sobre X da exactamente el negativo de
    X. Cualquier otro color daría un tinte en vez de una inversión. */
 #backdrop-blob i{

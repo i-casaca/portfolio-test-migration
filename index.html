@@ -54,6 +54,7 @@
 <script src="./assets/js/reveal.js" defer></script>
 <script src="./assets/js/backdrop.js" defer></script>
 <script src="./assets/js/tema.js" defer></script>
+<script src="./assets/js/indice.js" defer></script>
 <!-- Solo en la home: la secuencia de saludos de la entrada (ticket #40). -->
 <script src="./assets/js/entry.js" defer></script>
 <style>
@@ -374,9 +375,9 @@
      llenarla ella sola. Con la banda del titular delante (ticket #51), ese
      mínimo solo servía para dejar un hueco muerto entre las dos y empujar los
      proyectos fuera de la vista. El alto lo marca ahora la propia lista.
-     Efecto lateral buscado: la foto a sangre (.hero-preview, inset:0) pasa a
-     cubrir exactamente el índice en vez de una pantalla entera, que es a lo
-     que apunta de verdad. */
+     El alto lo marca ahora la propia lista. (La foto a sangre que este
+     comentario mencionaba se retiró en el ticket #55; la sustituye la imagen
+     flotante ligada al cursor.) */
   .hero{
     background:var(--bg);position:relative;overflow:hidden;
     display:flex;flex-direction:column;gap:3.5vh;
@@ -388,35 +389,38 @@
      la distorsión líquida del titular no tenía sitio claro y se retiró con
      ella. El cursor a medida (#cursor-dot) sigue en pie, es independiente.
      Ver DESIGN.md > Layout. */
-  .hero-preview{position:absolute;inset:0;z-index:0;}
-  .hero-preview-img{
-    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-    opacity:0;transition:opacity .7s cubic-bezier(.2,.7,.3,1);
-  }
-  /* view-transition-name solo en la foto activa, nunca en varias a la vez
-     (dos elementos con el mismo nombre en un documento invalida la
-     transición entera): al ser `.is-on` un estado exclusivo que ya
-     controla el JS de arriba, esta regla no necesita tocarlo. Ver
-     site.css > Transiciones de página para el otro lado del emparejamiento. */
-  .hero-preview-img.is-on{opacity:.5;view-transition-name:project-cover;}
-  /* Sin este velo, una foto clara detrás le quita legibilidad al índice —
-     más fuerte a la izquierda (donde vive el texto) que a la derecha.
+  /* ---------- la imagen flotante ligada al cursor (ticket #55) ----------
+     Sustituye a la foto a sangre del #41 y a su velo en gradiente. Con la
+     imagen pequeña y encima del cursor ya no hay una foto compitiendo con el
+     texto del índice, así que el velo desaparece con ella: era una corrección
+     de un problema que esta solución no tiene.
 
-     Las paradas intermedias van con `color-mix` sobre `var(--bg)` y NO con el
-     color escrito a pelo. Estaban como `rgba(32,25,21,…)` —el negro cálido
-     deletreado para poder darle alfa— y al pasar el índice a tema claro el
-     velo degradaba de hueso a marrón: una franja gris cruzando el pivote.
-     Es el fallo típico de introducir un segundo tema, y el único literal de
-     color que quedaba en todo el sitio. */
-  .hero-preview::after{
-    content:"";position:absolute;inset:0;
-    background:
-      linear-gradient(90deg,
-        var(--bg) 0%,
-        color-mix(in srgb, var(--bg) 55%, transparent) 45%,
-        color-mix(in srgb, var(--bg) 30%, transparent) 100%),
-      linear-gradient(to top, var(--bg) 0%, transparent 35%);
+     Un solo <img> al que se le cambia el `src`, no cinco apiladas. Es lo que
+     permite que el `view-transition-name` viva SIEMPRE en el mismo nodo — dos
+     elementos con el mismo nombre en un documento invalidan la transición
+     entera, y con cinco imágenes había que ir moviéndolo. Ver
+     site.css > Transiciones de página para el otro lado del emparejamiento. */
+  #index-float{
+    position:fixed;top:0;left:0;margin:0;pointer-events:none;
+    width:clamp(180px, 17vw, 280px);aspect-ratio:4/3;
+    z-index:45;                     /* delante de la mancha (40), detrás del chat (60) */
   }
+  /* El reparto de responsabilidades entre los dos elementos no es cosmético.
+     GSAP toma el <figure> para el seguimiento y **absorbe cualquier `scale`
+     declarado en CSS dentro de su propia matriz de transform** — se probó
+     poniéndolo aquí y quedaba congelado en el valor inicial, sin animar nunca.
+     Así que el <figure> es solo posición (GSAP) y el <img> es solo aspecto
+     (CSS). Cada uno con su transform, sin pisarse. */
+  #index-float img{
+    width:100%;height:100%;object-fit:cover;display:block;border-radius:2px;
+    opacity:0;transform:scale(.86);transform-origin:50% 50%;
+    transition:opacity .32s var(--ease-move), transform .32s var(--ease-move);
+  }
+  #index-float.is-on img{opacity:1;transform:scale(1);}
+  /* El nombre solo se declara con la imagen visible: si viviera siempre en el
+     nodo, una navegación disparada desde cualquier otro punto de la página
+     intentaría morfear una imagen invisible y a tamaño cero. */
+  #index-float.is-on img{view-transition-name:project-cover;}
 
   .project-index{position:relative;z-index:1;width:100%;max-width:1040px;}
   .index-item{
@@ -429,6 +433,17 @@
     font-family:var(--f);font-weight:500;font-stretch:120%;
     font-size:clamp(2.1rem,6vw,4.2rem);line-height:1;
     transition:opacity .3s ease;
+  }
+  /* Cada carácter del nombre, en su propia caja de ancho fijo (indice.js mide
+     el ancho natural y lo congela antes de animar). Sin esto, el barrido de
+     letras movería la palabra: Roboto Flex no es monoespaciada, y el alto del
+     hero está calculado para que asome media fila del primer proyecto —un
+     temblor aquí se propaga hasta arriba del todo.
+     `tabular-nums` no sirve: solo iguala las cifras, no las letras. */
+  .index-name .flap{
+    display:inline-block;text-align:center;
+    /* La caja la fija el JS en px; esto solo evita que un espacio colapse. */
+    white-space:pre;
   }
   .index-meta{
     margin-left:auto;display:flex;align-items:center;gap:.9rem;
@@ -474,8 +489,10 @@
   ::view-transition-new(index-item-3){animation:.4s var(--ease-move) .08s both index-enter;}
   ::view-transition-new(index-item-2){animation:.4s var(--ease-move) .12s both index-enter;}
   ::view-transition-new(index-item-1){animation:.4s var(--ease-move) .16s both index-enter;}
-  /* Oculta en escritorio (ahí la foto es la de sangre, en .hero-preview);
-     es la respuesta a "no puede ser que en móvil no se vean las imágenes". */
+  /* Oculta en escritorio, donde la foto la pone la imagen flotante que sigue
+     al cursor. En táctil no hay cursor al que atarla, así que la miniatura
+     sigue siendo la respuesta a "no puede ser que en móvil no se vean las
+     imágenes" — más necesaria ahora que antes, no menos. */
   .index-thumb{display:none;}
 
   @media (hover:hover) and (pointer:fine){
@@ -507,7 +524,6 @@
        para todo el sitio. El tamaño y la velocidad de la marquesina los fijan
        las consultas de 1024 y 600 de arriba. */
 
-    .hero-preview{display:none;}
     /* 2,5rem arriba, igual que en escritorio: las 7rem de antes eran de cuando
        esta sección abría la página. Con la banda del titular delante, ese
        colchón empujaba la primera fila por debajo del corte y se perdía el
@@ -573,7 +589,11 @@
   }
 
   @media (prefers-reduced-motion: reduce){
-    .hero-preview-img{transition:none;}
+    /* La imagen flotante aparece y desaparece sin interpolar, y sin perseguir
+       al cursor: indice.js ni siquiera engancha el seguimiento con
+       `prefers-reduced-motion`, así que aquí solo hay que quitar la
+       transición del <img>, que es donde vive. */
+    #index-float img{transition:none;}
   }
 </style>
 </head>
@@ -670,48 +690,41 @@
 </section>
 
 <div class="hero" id="trabajo">
-  <div class="hero-preview" id="hero-preview" aria-hidden="true">
-    <img class="hero-preview-img" data-idx="0" src="./assets/images/manu-cardiel/hero.jpg" alt="" />
-    <img class="hero-preview-img" data-idx="1" src="./assets/images/adrenaline/hero.jpg" alt="" />
-    <img class="hero-preview-img" data-idx="2" src="./assets/images/arabvision/hero.jpg" alt="" />
-    <img class="hero-preview-img" data-idx="3" src="./assets/images/nexahub/hero.jpg" alt="" />
-    <img class="hero-preview-img" data-idx="4" src="./assets/images/el-paraguas/hero.jpg" alt="" />
-  </div>
-
   <!-- Sustituye a la rejilla de 6 celdas (decidido en el ticket #41): un
-       índice numerado, con la foto del proyecto a sangre detrás del ítem que
-       se apunta en vez de una miniatura. "Sobre mí" ya no vive aquí — el nav
+       índice numerado. La foto a sangre que llevaba detrás del ítem apuntado
+       se retiró en el #55: la sustituye la imagen flotante ligada al cursor
+       (#index-float, al final del <body> con las demás capas fijas). "Sobre mí" ya no vive aquí — el nav
        lo cubre — y el índice se queda enfocado solo en los 5 proyectos. Es
        ya el único listado de proyectos de la home: el works-section que
        repetía los mismos 5 en filas alternadas se retiró por duplicado. En
        su lugar, cada ítem lleva su propia miniatura para móvil/táctil (ver
        .index-thumb), que es donde antes recaía esa responsabilidad. -->
   <nav class="project-index" id="project-index" aria-label="Índice de proyectos">
-    <a class="index-item" data-idx="0" href="./manu-cardiel.html">
+    <a class="index-item" data-idx="0" data-foto="./assets/images/manu-cardiel/hero.jpg" href="./manu-cardiel.html">
       <span class="index-num">01</span>
       <img class="index-thumb" src="./assets/images/manu-cardiel/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
       <span class="index-name">Manu Cardiel</span>
       <span class="index-meta">Personal · 2024</span>
     </a>
-    <a class="index-item is-locked" data-idx="1" href="./adrenaline.html">
+    <a class="index-item is-locked" data-idx="1" data-foto="./assets/images/adrenaline/hero.jpg" href="./adrenaline.html">
       <span class="index-num">02</span>
       <img class="index-thumb" src="./assets/images/adrenaline/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
       <span class="index-name">Adrenaline</span>
       <span class="index-meta">Cliente · 2023 <span class="index-lock">🔒 NDA</span></span>
     </a>
-    <a class="index-item is-locked" data-idx="2" href="./arabvision.html">
+    <a class="index-item is-locked" data-idx="2" data-foto="./assets/images/arabvision/hero.jpg" href="./arabvision.html">
       <span class="index-num">03</span>
       <img class="index-thumb" src="./assets/images/arabvision/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
       <span class="index-name">Arabvision</span>
       <span class="index-meta">Cliente · 2023 <span class="index-lock">🔒 NDA</span></span>
     </a>
-    <a class="index-item is-locked" data-idx="3" href="./nexahub.html">
+    <a class="index-item is-locked" data-idx="3" data-foto="./assets/images/nexahub/hero.jpg" href="./nexahub.html">
       <span class="index-num">04</span>
       <img class="index-thumb" src="./assets/images/nexahub/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
       <span class="index-name">Nexahub</span>
       <span class="index-meta">Cliente · 2022 <span class="index-lock">🔒 NDA</span></span>
     </a>
-    <a class="index-item" data-idx="4" href="./el-paraguas.html">
+    <a class="index-item" data-idx="4" data-foto="./assets/images/el-paraguas/hero.jpg" href="./el-paraguas.html">
       <span class="index-num">05</span>
       <img class="index-thumb" src="./assets/images/el-paraguas/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
       <span class="index-name">El Paraguas</span>
@@ -804,16 +817,9 @@
   const cursorDot = document.getElementById('cursor-dot');
   const finePointer = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
 
-  /* ---------- índice de proyectos: la foto del ítem apuntado, a sangre detrás ---------- */
-  document.querySelectorAll('.index-item').forEach((item) => {
-    const img = document.querySelector(`.hero-preview-img[data-idx="${item.dataset.idx}"]`);
-    const on = () => img.classList.add('is-on');
-    const off = () => img.classList.remove('is-on');
-    item.addEventListener('mouseenter', on);
-    item.addEventListener('mouseleave', off);
-    item.addEventListener('focus', on);
-    item.addEventListener('blur', off);
-  });
+  /* El hover del índice (imagen flotante y letras de aeropuerto) vive ahora en
+     assets/js/indice.js: necesita GSAP, y aquí no hay garantía de que haya
+     cargado todavía. Ver ticket #55. */
 
   if (finePointer){
     document.addEventListener('mousemove', (e) => {
@@ -890,6 +896,16 @@
 <script src="./assets/js/chat-corpus-tags.js"></script>
 <script src="./assets/js/chat-corpus.js"></script>
 <script src="./assets/js/chat-bubble.js"></script>
+
+<!-- La imagen flotante del índice (ticket #55). Sustituye a la foto a sangre
+     del #41: un solo <img> cuyo `src` se cambia al apuntar cada fila, no cinco
+     imágenes apiladas — un único elemento es lo que permite que el
+     `view-transition-name` viva siempre en el mismo nodo.
+
+     Las rutas viven en `data-foto` de cada fila, e indice.js las precarga al
+     arrancar: sin eso, la primera vez que se apunta una fila el `src` cambia y
+     la imagen llega en blanco justo cuando se está mirando. -->
+<figure id="index-float" aria-hidden="true"><img alt="" decoding="async" /></figure>
 
 <!-- La mancha que sigue al ratón (ticket #53). Va vacía: backdrop.js crea
      dentro los circulos que la forman, y no la monta siquiera sin puntero
