@@ -481,8 +481,16 @@
     .hero-statement,
     .hero{cursor:none;}
     .index-item:hover .index-name, .index-item:focus-visible .index-name{font-style:italic;}
+    /* El atenuado de las filas que no se apuntan (decisión del #41) sigue el
+       eje del tema, igual que --dim. No es un cambio de esa decisión: es
+       mantenerla. El 0,32 sobre negro da 2,55:1, y el mismo 0,32 sobre hueso
+       caería a 1,97:1 — la fila atenuada casi desaparecería en vez de quedar
+       en segundo plano. 0,42 sobre hueso devuelve 2,53:1, o sea el MISMO
+       grado de atenuación a los dos extremos de la inversión. */
     .project-index:has(.index-item:hover) .index-item:not(:hover) .index-name,
-    .project-index:has(.index-item:hover) .index-item:not(:hover) .index-meta{opacity:.32;}
+    .project-index:has(.index-item:hover) .index-item:not(:hover) .index-meta{
+      opacity:calc(.32 + .10 * var(--tk));
+    }
     .index-item:focus-visible{outline:none;}
     .index-item:focus-visible .index-name{text-decoration:underline;text-underline-offset:.15em;}
   }
