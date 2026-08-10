@@ -485,21 +485,21 @@
   @keyframes index-exit{ to{transform:translateY(-2.5rem);opacity:0;} }
   @keyframes index-enter{ from{transform:translateY(-2.5rem);opacity:0;} }
 
-  ::view-transition-old(hero-statement){animation:.32s var(--ease-move) both index-exit;}
-  ::view-transition-new(hero-statement){animation:.4s var(--ease-move) .1s both index-enter;}
+  ::view-transition-old(hero-statement){animation:.48s var(--ease-move) both index-exit;}
+  ::view-transition-new(hero-statement){animation:.62s var(--ease-move) .15s both index-enter;}
 
-  ::view-transition-old(index-item-1){animation:.32s var(--ease-move) both index-exit;}
-  ::view-transition-old(index-item-2){animation:.32s var(--ease-move) .04s both index-exit;}
-  ::view-transition-old(index-item-3){animation:.32s var(--ease-move) .08s both index-exit;}
-  ::view-transition-old(index-item-4){animation:.32s var(--ease-move) .12s both index-exit;}
-  ::view-transition-old(index-item-5){animation:.32s var(--ease-move) .16s both index-exit;}
+  ::view-transition-old(index-item-1){animation:.48s var(--ease-move) both index-exit;}
+  ::view-transition-old(index-item-2){animation:.48s var(--ease-move) .06s both index-exit;}
+  ::view-transition-old(index-item-3){animation:.48s var(--ease-move) .12s both index-exit;}
+  ::view-transition-old(index-item-4){animation:.48s var(--ease-move) .18s both index-exit;}
+  ::view-transition-old(index-item-5){animation:.48s var(--ease-move) .24s both index-exit;}
 
   /* La entrada rebobina el mismo gesto: el último en salir es el primero en volver. */
-  ::view-transition-new(index-item-5){animation:.4s var(--ease-move) both index-enter;}
-  ::view-transition-new(index-item-4){animation:.4s var(--ease-move) .04s both index-enter;}
-  ::view-transition-new(index-item-3){animation:.4s var(--ease-move) .08s both index-enter;}
-  ::view-transition-new(index-item-2){animation:.4s var(--ease-move) .12s both index-enter;}
-  ::view-transition-new(index-item-1){animation:.4s var(--ease-move) .16s both index-enter;}
+  ::view-transition-new(index-item-5){animation:.62s var(--ease-move) both index-enter;}
+  ::view-transition-new(index-item-4){animation:.62s var(--ease-move) .06s both index-enter;}
+  ::view-transition-new(index-item-3){animation:.62s var(--ease-move) .12s both index-enter;}
+  ::view-transition-new(index-item-2){animation:.62s var(--ease-move) .18s both index-enter;}
+  ::view-transition-new(index-item-1){animation:.62s var(--ease-move) .24s both index-enter;}
   /* Oculta en escritorio, donde la foto la pone la imagen flotante que sigue
      al cursor. En táctil no hay cursor al que atarla, así que la miniatura
      sigue siendo la respuesta a "no puede ser que en móvil no se vean las

@@ -92,7 +92,12 @@
      nombre, así que 'power2.inOut' se aproxima con este cubic-bezier. Ver
      DESIGN.md > Transiciones de página. */
   --ease-move: cubic-bezier(.45,0,.55,1);
-  --dur-move: .6s;
+  /* Subida de 0,6 s a 0,95 s en la revisión del #55: a 0,6 el morfismo de la
+     portada se resolvía antes de que el ojo lo siguiera y la página de
+     proyecto aparecía casi de golpe. Es la duración del cambio de página, no
+     de una microinteracción — aquí lo que se quiere es que se lea el
+     recorrido, no que termine pronto. */
+  --dur-move: .95s;
 
   /* Escala tipográfica: un solo clamp() en la raíz (suelo y techo), y cada
      paso declarado en rem para que respire de golpe con el viewport. Ver
@@ -381,6 +386,21 @@ html.is-entering #backdrop-blob{opacity:0;}
    revelan de golpe con un cambio de clase. */
 html.js .media{opacity:0;transform:translateY(30px) scale(.985);}
 html.js .media.is-visible{opacity:1;transform:none;}
+
+/* La portada del proyecto queda FUERA del reveal, y no es una excepción
+   estética: es la que lleva `project-cover`, o sea el destino del morfismo
+   desde la imagen flotante del índice.
+
+   El fallo que corrige, encontrado navegando de verdad: al llegar a la página,
+   la transición capturaba el destino con `opacity:0` y desplazado 30px, así
+   que el morfismo salía de la imagen flotante y entraba **en la nada**. Se
+   veía la salida y no la entrada. Ninguno de los dos tickets que se cruzan
+   aquí podía verlo solo — el reveal (#39) y la transición de página (#42)
+   funcionan cada uno por su lado.
+
+   Además, revelar por scroll algo que ya está en pantalla al cargar nunca
+   tuvo sentido: esta figura vive por encima del pliegue. */
+html.js .project-body .media:first-of-type{opacity:1;transform:none;}
 
 @media (max-width: 860px){
   .text-cols{grid-template-columns:1fr;gap:2.5rem;margin:5vh 0;}

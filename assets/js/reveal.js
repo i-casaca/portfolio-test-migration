@@ -7,7 +7,14 @@
 (function () {
   'use strict';
 
-  var els = [].slice.call(document.querySelectorAll('.media'));
+  /* La portada del proyecto se queda fuera: es el destino del morfismo desde
+   * el índice (`project-cover`), vive por encima del pliegue, y el CSS ya la
+   * declara visible. Crearle un trigger no la rompería —este script anima
+   * HACIA visible, así que sería un no-op— pero dejarlo daría a entender que
+   * participa del reveal, y es justo lo contrario: revelarla por scroll fue lo
+   * que dejó la transición de entrada sin destino visible. Ver site.css. */
+  var els = [].slice.call(document.querySelectorAll('.media'))
+    .filter(function (el) { return getComputedStyle(el).viewTransitionName !== 'project-cover'; });
   if (!els.length) return;
 
   function revealAll() {
