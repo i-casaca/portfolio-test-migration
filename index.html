@@ -402,7 +402,7 @@
      site.css > Transiciones de página para el otro lado del emparejamiento. */
   #index-float{
     position:fixed;top:0;left:0;margin:0;pointer-events:none;
-    width:clamp(180px, 17vw, 280px);aspect-ratio:4/3;
+    width:clamp(360px, 34vw, 560px);aspect-ratio:4/3;
     z-index:45;                     /* delante de la mancha (40), detrás del chat (60) */
   }
   /* El reparto de responsabilidades entre los dos elementos no es cosmético.
@@ -415,6 +415,17 @@
     width:100%;height:100%;object-fit:cover;display:block;border-radius:2px;
     opacity:0;transform:scale(.86);transform-origin:50% 50%;
     transition:opacity .32s var(--ease-move), transform .32s var(--ease-move);
+    /* Que se lea como que está POR ENCIMA de todo lo demás. La sombra sola no
+       basta: sobre el extremo oscuro una sombra oscura es invisible. Así que
+       hay dos señales cruzadas por el eje del tema — la sombra crece con `--t`
+       (manda en claro) y el filo claro se apaga con él (manda en oscuro), de
+       modo que siempre hay exactamente una haciendo el trabajo. */
+    box-shadow:
+      0 calc(10px + 16px * var(--t)) calc(28px + 36px * var(--t)) -6px
+        color-mix(in oklab, transparent, var(--c-negro) calc(22% + 26% * var(--t))),
+      0 2px 6px color-mix(in oklab, transparent, var(--c-negro) 28%);
+    outline:1px solid color-mix(in oklab, transparent, var(--c-hueso) calc(16% - 16% * var(--t)));
+    outline-offset:0;
   }
   #index-float.is-on img{opacity:1;transform:scale(1);}
   /* El nombre solo se declara con la imagen visible: si viviera siempre en el
@@ -432,7 +443,7 @@
   .index-name{
     font-family:var(--f);font-weight:500;font-stretch:120%;
     font-size:clamp(2.1rem,6vw,4.2rem);line-height:1;
-    transition:opacity .3s ease;
+    transition:opacity .3s ease, font-weight .28s var(--ease-move);
   }
   /* Cada carácter del nombre, en su propia caja de ancho fijo (indice.js mide
      el ancho natural y lo congela antes de animar). Sin esto, el barrido de
@@ -498,7 +509,17 @@
   @media (hover:hover) and (pointer:fine){
     .hero-statement,
     .hero{cursor:none;}
-    .index-item:hover .index-name, .index-item:focus-visible .index-name{font-style:italic;}
+    /* El nombre engorda al apuntarlo, no se inclina. La cursiva era la marca
+       del #41; con el barrido de letras encima se leían como dos efectos
+       compitiendo, y la inclinación además peleaba con el ancho fijo de cada
+       celda. El peso es la misma señal sin ese conflicto.
+
+       Roboto Flex llega con el eje `wght` completo (100–1000) del mismo
+       `<link>` que ya carga el sitio: no cuesta una petición más. Y como cada
+       carácter vive en una caja de ancho congelado, engordar no mueve nada —
+       sin las celdas, pasar de 500 a 800 ensancharía la palabra y arrastraría
+       la fila. Las dos piezas se sostienen entre sí. */
+    .index-item:hover .index-name, .index-item:focus-visible .index-name{font-weight:850;}
     /* El atenuado de las filas que no se apuntan (decisión del #41) sigue el
        eje del tema, igual que --dim. No es un cambio de esa decisión: es
        mantenerla. El 0,32 sobre negro da 2,55:1, y el mismo 0,32 sobre hueso
@@ -529,15 +550,46 @@
        colchón empujaba la primera fila por debajo del corte y se perdía el
        "media fila asomando" que busca el alto del hero. */
     .hero{padding:2.5rem 6vw 3rem;}
-    .index-item{flex-wrap:wrap;align-items:center;}
-    .index-thumb{
-      display:block;width:56px;height:56px;object-fit:cover;border-radius:4px;
-      order:1;
+
+    /* La fila en móvil se reordenó al no haber hover ni imagen flotante: aquí
+       la miniatura ES la foto del proyecto, no un apoyo. Se pasa de `flex` con
+       envolturas a una rejilla de dos columnas, que es lo que esta fila pide de
+       verdad — la miniatura manda la altura y el texto se apila a su derecha.
+       Con `flex-wrap` el nombre y el meta caían a líneas sueltas de ancho
+       completo y la fila quedaba desarmada. */
+    .index-item{
+      display:grid;
+      grid-template-columns:72px 1fr;
+      grid-template-areas:
+        "num   nombre"
+        "thumb meta";
+      column-gap:1rem;row-gap:.45rem;
+      align-items:start;padding:1.1rem 0;
     }
-    .index-num{order:0;}
-    .index-name{order:2;font-size:clamp(1.4rem,7vw,2rem);}
-    .index-item.is-locked .index-thumb{filter:blur(5px) saturate(.9);}
-    .index-meta{margin-left:0;flex:1 0 100%;order:3;}
+    .index-thumb{
+      display:block;grid-area:thumb;
+      width:72px;height:72px;object-fit:cover;border-radius:4px;
+    }
+    .index-num{grid-area:num;align-self:center;}
+    /* Sin `clamp` de 7vw: a 7vw un nombre largo se comía dos líneas y partía
+       palabras. Un cuerpo fijo y `text-wrap:balance` reparten mejor cuando hay
+       que envolver, y `hyphens:none` impide que "Cardiel" se corte. */
+    .index-name{
+      grid-area:nombre;font-size:1.72rem;line-height:1.05;
+      text-wrap:balance;hyphens:none;
+    }
+    /* `clip-path` además del `filter`: un desenfoque se pinta MÁS ALLÁ de la
+       caja del elemento, así que las tres miniaturas con NDA derramaban un
+       halo fuera de su cuadrado y se comían el aire de la fila. El clip
+       recorta el resultado ya filtrado, que es el orden en que el navegador
+       los aplica. */
+    .index-item.is-locked .index-thumb{
+      filter:blur(5px) saturate(.9);
+      clip-path:inset(0 round 4px);
+    }
+    /* `start` y no `center`: centrado en su celda, el meta flotaba a media
+       altura de la miniatura, lejos del nombre al que pertenece. */
+    .index-meta{grid-area:meta;margin-left:0;align-self:start;}
   }
 
   /* ---------- cursor a medida: bolita de 24px que invierte lo que tiene detrás ---------- */

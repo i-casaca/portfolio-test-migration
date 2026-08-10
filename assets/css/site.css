@@ -226,6 +226,14 @@ a{color:inherit;text-decoration:none;}
    flotante vive pegada al cursor, que es exactamente donde vive la mancha —
    sin esto se solaparían siempre, no de vez en cuando. */
 body:has(#index-float.is-on) #backdrop-blob{opacity:0;}
+
+/* Y no existe durante la entrada. La secuencia de saludos y el indicador de
+   carga son una pieza cerrada con su propia coreografía (#40); una mancha
+   invirtiendo por encima mientras cargan la ensucia y, peor, adelanta un
+   efecto del sitio antes de que el sitio haya llegado. `is-entering` lo pone
+   y lo quita entry.js, así que esto se apaga solo cuando la entrada termina.
+   Pesa (1,1,1) contra el (1,1,0) de `.is-on`, así que gana sin `!important`. */
+html.is-entering #backdrop-blob{opacity:0;}
 /* Blanco puro: con `difference`, blanco sobre X da exactamente el negativo de
    X. Cualquier otro color daría un tinte en vez de una inversión. */
 #backdrop-blob i{

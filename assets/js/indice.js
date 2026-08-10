@@ -131,13 +131,24 @@
 
     nombre.textContent = '';
     nombre.appendChild(frag);
+    return celdas;
+  }
 
-    /* Se mide DESPUÉS de insertar, con la tipografía ya aplicada, y se fija en
-     * píxeles. Medir antes daría el ancho de la fuente de reserva. */
+  /* Medir es un paso aparte de trocear, y **cuándo** se mide fue un fallo real:
+   * midiendo al arrancar, Roboto Flex todavía no había cargado (va con
+   * `display=swap`), así que cada celda se quedaba con el ancho de la fuente de
+   * reserva —más ancha— y al llegar la buena los glifos bailaban dentro de
+   * cajas grandes. En móvil se veía clarísimo: "M a n u   C a r d i e l".
+   *
+   * Se mide con `document.fonts.ready`, igual que motion.js hace con
+   * ScrollTrigger y por el mismo motivo. Y se vuelve a medir al cambiar el
+   * tamaño, porque el cuerpo del nombre es fluido (`clamp(...,6vw,...)`): un
+   * ancho congelado en píxeles deja de valer en cuanto cambia el viewport. */
+  function medir(celdas) {
+    celdas.forEach(function (c) { c.el.style.width = 'auto'; });
     celdas.forEach(function (c) {
       c.el.style.width = c.el.getBoundingClientRect().width + 'px';
     });
-    return celdas;
   }
 
   function barrer(celdas) {
@@ -174,11 +185,19 @@
     requestAnimationFrame(paso);
   }
 
-  if (!reducido) {
+  /* Solo se trocea el nombre donde el barrido puede ocurrir. En táctil no hay
+   * hover que lo dispare, así que partir el título en celdas allí no aporta
+   * nada y sí puede romper: es el reparto en `<span>` lo que hacía que el
+   * nombre se desmontara en móvil. Sin puntero fino, el título se queda como
+   * un texto normal. */
+  if (!reducido && punteroFino) {
+    var todas = [];
+
     items.forEach(function (item) {
       var nombre = item.querySelector('.index-name');
       if (!nombre) return;
       var celdas = preparar(nombre);
+      todas.push(celdas);
       var corriendo = false;
 
       var lanzar = function () {
@@ -193,6 +212,19 @@
 
       item.addEventListener('pointerenter', lanzar);
       item.addEventListener('focus', lanzar);
+    });
+
+    var medirTodas = function () { todas.forEach(medir); };
+
+    /* Con las fuentes ya resueltas. `document.fonts.ready` cumple igual si la
+     * fuente ya estaba en caché, así que no hace falta distinguir el caso. */
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(medirTodas);
+    else medirTodas();
+
+    var t = null;
+    window.addEventListener('resize', function () {
+      clearTimeout(t);
+      t = setTimeout(medirTodas, 150);
     });
   }
 })();
