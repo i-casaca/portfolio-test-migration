@@ -53,6 +53,7 @@
 <script src="./assets/js/motion.js" defer></script>
 <script src="./assets/js/reveal.js" defer></script>
 <script src="./assets/js/backdrop.js" defer></script>
+<script src="./assets/js/tema.js" defer></script>
 <!-- Solo en la home: la secuencia de saludos de la entrada (ticket #40). -->
 <script src="./assets/js/entry.js" defer></script>
 <style>
@@ -399,11 +400,21 @@
      site.css > Transiciones de página para el otro lado del emparejamiento. */
   .hero-preview-img.is-on{opacity:.5;view-transition-name:project-cover;}
   /* Sin este velo, una foto clara detrás le quita legibilidad al índice —
-     más fuerte a la izquierda (donde vive el texto) que a la derecha. */
+     más fuerte a la izquierda (donde vive el texto) que a la derecha.
+
+     Las paradas intermedias van con `color-mix` sobre `var(--bg)` y NO con el
+     color escrito a pelo. Estaban como `rgba(32,25,21,…)` —el negro cálido
+     deletreado para poder darle alfa— y al pasar el índice a tema claro el
+     velo degradaba de hueso a marrón: una franja gris cruzando el pivote.
+     Es el fallo típico de introducir un segundo tema, y el único literal de
+     color que quedaba en todo el sitio. */
   .hero-preview::after{
     content:"";position:absolute;inset:0;
     background:
-      linear-gradient(90deg, var(--bg) 0%, rgba(32,25,21,.55) 45%, rgba(32,25,21,.3) 100%),
+      linear-gradient(90deg,
+        var(--bg) 0%,
+        color-mix(in srgb, var(--bg) 55%, transparent) 45%,
+        color-mix(in srgb, var(--bg) 30%, transparent) 100%),
       linear-gradient(to top, var(--bg) 0%, transparent 35%);
   }
 
@@ -413,7 +424,7 @@
     border-top:1px solid var(--line);text-decoration:none;color:var(--ink);
   }
   .index-item:last-child{border-bottom:1px solid var(--line);}
-  .index-num{font-size:var(--fs-small);opacity:.5;font-variant-numeric:tabular-nums;flex:0 0 2.4ch;}
+  .index-num{font-size:var(--fs-small);opacity:var(--dim-faint);font-variant-numeric:tabular-nums;flex:0 0 2.4ch;}
   .index-name{
     font-family:var(--f);font-weight:500;font-stretch:120%;
     font-size:clamp(2.1rem,6vw,4.2rem);line-height:1;
@@ -421,7 +432,7 @@
   }
   .index-meta{
     margin-left:auto;display:flex;align-items:center;gap:.9rem;
-    font-size:var(--fs-small);opacity:.6;white-space:nowrap;align-self:center;
+    font-size:var(--fs-small);opacity:var(--dim);white-space:nowrap;align-self:center;
   }
   .index-lock{
     display:inline-flex;align-items:center;gap:.4em;font-size:var(--fs-micro);
@@ -471,8 +482,16 @@
     .hero-statement,
     .hero{cursor:none;}
     .index-item:hover .index-name, .index-item:focus-visible .index-name{font-style:italic;}
+    /* El atenuado de las filas que no se apuntan (decisión del #41) sigue el
+       eje del tema, igual que --dim. No es un cambio de esa decisión: es
+       mantenerla. El 0,32 sobre negro da 2,55:1, y el mismo 0,32 sobre hueso
+       caería a 1,97:1 — la fila atenuada casi desaparecería en vez de quedar
+       en segundo plano. 0,42 sobre hueso devuelve 2,53:1, o sea el MISMO
+       grado de atenuación a los dos extremos de la inversión. */
     .project-index:has(.index-item:hover) .index-item:not(:hover) .index-name,
-    .project-index:has(.index-item:hover) .index-item:not(:hover) .index-meta{opacity:.32;}
+    .project-index:has(.index-item:hover) .index-item:not(:hover) .index-meta{
+      opacity:calc(.32 + .10 * var(--tk));
+    }
     .index-item:focus-visible{outline:none;}
     .index-item:focus-visible .index-name{text-decoration:underline;text-underline-offset:.15em;}
   }
@@ -531,10 +550,10 @@
     padding:.9rem 0;border-top:1px solid var(--line);
   }
   .cv-role{grid-column:1;grid-row:1;font-weight:600;font-size:.95rem;}
-  .cv-org{grid-column:1;grid-row:2;font-size:.85rem;opacity:.6;}
+  .cv-org{grid-column:1;grid-row:2;font-size:.85rem;opacity:var(--dim);}
   .cv-year{
     grid-column:2;grid-row:1/3;align-self:center;text-align:right;
-    font-size:var(--fs-micro);letter-spacing:.06em;opacity:.6;padding-left:1.5rem;
+    font-size:var(--fs-micro);letter-spacing:.06em;opacity:var(--dim);padding-left:1.5rem;
   }
 
   /* ---------- metodología: cómo trabaja, en su voz ---------- */

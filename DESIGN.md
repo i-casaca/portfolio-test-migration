@@ -30,29 +30,106 @@ Decidido en el ticket
 [El sistema visual oscuro: color, grano y escala tipográfica](https://github.com/i-casaca/portfolio-test-migration/issues/38),
 viendo un prototipo real contra las fotos de los proyectos — no eligiendo sobre una paleta abstracta.
 
-### Los dos tokens
+### Los dos colores
 
 ```css
---bg:       oklch(22% 0.014 50);   /* #201915 — fondo, toda la superficie */
---surface1: oklch(27% 0.014 50);   /* un paso elevado: franja de contacto, tarjetas, muro NDA */
---surface2: oklch(32% 0.014 50);   /* dos pasos: hover sobre una superficie ya elevada */
---ink:      oklch(92% 0.018 78);   /* #EBE3D8 — texto, bordes, iconografía */
---line:     oklch(92% 0.018 78 / .14);
+--c-negro: oklch(22% 0.014 50);   /* #201915 */
+--c-hueso: oklch(92% 0.018 78);   /* #EBE3D8 */
 ```
 
-Contraste `--bg`/`--ink`: **13,6:1**, muy por encima del mínimo de 4.5:1. La profundidad entre
-`--bg`/`--surface1`/`--surface2` sale de subir la luminosidad manteniendo el mismo tono y croma —
-nunca de una sombra — que es como se construye elevación en un registro oscuro.
+Son los **únicos literales de color del sitio**. Todo lo demás —fondo, tinta, superficies, líneas—
+se deriva de ellos y del eje `--t` (ver [La inversión](#la-inversión)).
 
-**Solo dos tokens, deliberadamente.** No hay un tercer color de acento: la fotografía de proyecto es
-la única fuente de color saturado del sitio. Ver [Excepciones deliberadas](#excepciones-deliberadas).
+**Solo dos, deliberadamente.** No hay un tercer color de acento: la fotografía de proyecto es la
+única fuente de color saturado del sitio. Ver [Excepciones deliberadas](#excepciones-deliberadas).
 Sustituye por completo a la paleta crema/menta del MVP (`--cream`, `--mint`, `--ink` en
 `assets/css/site.css`), que desaparece de `:root`.
 
-**Toda opacidad usada como color de texto se fijó en ≥ 0,55.** Es el suelo real: por debajo de eso el
-hueso sobre `--bg` cae de 4,97:1 hacia abajo y dejar de cumplir AA en texto que no es grande. Un
-`.disclaimer` a 0,5 y un `cv-year` a 0,5 se detectaron así durante la implementación y se subieron a
-0,6. Antes de bajar una opacidad de texto por debajo de 0,55, hay que volver a medir.
+### La inversión
+
+Decidido en el ticket
+[El índice en claro](https://github.com/i-casaca/portfolio-test-migration/issues/54).
+
+**El sitio no tiene dos temas: tiene un eje.** El claro no es una zona del documento — es el mundo de
+los proyectos. La página entera se va invirtiendo conforme la lista de proyectos toma la pantalla, y
+se deshace por los dos lados: subiendo al hero, o bajando a "Sobre mí".
+
+```css
+--t:   /* 0 = oscuro · 1 = claro. Continuo. Mueve el FONDO. */
+--tk:  /* 0 ó 1. Salta en t = 0,48. Mueve la TINTA. */
+
+--bg:  color-mix(in oklab, var(--c-negro), var(--c-hueso) calc(var(--t)  * 100%));
+--ink: color-mix(in oklab, var(--c-hueso), var(--c-negro) calc(var(--tk) * 100%));
+--surface1: color-mix(in oklab, var(--bg), var(--ink) 7%);
+--surface2: color-mix(in oklab, var(--bg), var(--ink) 14%);
+--line:     color-mix(in oklab, transparent, var(--ink) 13%);
+```
+
+`assets/js/tema.js` escribe `--t` y `--tk`, **y nada más en el sitio los escribe**. El progreso se
+mide por **ocupación** —qué fracción de la pantalla cubre la lista, entre 0,18 y 0,62— y no por
+posición de scroll: así las rampas de entrada y salida salen simétricas solas, sin escribir dos
+cálculos.
+
+**Los dos colores intercambian su papel, no se añade ninguno.** El hueso deja de ser tinta y pasa a
+ser superficie. Por eso el contraste sale idéntico en los dos extremos —**13,63:1**— sin calibrar
+una paleta nueva: es literalmente el mismo par. Y las superficies, derivadas empujando el fondo
+*hacia* la tinta, cambian de sentido solas: en oscuro un paso elevado sale más claro, en claro más
+oscuro, sin dos juegos de valores. La elevación sigue construyéndose moviendo luminosidad, nunca con
+una sombra.
+
+Se mezcla **en oklab**: el camino recto entre los dos pasa por grises neutros en vez de por un marrón
+sucio a mitad de recorrido.
+
+#### Por qué el fondo fluye y la tinta salta
+
+Si fondo y tinta cruzan a la vez, a mitad de camino **son el mismo color y el texto desaparece**.
+Medido: 1,00:1 en `t = 0,5`, y por debajo de AA durante el 56% de la rampa. Es inevitable mientras
+ambos viajen juntos, porque los dos extremos son el mismo par intercambiado.
+
+Por eso la tinta va en su propio eje y da un **único salto en `t = 0,48`**. Ese número está
+calculado, no elegido: es el punto donde el fondo a medio camino contrasta lo mismo con los dos
+extremos de tinta (3,72:1 con el hueso, 3,67:1 con el negro), así que saltar ahí **maximiza el peor
+instante de todo el recorrido**.
+
+Medido sobre el scroll real completo: peor contraste **3,72:1**, y solo **60 px de 3376** por debajo
+de AA — el instante del salto.
+
+#### Nada de esto se anima con `transition`
+
+La primera versión ponía una `transition` sobre `html.tema-volteando *`. Cientos de elementos
+arrancando cada uno su propia animación, que el navegador no puede iniciar en el mismo fotograma, y
+lo que no es color (imágenes, capas, pseudos) saltaba de golpe mientras el resto interpolaba: **un
+parpadeo escalonado**, bien visible, detectado al verlo correr.
+
+**La regla que sale de ahí: para invertir la página entera, anima UN valor y deriva el resto.** Con
+un solo número, todos los tokens se recalculan en el mismo paso de estilo y es imposible que se
+desincronicen. `--t` y `--tk` se escriben en el mismo turno de JS por la misma razón.
+
+Un parpadeo es que las cosas cambien en momentos distintos. El salto de la tinta es lo contrario:
+una propiedad, un elemento, todo el texto del sitio a la vez.
+
+#### El suelo de opacidad no se hereda
+
+**Toda opacidad usada como color de texto se fijó en ≥ 0,55** para el extremo oscuro: por debajo de
+eso el hueso sobre el negro cae de 4,97:1 hacia abajo y deja de cumplir AA en texto que no es grande.
+Un `.disclaimer` a 0,5 y un `cv-year` a 0,5 se detectaron así durante la implementación y se
+subieron a 0,6.
+
+**Ese suelo no vale en el otro extremo, y no por poco.** El mismo alfa 0,55 da 4,97:1 sobre negro
+pero **3,62:1 sobre hueso**; el mínimo para AA sube de 0,52 a **0,63**. Cuatro reglas de texto
+secundario caían por debajo de AA al invertir. Por eso los escalones interpolan con `--tk` en vez de
+quedarse fijos:
+
+```css
+--dim-faint: calc(.5 + .13 * var(--tk));   /* numeración del índice */
+--dim:       calc(.6 + .08 * var(--tk));   /* metadatos, pies, notas */
+```
+
+El atenuado del hover del índice sigue la misma regla por el mismo motivo:
+`calc(.32 + .10 * var(--tk))`, que da 2,55:1 en oscuro y 2,53:1 en claro — el mismo grado de
+atenuación a los dos extremos. No cambia la decisión del #41, la mantiene.
+
+**Antes de escribir una opacidad de texto, hay que medirla en los dos extremos.** Uno solo no basta.
 
 ### El grano
 
@@ -822,14 +899,23 @@ Construidas en el ticket
 excepción quedó escrita antes de construirlas a propósito — si no estuviera puesta, la primera
 pasada del skill que las vea las trataría como andamiaje y las quitaría.
 
-### 2. El hueso como tinta, no como superficie
+### 2. El hueso, que es tinta y también superficie
 
 `impeccable` prohíbe la banda crema/arena/hueso como fondo de página, y marca como sospechosos los
 nombres de token del tipo `--bone` o `--cream`. Es una prohibición correcta: ese fondo es el default
 saturado de la IA actual.
 
-Aquí el hueso es **tinta sobre una superficie oscura**, que es exactamente el caso contrario. La
-prohibición no aplica, y el token no se debe reemplazar por un blanco neutro "por seguridad".
+Hasta el ticket [#54](https://github.com/i-casaca/portfolio-test-migration/issues/54) esta excepción
+se justificaba sola: el hueso era **solo tinta sobre una superficie oscura**, el caso contrario al
+prohibido. Con la inversión, en el extremo claro **sí es el fondo de la página** — justo lo que la
+regla prohíbe.
+
+Sigue sin aplicar, y por un motivo más fuerte que el anterior: el hueso no se eligió como fondo. Es
+el mismo token de tinta cumpliendo el otro papel durante el tramo de los proyectos, y el sitio vuelve
+a oscuro en cuanto se sale de él. No hay una paleta crema, hay **dos colores que se intercambian**.
+El token no se debe reemplazar por un blanco neutro "por seguridad", ni el extremo claro rediseñarse
+como si fuera un tema independiente: en cuanto se le da color propio, deja de ser una inversión y el
+contraste hay que recalibrarlo de cero.
 
 **Matiz introducido en el ticket [#51](https://github.com/i-casaca/portfolio-test-migration/issues/51)
 (ver [Hero](#hero)):** el marco de la polaroid del hero sí usa `--ink` como superficie — un objeto

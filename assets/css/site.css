@@ -5,15 +5,87 @@
    de esa página. Aquí solo va lo que se repite en todas.
    =========================================================================== */
 
+/* ---------- la inversión de tema ----------
+   El sitio deja de ser monotema (ticket #54). El claro **no es una zona del
+   documento**: es el mundo de los proyectos. La página entera se va
+   invirtiendo conforme la lista de proyectos toma la pantalla, y se deshace
+   por los dos lados — subiendo al hero o bajando a "Sobre mí". No hay un
+   atributo de tema ni dos juegos de valores: hay un eje continuo que mueve el
+   scroll (assets/js/tema.js). Ver DESIGN.md > Color > La inversión.
+
+   --------- el eje: UN solo número ---------
+   `--t` es todo el mecanismo: 0 = oscuro, 1 = claro, y cualquier valor
+   intermedio es la inversión a medio camino. Lo mueve el scroll
+   (assets/js/tema.js) y **nada más en el sitio lo escribe**.
+
+   Por qué un número y no una clase con transiciones: la primera versión ponía
+   una `transition` sobre `html.tema-volteando *`, o sea cientos de elementos
+   arrancando cada uno su propia animación. El navegador no puede iniciarlas
+   todas en el mismo fotograma, y lo que no es color (imágenes, capas, pseudos)
+   saltaba de golpe mientras el resto interpolaba: **un parpadeo escalonado**,
+   detectado al verlo correr. Con un solo número, todos los tokens se
+   recalculan en el mismo paso de estilo y es imposible que se desincronicen.
+
+   Registrarlo con `@property` lo tipa como número de verdad, así que los
+   `calc()` de abajo son válidos y el valor puede interpolarse. Donde no haya
+   soporte, el valor literal sigue funcionando en `calc()` igual. */
+@property --t{  syntax:'<number>'; inherits:true; initial-value:0; }
+@property --tk{ syntax:'<number>'; inherits:true; initial-value:0; }
+
 :root{
-  /* Los dos tokens del sistema: fondo negro cálido y tinta hueso cálido. La
-     fotografía de proyecto es la única fuente de color saturado del sitio —
-     no hay un tercer token de acento. Ver DESIGN.md > Color. */
-  --bg:       oklch(22% 0.014 50);   /* #201915 */
-  --surface1: oklch(27% 0.014 50);   /* un paso elevado: franja de contacto, tarjetas, muro NDA */
-  --surface2: oklch(32% 0.014 50);   /* dos pasos: estados de hover sobre una superficie ya elevada */
-  --ink:      oklch(92% 0.018 78);   /* #EBE3D8 */
-  --line:     oklch(92% 0.018 78 / .14);
+  /* `--t` mueve el FONDO, de forma continua: es el gesto que se ve.
+     `--tk` mueve la TINTA, y da un único salto en t = 0,48.
+
+     No es un capricho: si fondo y tinta cruzan juntos, a mitad de camino son
+     literalmente el mismo color y **el texto desaparece** — medido, 1,00:1 en
+     t = 0,5, y por debajo de AA durante el 56% de la rampa. Como los dos
+     extremos son el mismo par intercambiado, ese cruce es inevitable mientras
+     ambos viajen a la vez.
+
+     0,48 es el punto donde el fondo, a medio camino, contrasta lo mismo con
+     los dos extremos de tinta (3,72:1 con el hueso, 3,67:1 con el negro).
+     Saltar ahí es lo que maximiza el peor instante de todo el recorrido: el
+     mínimo pasa de 1,00:1 a **3,67:1**, y solo en ese instante.
+
+     Y no reintroduce el parpadeo que tenía la versión de transiciones: es UNA
+     propiedad en UN elemento, así que todo el texto del sitio cambia en el
+     mismo paso de estilo. Un parpadeo es que las cosas cambien en momentos
+     distintos; esto es lo contrario. */
+  --t: 0;
+  --tk: 0;
+
+  /* Los dos colores del sistema, y los únicos literales. Todo lo demás se
+     deriva de ellos y de `--t`. La fotografía de proyecto sigue siendo la
+     única fuente de color saturado — no hay un tercer token de acento. */
+  --c-negro: oklch(22% 0.014 50);   /* #201915 */
+  --c-hueso: oklch(92% 0.018 78);   /* #EBE3D8 */
+
+  /* El tema claro no trae colores nuevos: los dos **intercambian su papel**.
+     El hueso deja de ser tinta y pasa a ser superficie. Por eso el contraste
+     sale idéntico en los dos extremos (13,63:1) sin calibrar una paleta nueva
+     — es literalmente el mismo par. Invierte por sí solo la excepción
+     deliberada nº 2, que a partir de aquí solo describe el extremo oscuro.
+     Se mezcla en oklab y no en sRGB: el camino recto entre los dos pasa por
+     grises neutros en vez de por un marrón sucio a mitad de recorrido. */
+  --bg:  color-mix(in oklab, var(--c-negro), var(--c-hueso) calc(var(--t) * 100%));
+  --ink: color-mix(in oklab, var(--c-hueso), var(--c-negro) calc(var(--tk) * 100%));
+
+  /* La elevación se construye moviendo la luminosidad, nunca con una sombra —
+     y derivarla empujando el fondo HACIA la tinta hace que cambie de sentido
+     sola: en oscuro un paso elevado sale más claro, en claro sale más oscuro,
+     sin escribir dos juegos de valores. */
+  --surface1: color-mix(in oklab, var(--bg), var(--ink) 7%);
+  --surface2: color-mix(in oklab, var(--bg), var(--ink) 14%);
+  --line:     color-mix(in oklab, transparent, var(--ink) 13%);
+
+  /* Los dos escalones de texto secundario suben con `--t`. El suelo de
+     opacidad NO se hereda de un extremo al otro, y no por poco: medido sobre
+     el mismo par, alfa 0,55 da 4,97:1 sobre negro pero solo 3,62:1 sobre
+     hueso, y el mínimo para AA 4,5:1 sube de 0,52 a 0,63. Por eso interpolan
+     en vez de quedarse fijos: si se quedaran en el valor del tema oscuro,
+     cuatro reglas de texto secundario caerían por debajo de AA al invertir. */
+  --dim-faint: calc(.5 + .13 * var(--tk));
+  --dim:       calc(.6 + .08 * var(--tk));
 
   /* Traducción a CSS de Motion.ease.move / Motion.dur.move (assets/js/motion.js):
      las View Transitions son CSS puro y no pueden llamar a un ease de GSAP por
