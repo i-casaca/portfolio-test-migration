@@ -161,20 +161,225 @@
 
   /* La info del hero aparece con la llegada del naming, no está ya ahí
      esperando a que se descubra — solo cuando la entrada corre de verdad. */
-  html.js-entry .hero-eyebrow,
+  html.js-entry .hero-statement,
   html.js-entry .project-index{opacity:0;}
 
   @media (prefers-reduced-motion: reduce){
     .entry{display:none !important;}
   }
 
-  .hero{
-    background:var(--bg);min-height:100vh;position:relative;overflow:hidden;
-    display:flex;flex-direction:column;justify-content:center;gap:3.5vh;
-    padding:9rem 6vw 4rem;
+  /* ---------- el hero: la afirmación del sitio, entre la entrada y el índice ----------
+     Ticket #51. Ocupa una banda alta, no el viewport entero — la entrada ya se
+     recortó a poco más de un segundo a propósito, para que no se sintiera como
+     un peaje; un 100vh aquí añadiría otra pausa entera justo después. Deja
+     asomar el primer ítem del índice para seguir invitando a bajar. Sustituye
+     al `hero-eyebrow` ("Product Design & UX"), que queda absorbido: DESIGN.md
+     lo anotaba como andamiaje heredado del MVP pendiente de revisión. */
+  .hero-statement{
+    /* Ancho de la polaroid, en una variable propia: las proporciones del marco
+       se calculan sobre ella (ver .hero-portrait), así que cambiar el tamaño
+       en un breakpoint es tocar solo esta línea. */
+    --pw:min(26vw,300px);
+    /* La vuelta completa del carril. No es "la velocidad": el carril mide
+       distinto en cada viewport, así que la duración se ajusta por breakpoint
+       para que los píxeles por segundo se parezcan y la frase siga dando
+       tiempo a leerse. */
+    --marquee-dur:95s;
+
+    background:var(--bg);position:relative;overflow:hidden;
+    /* El alto está calculado para que asome MEDIA fila del primer proyecto:
+       ese trozo de lista cortado por el borde de la pantalla es lo que dice
+       "sigue bajando" sin necesidad de una flecha ni un "scroll".
+       Las 6rem que se restan son la suma de lo que va por debajo del hero
+       hasta la mitad de esa primera fila: el padding superior del bloque del
+       índice (2,5rem) más media fila (~3,4rem). Si cambia el cuerpo de
+       `.index-name` o el padding de `.index-item`, hay que recalcularlas.
+       `svh` y no `vh`: en móvil, con la barra del navegador desplegada, `vh`
+       mide de más y la fila se iría justo por debajo del corte. */
+    min-height:calc(100svh - 6rem);
+    padding:6rem 6vw 2.5rem;
+    display:grid;align-items:center;
   }
 
-  .hero-eyebrow{font-size:var(--fs-small);letter-spacing:.08em;line-height:var(--lh-small);position:relative;z-index:3;}
+  /* La polaroid. El marco en --ink es una excepción consciente a "el hueso es
+     tinta, no superficie" (DESIGN.md > Excepciones deliberadas): no es el
+     fondo de la página, es un objeto físico —una foto impresa— que toma
+     prestado el mismo token en vez de inventar un blanco nuevo.
+
+     Anclada al margen izquierdo: es el objeto quieto contra el que pasa la
+     marquesina.
+
+     **Y bajada respecto al centro.** La marquesina va centrada en la banda, así
+     que una foto también centrada hacía que el texto la partiera exactamente
+     por la mitad: dos ejes simétricos que se anulan y se leen como una
+     plantilla. Empujándola hacia abajo, la frase le cruza por el tercio
+     superior y la cara queda despejada debajo — el mismo solape, pero
+     descentrado, que es de donde sale el interés.
+
+     El desplazamiento va en `top` (posición relativa) y NO en `transform`: el
+     parallax del ratón reescribe `transform` entero en cada fotograma y se
+     llevaría por delante cualquier desplazamiento declarado ahí. Al ser
+     relativo tampoco altera el alto de la sección, así que el cálculo de "media
+     fila asomando" de arriba se mantiene intacto. */
+  .hero-portrait{
+    justify-self:start;width:var(--pw);
+    /* El desplazamiento se mide sobre el ancho de la propia foto, no sobre el
+       alto del viewport: atado a `vh`, en móvil la foto encogía pero el empujón
+       no, y la frase acababa rozando el marco por fuera en vez de cruzar la
+       imagen. Con `--pw` la proporción del cruce se mantiene en todos los
+       tamaños. */
+    position:relative;top:calc(var(--pw) * .24);
+    /* Las proporciones reales de una Polaroid: foto cuadrada, marco fino y
+       parejo arriba y a los lados, y el pie más ancho. Van en calc() sobre el
+       ancho —no en px fijos— para que la proporción aguante a cualquier
+       tamaño; unos px fijos son lo que descuadraba el marco en móvil, donde
+       la foto encoge pero el marco se quedaba igual de grueso. */
+    padding:calc(var(--pw)*.05) calc(var(--pw)*.05) calc(var(--pw)*.2);
+    background:var(--ink);border-radius:2px;
+    box-shadow:0 24px 48px -12px rgba(0,0,0,.55);
+    /* -5,5deg y no los -4 de antes: con la foto ya descentrada, una
+       inclinación algo más marcada acaba de romper la retícula y la hace leer
+       como una foto dejada ahí, no como una imagen colocada en su hueco. */
+    transform:rotate(-5.5deg);
+    will-change:transform;
+  }
+  /* `height:auto` pisa el atributo HTML height="900": sin él, ese atributo
+     entra como pista de presentación con un alto fijo en px y el aspect-ratio
+     deja de tener nada "auto" que derivar. */
+  .hero-portrait img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;}
+
+  /* ---------- la marquesina ----------
+     Va en `position:absolute` de lado a lado de la sección y por encima de la
+     polaroid (mismo grupo de pintado, y en el DOM va después), así que la
+     frase cruza la foto sin parar. El `mix-blend-mode` vive AQUÍ, en la caja
+     de fuera, y no en cada copia del texto: el carril lleva un `transform`
+     animado y eso crea un contexto de apilamiento, de modo que un blend
+     declarado dentro del carril solo vería el fondo del propio carril
+     —transparente— y no la fotografía. Puesto en `.hero-marquee`, lo que se
+     mezcla es el bloque entero contra el fondo de la sección, foto incluida. */
+  .hero-marquee{
+    position:absolute;left:0;right:0;top:50%;
+    transform:translateY(-50%);
+    overflow:hidden;
+    mix-blend-mode:difference;
+  }
+  .hero-marquee-track{
+    display:flex;width:max-content;
+    animation:hero-marquee var(--marquee-dur) linear infinite;
+  }
+  /* Cuatro copias y un recorrido del 50%: al terminar, las copias 3 y 4 están
+     exactamente donde arrancaron la 1 y la 2, así que el salto de vuelta a
+     cero cae en un fotograma idéntico y no se ve la costura. El margen
+     derecho va en cada copia (no como `gap` del flex) para que el patrón sea
+     perfectamente periódico; con `gap`, el hueco del final no existe y la
+     repetición cojea. */
+  @keyframes hero-marquee{
+    from{transform:translate3d(0,0,0);}
+    to{transform:translate3d(-50%,0,0);}
+  }
+  .hero-marquee-copy{
+    margin:0;padding-right:.4em;white-space:nowrap;
+    font-family:var(--f);font-weight:600;font-stretch:118%;
+    /* El doble que el titular anterior, y muy por encima del techo de 6rem que
+       impeccable pone a los titulares. Es una excepción deliberada y del mismo
+       tipo que la de los saludos de la entrada: aquí el tamaño ES la pieza —
+       una frase que cruza la pantalla no tiene que caber, tiene que pasar.
+       Ver DESIGN.md > Hero. */
+    font-size:clamp(4.8rem,10.4vw,10.4rem);line-height:1.06;letter-spacing:-.01em;
+    color:var(--ink);
+  }
+  /* El nombre de la transición va solo en el <h1>, nunca en la clase que
+     comparten las cuatro copias: dos elementos con el mismo
+     `view-transition-name` en un documento invalidan la transición entera. */
+  #hero-titular{view-transition-name:hero-statement;}
+
+  /* ---------- el reclamo de scroll ----------
+     Abajo y al centro de la banda. Es un enlace de verdad al índice, no un
+     adorno: se tabula, se pulsa y lleva a donde señala.
+
+     El segmento baja SIEMPRE y nunca deshace el camino: se desvanece al final
+     del recorrido y reaparece arriba ya invisible, así que no se le ve subir
+     nunca. Es la gramática de movimiento del sitio (DESIGN.md > Motion), y es
+     también la razón de no poner la flecha que rebota — rebotar es justamente
+     deshacer el recorrido. */
+  .hero-scroll{
+    position:absolute;left:50%;bottom:1.2rem;transform:translateX(-50%);
+    z-index:3;display:grid;place-items:center;
+    width:44px;height:64px;               /* objetivo cómodo para el dedo */
+    color:var(--ink);text-decoration:none;
+  }
+  .hero-scroll-track{
+    position:relative;overflow:hidden;
+    width:1px;height:56px;background:var(--line);
+    transition:background .3s ease;
+  }
+  .hero-scroll-dot{
+    position:absolute;left:0;top:0;width:1px;height:18px;background:var(--ink);
+    animation:hero-scroll-run 2.4s cubic-bezier(.4,0,.5,1) infinite;
+  }
+  @keyframes hero-scroll-run{
+    0%  {transform:translateY(-18px);opacity:0;}
+    18% {opacity:1;}
+    72% {opacity:1;}
+    100%{transform:translateY(56px);opacity:0;}
+  }
+  .hero-scroll:hover .hero-scroll-track,
+  .hero-scroll:focus-visible .hero-scroll-track{background:var(--ink);}
+
+  @media (prefers-reduced-motion: reduce){
+    .hero-portrait{transform:rotate(-5.5deg) !important;top:0;}
+    /* La versión quieta: el segmento se queda posado a media pista, como una
+       marca. No es la animación congelada en un punto cualquiera. */
+    .hero-scroll-dot{animation:none;opacity:1;transform:translateY(19px);}
+    /* La versión quieta no es la marquesina parada —eso dejaría media frase
+       fuera de la pantalla— sino la frase entera, centrada y a un tamaño que
+       cabe. El estado final legible, no la animación a medias. */
+    .hero-marquee{position:static;transform:none;overflow:visible;mix-blend-mode:normal;}
+    .hero-marquee-track{animation:none;width:auto;display:block;}
+    .hero-marquee-copy[aria-hidden]{display:none;}
+    #hero-titular{
+      padding:0;white-space:normal;text-align:center;text-wrap:balance;
+      max-width:15ch;margin-inline:auto;font-size:clamp(2rem,5vw,4rem);
+    }
+    .hero-statement{gap:2.5rem;}
+  }
+
+  @media (max-width:1024px), (hover:none){
+    /* Se resta 1rem MENOS que en escritorio (hero más alto, fila más tapada):
+       aquí `.index-name` va por su tramo fluido y la fila es más baja, así que
+       con las 6rem generales asomaba un 67% en vez de la mitad. */
+    .hero-statement{
+      --pw:min(42vw,270px);--marquee-dur:55s;
+      min-height:calc(100svh - 5rem);padding:6rem 6vw 2.5rem;
+    }
+  }
+  @media (max-width:600px){
+    /* El padding superior sube a 8.5rem porque aquí el nav envuelve a dos
+       líneas y baja hasta ~128px: con los 6rem de la consulta anterior, la
+       polaroid se le subía encima (visible sobre todo con menos movimiento,
+       donde la foto y la frase se reparten en dos filas y la foto sube). */
+    /* Se resta 1rem más que en escritorio: aquí la fila del índice es más alta
+       (lleva miniatura), así que su mitad cae más abajo. Con las 6rem de la
+       regla general solo asomaba un 40%. */
+    .hero-statement{
+      --pw:min(58vw,215px);--marquee-dur:32s;
+      min-height:calc(100svh - 7rem);padding-top:8.5rem;
+    }
+  }
+
+  /* El bloque del índice. Ya no lleva `min-height:100vh` ni centrado vertical:
+     eso era de cuando esta sección ERA el hero de la página y tenía que
+     llenarla ella sola. Con la banda del titular delante (ticket #51), ese
+     mínimo solo servía para dejar un hueco muerto entre las dos y empujar los
+     proyectos fuera de la vista. El alto lo marca ahora la propia lista.
+     Efecto lateral buscado: la foto a sangre (.hero-preview, inset:0) pasa a
+     cubrir exactamente el índice en vez de una pantalla entera, que es a lo
+     que apunta de verdad. */
+  .hero{
+    background:var(--bg);position:relative;overflow:hidden;
+    display:flex;flex-direction:column;gap:3.5vh;
+    padding:2.5rem 6vw 4rem;
+  }
 
   /* ---------- el índice: 5 proyectos, imagen a sangre detrás del que se apunta ----------
      Sustituye a la rejilla de 6 celdas (ticket #6): con una foto real detrás,
@@ -230,7 +435,9 @@
      entrada, así que al volver estos nombres reaparecen solos, sin salida
      previa que deshacer — la propia asimetría del old/new ya da "la vuelta
      es el espejo exacto" sin escribirlo dos veces. */
-  .hero-eyebrow{view-transition-name:hero-eyebrow;}
+  /* El `view-transition-name` del titular se declara arriba, junto a la
+     marquesina (`#hero-titular`): tiene que ir en el <h1> concreto y no en la
+     clase que comparten sus cuatro copias. */
   .index-item:nth-child(1){view-transition-name:index-item-1;}
   .index-item:nth-child(2){view-transition-name:index-item-2;}
   .index-item:nth-child(3){view-transition-name:index-item-3;}
@@ -240,8 +447,8 @@
   @keyframes index-exit{ to{transform:translateY(-2.5rem);opacity:0;} }
   @keyframes index-enter{ from{transform:translateY(-2.5rem);opacity:0;} }
 
-  ::view-transition-old(hero-eyebrow){animation:.32s var(--ease-move) both index-exit;}
-  ::view-transition-new(hero-eyebrow){animation:.4s var(--ease-move) .1s both index-enter;}
+  ::view-transition-old(hero-statement){animation:.32s var(--ease-move) both index-exit;}
+  ::view-transition-new(hero-statement){animation:.4s var(--ease-move) .1s both index-enter;}
 
   ::view-transition-old(index-item-1){animation:.32s var(--ease-move) both index-exit;}
   ::view-transition-old(index-item-2){animation:.32s var(--ease-move) .04s both index-exit;}
@@ -260,6 +467,7 @@
   .index-thumb{display:none;}
 
   @media (hover:hover) and (pointer:fine){
+    .hero-statement,
     .hero{cursor:none;}
     .index-item:hover .index-name, .index-item:focus-visible .index-name{font-style:italic;}
     .project-index:has(.index-item:hover) .index-item:not(:hover) .index-name,
@@ -271,8 +479,20 @@
   /* Sin hover no hay forma de descubrir las fotos a sangre, así que cada
      ítem lleva su propia miniatura fija en su lugar. */
   @media (hover:none), (max-width:760px){
+    /* El ángulo de la polaroid NO se retoca aquí. Llegó a llevar uno propio,
+       más suave, y era un fallo: esta consulta entra también en una ventana
+       estrecha CON ratón (`max-width:760px`), donde el parallax sí corre y
+       reescribe el `transform` con el ángulo del bloque general — la foto daba
+       un salto en cuanto el cursor entraba en la banda. El ángulo es uno solo
+       para todo el sitio. El tamaño y la velocidad de la marquesina los fijan
+       las consultas de 1024 y 600 de arriba. */
+
     .hero-preview{display:none;}
-    .hero{padding:7rem 6vw 3rem;min-height:auto;}
+    /* 2,5rem arriba, igual que en escritorio: las 7rem de antes eran de cuando
+       esta sección abría la página. Con la banda del titular delante, ese
+       colchón empujaba la primera fila por debajo del corte y se perdía el
+       "media fila asomando" que busca el alto del hero. */
+    .hero{padding:2.5rem 6vw 3rem;}
     .index-item{flex-wrap:wrap;align-items:center;}
     .index-thumb{
       display:block;width:56px;height:56px;object-fit:cover;border-radius:4px;
@@ -395,9 +615,41 @@
   </div>
 </section>
 
-<div class="hero" id="trabajo">
-  <div class="hero-eyebrow">Product<br>Design &amp;<br>UX</div>
+<!-- El hero (ticket #51): la afirmación del sitio, entre la entrada y el
+     índice. Sustituye al hero-eyebrow ("Product Design & UX"). La polaroid en
+     su columna y la frase en la suya, sin superponerse — el porqué (con las
+     mediciones de contraste que lo cerraron) está en el <style> de arriba y
+     en DESIGN.md > Hero. El parallax que sigue al ratón vive al final del
+     body, junto al resto del JS de esta página. -->
+<section class="hero-statement">
+  <div class="hero-portrait">
+    <img src="./assets/images/hero/retrato-hero.jpg" width="900" height="900" alt="Ismael Casado sonriendo en la cima del Peñalara, con gafas de sol y chaqueta azul marino" />
+  </div>
+  <!-- La marquesina: la frase cruza de lado a lado sin parar, lenta para que
+       dé tiempo a leerla. Cuatro copias idénticas en el carril; solo la
+       primera es el <h1> de verdad — las otras tres son repeticiones visuales
+       y van `aria-hidden` para que un lector de pantalla no lea la misma
+       frase cuatro veces seguidas. Es puro CSS: sin JS también gira. -->
+  <div class="hero-marquee">
+    <div class="hero-marquee-track">
+      <h1 class="hero-marquee-copy" id="hero-titular">Diseño sistemas, y sé cómo se construyen.</h1>
+      <span class="hero-marquee-copy" aria-hidden="true">Diseño sistemas, y sé cómo se construyen.</span>
+      <span class="hero-marquee-copy" aria-hidden="true">Diseño sistemas, y sé cómo se construyen.</span>
+      <span class="hero-marquee-copy" aria-hidden="true">Diseño sistemas, y sé cómo se construyen.</span>
+    </div>
+  </div>
 
+  <!-- El reclamo de scroll. Enlace real al índice (`#trabajo`), no un adorno
+       decorativo: quien navegue con teclado lo encuentra y lo puede usar. La
+       pista y el segmento van `aria-hidden` porque son dibujo; el nombre
+       accesible lo pone el texto oculto. -->
+  <a class="hero-scroll" href="#trabajo">
+    <span class="hero-scroll-track" aria-hidden="true"><span class="hero-scroll-dot"></span></span>
+    <span class="sr-only">Ir a los proyectos</span>
+  </a>
+</section>
+
+<div class="hero" id="trabajo">
   <div class="hero-preview" id="hero-preview" aria-hidden="true">
     <img class="hero-preview-img" data-idx="0" src="./assets/images/manu-cardiel/hero.jpg" alt="" />
     <img class="hero-preview-img" data-idx="1" src="./assets/images/adrenaline/hero.jpg" alt="" />
@@ -549,6 +801,66 @@
       cursorDot.style.transform = `translate3d(${e.clientX - 12}px, ${e.clientY - 12}px, 0)`;
     });
     document.addEventListener('mouseleave', () => { cursorDot.style.opacity = 0; });
+  }
+
+  /* ---------- hero-statement: la polaroid sigue al ratón (parallax sutil) ----------
+     Sin GSAP a propósito: este script corre inline, antes de que los <script
+     defer> del <head> (GSAP incluido) hayan terminado, así que no hay
+     garantía de que `gsap`/`window.Motion` existan todavía aquí. Un lerp a
+     mano por requestAnimationFrame no depende de ese orden. La comprobación
+     de `prefers-reduced-motion` es directa por el mismo motivo: no espera a
+     que `motion.js` publique `Motion.reduced`. */
+  const heroStatement = document.querySelector('.hero-statement');
+  const heroPortrait = document.querySelector('.hero-portrait');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (heroStatement && heroPortrait && finePointer && !reducedMotion){
+    let targetX = 0, targetY = 0, curX = 0, curY = 0, raf = null;
+
+    function tick(){
+      curX += (targetX - curX) * 0.08;
+      curY += (targetY - curY) * 0.08;
+      // El ángulo tiene que repetir el del CSS (.hero-portrait): esta línea
+      // reescribe el `transform` entero, así que omitirlo enderezaría la foto
+      // en cuanto el ratón entrase en la banda.
+      heroPortrait.style.transform = `translate3d(${curX.toFixed(2)}px, ${curY.toFixed(2)}px, 0) rotate(-5.5deg)`;
+      if (Math.abs(targetX - curX) > 0.05 || Math.abs(targetY - curY) > 0.05){
+        raf = requestAnimationFrame(tick);
+      } else {
+        raf = null;
+      }
+    }
+
+    heroStatement.addEventListener('mousemove', (e) => {
+      const rect = heroStatement.getBoundingClientRect();
+      targetX = ((e.clientX - rect.left) / rect.width - 0.5) * 28;
+      targetY = ((e.clientY - rect.top) / rect.height - 0.5) * 20;
+      if (!raf) raf = requestAnimationFrame(tick);
+    });
+    heroStatement.addEventListener('mouseleave', () => {
+      targetX = 0; targetY = 0;
+      if (!raf) raf = requestAnimationFrame(tick);
+    });
+  }
+
+  /* El reclamo de scroll baja al índice con la instancia de Lenis que publica
+     `motion.js` —expuesta justo para "saltar a un punto", ver DESIGN.md >
+     Motion— para que sea un desplazamiento y no un corte seco. Si Lenis no
+     está (CDN caído, o `prefers-reduced-motion`, donde ni siquiera se
+     inicializa), no se toca el evento y el ancla del HTML hace su trabajo de
+     siempre. El enlace nunca depende de este script. */
+  const heroScroll = document.querySelector('.hero-scroll');
+  if (heroScroll){
+    heroScroll.addEventListener('click', (e) => {
+      const M = window.Motion;
+      const destino = document.querySelector(heroScroll.getAttribute('href'));
+      if (!M || !M.lenis || !destino) return;
+      e.preventDefault();
+      // Se le pasa un número, no el elemento: comprobado en el navegador, a
+      // esta versión de Lenis (1.1.18) le das un HTMLElement y no se mueve —
+      // sin error, simplemente no pasa nada. Con la posición ya resuelta sí.
+      M.lenis.scrollTo(destino.getBoundingClientRect().top + window.scrollY);
+    });
   }
 </script>
 

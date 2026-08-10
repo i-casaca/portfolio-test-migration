@@ -384,7 +384,11 @@ de `index.html` como `.entry-spinner` — la entrada es el único sitio que lo u
 ### La entrega al hero
 
 El logotipo vuela desde el centro hasta su sitio en la cabecera mientras la entrada se recoge y el
-hero aparece debajo — un solo movimiento, no dos pasos.
+hero aparece debajo — un solo movimiento, no dos pasos. Desde el ticket
+[#51](https://github.com/i-casaca/portfolio-test-migration/issues/51) (ver [Hero](#hero)), "el hero"
+que aparece aquí es la sección `.hero-statement` (titular + polaroid), no solo el `hero-eyebrow` que
+había antes — la línea de la timeline de `entry.js` que lo revela cambió de selector, no de
+comportamiento.
 
 **El relevo entre el logo volador y el wordmark real es instantáneo y simultáneo**, nunca un
 fundido: mientras el volador está en pantalla, `html.naming-flying` mantiene oculto el wordmark del
@@ -415,6 +419,237 @@ símbolo, no una sustitución. Va en `currentColor`, de modo que hereda el hueso
 **Sustituye al wordmark de texto** en las seis páginas.
 
 `assets/images/logo-mark.svg` (la versión cuadrada) queda en el repo sin usar todavía.
+
+## Hero
+
+Decidido en el ticket
+[El hero: qué recibe al visitante entre la entrada y el índice de proyectos](https://github.com/i-casaca/portfolio-test-migration/issues/51).
+Hasta este ticket, lo único entre la entrada y el índice era el `hero-eyebrow` ("Product Design &
+UX") — andamiaje heredado del MVP, no una afirmación. PRODUCT.md nombra la línea que se recuerda a
+los 10 segundos (*"Diseño sistemas, y sé cómo se construyen"*) y decía dónde tenía que vivir; en
+ningún sitio del sitio se decía todavía.
+
+### Qué dice, y cómo
+
+La línea de PRODUCT.md, literal, sin variante — es la que el propio documento nombra como la que se
+recuerda, así que parafrasearla habría sido reescribir una decisión ya tomada en otro documento.
+
+**Una sola frase, no varias.** Se llegó a construir una versión con cinco frases rotatorias y un
+control para cambiarlas; se descartó al verla en marcha. La razón está en el propio PRODUCT.md: la
+línea que se recuerda a los diez segundos es **una**, y repartir el sitio del titular entre cinco la
+diluía en vez de reforzarla. Con ella se fueron el control, su contador y todo el JS de relevo.
+
+**La frase no se lee quieta: pasa.** Va en una **marquesina** que cruza la pantalla de lado a lado
+sin parar, en bucle, a velocidad lenta para que dé tiempo a leerla entera. Ver
+[La marquesina](#la-marquesina).
+
+### Cuánto ocupa: media fila asomando
+
+El alto del hero no es una cifra redonda ni un porcentaje elegido a ojo: está calculado para que por
+debajo asome **media fila del primer proyecto**. Ese trozo de lista cortado por el borde de la
+pantalla es lo que dice "sigue bajando" sin necesidad de una flecha, un "scroll" ni un indicador.
+
+```css
+min-height: calc(100svh - 6rem);   /* 5rem ≤1024 · 7rem ≤600 */
+```
+
+Lo que se resta es lo que va por debajo del hero hasta la mitad de esa primera fila: el padding
+superior del bloque del índice (2,5rem) más media fila. **Cambia por breakpoint porque la fila cambia
+de alto**: `.index-name` va por su tramo fluido en tablet (fila más baja, hay que restar menos) y en
+móvil la fila crece porque lleva miniatura (hay que restar más). Medido: **51% asomando en
+escritorio, 48% en tablet, 52% en móvil**. Si se toca el cuerpo de `.index-name` o el padding de
+`.index-item`, estas tres cifras hay que recalcularlas.
+
+`svh` y no `vh`: en móvil, con la barra del navegador desplegada, `vh` mide de más y la fila se iría
+justo por debajo del corte — que es exactamente el efecto que este cálculo existe para producir.
+
+**El bloque del índice perdió a la vez su `min-height:100vh` y su centrado vertical**, y su padding
+superior de 7rem en móvil. Eran de cuando esa sección *era* el hero de la página y tenía que llenarla
+ella sola; con una banda de titular delante, solo servían para dejar un hueco muerto entre las dos y
+empujar la fila por debajo del corte. Efecto lateral buscado: la foto a sangre del índice
+(`.hero-preview`, `inset:0`) pasa a cubrir exactamente la lista en vez de una pantalla entera, que es
+a lo que apunta de verdad.
+
+### La polaroid
+
+El hero lleva una fotografía personal de Ismael, enmarcada como una polaroid: marco en `--ink`,
+ligera rotación y sombra, anclada al **margen izquierdo** y con el titular superpuesto encima. Es una
+excepción consciente y pedida en vivo, no la dirección por defecto: el sistema reserva la fotografía
+de *proyecto* como única fuente de color saturado (ver [Color](#color)), y esa regla sigue en pie —
+esta es una fotografía personal, en un momento del sitio que no compite con el índice de abajo.
+
+**A la izquierda, no centrada bajo la frase.** Centrada se leía como un sello estampado detrás del
+texto, no como una composición. Anclada al margen, es el **objeto quieto contra el que pasa la
+marquesina** — y esa relación (una cosa fija, una cosa que se mueve) es la que hace que el cruce
+tenga sentido en vez de parecer un accidente.
+
+**Y bajada respecto al centro, que es de donde sale el interés.** La marquesina va centrada en la
+banda; con la foto también centrada, la frase la partía exactamente por la mitad — dos ejes
+simétricos que se anulan y se leen como una plantilla. Empujada hacia abajo, el texto le cruza por el
+**22%** de su alto en escritorio y por el **11%** en móvil, dejando la cara despejada por debajo: el
+mismo solape, pero descentrado.
+
+El desplazamiento va en `top` (posición relativa) y **no** en `transform`: el parallax del ratón
+reescribe `transform` entero en cada fotograma y se llevaría por delante cualquier desplazamiento
+declarado ahí. Al ser relativo tampoco altera el alto de la sección, así que el cálculo de "media
+fila asomando" se mantiene intacto. Y se mide sobre `--pw`, no sobre `vh`: atado al viewport, en
+móvil la foto encogía pero el empujón no, y la frase acababa rozando el marco por fuera en vez de
+cruzar la imagen.
+
+La inclinación subió de -4° a **-5,5°** por el mismo motivo: con la foto ya descentrada, un ángulo
+algo más marcado acaba de romper la retícula y la hace leer como una foto dejada ahí, no como una
+imagen colocada en su hueco. **Ese ángulo está repetido en el JS del parallax**, que reescribe el
+`transform` completo: si se cambia en el CSS y no allí, la foto se endereza en cuanto el ratón entra
+en la banda.
+
+**Las proporciones son las de una Polaroid real**: foto cuadrada (`aspect-ratio:1`), marco fino y
+parejo arriba y a los lados (5% del ancho) y el pie más ancho (20%). Van declaradas en `calc()`
+sobre una variable de ancho (`--pw`), no en px fijos, porque un padding fijo descuadra el marco en
+cuanto la foto encoge: cambiar el tamaño en un breakpoint es tocar solo `--pw`.
+
+**El marco de la polaroid usa `--ink` como superficie, no como tinta** — en apariencia, el caso
+exacto que la [excepción #2](#excepciones-deliberadas) prohíbe. La diferencia es de escala y de
+papel: la excepción prohíbe el hueso como *fondo de página*; aquí es el marco de un objeto físico
+pequeño —una foto impresa—, que toma prestado el mismo token del sistema en vez de inventar un
+blanco nuevo. Ver la nota ampliada en esa excepción.
+
+La polaroid sigue el ratón con un parallax sutil (±28px horizontal, ±20px vertical, con `lerp` a
+mano por `requestAnimationFrame`, sin GSAP): el script vive inline al final de `index.html`, antes
+de que los `<script defer>` del `<head>` —GSAP incluido— terminen de cargar, así que no puede
+depender de `window.gsap` ni de `window.Motion` sin arriesgarse a un `ReferenceError` según el orden
+de carga. Comprueba `prefers-reduced-motion` de forma directa por el mismo motivo.
+
+### El titular en negativo: una excepción con los números delante
+
+El titular pasa a negativo donde cruza la foto (`mix-blend-mode:difference`) — la misma técnica que
+ya usa `#cursor-dot` contra el resto del sitio (ver [Layout](#layout)), no un recurso nuevo.
+
+**Esto incumple el compromiso de contraste de [PRODUCT.md](PRODUCT.md#accessibility--inclusion), y
+se hace a sabiendas.** Está medido, no estimado, y se escribe aquí entero para que nadie lo
+"arregle" por sorpresa ni lo repita sin saber lo que ya se probó.
+
+Muestreando los píxeles reales de la franja de foto que la marquesina barre (159px de alto por todo
+el ancho de la imagen, medido a 1440):
+
+| Tratamiento de la foto | Peor contraste | % del área bajo 3:1 |
+|---|---|---|
+| Ninguno (foto a plena fuerza) | 1,00:1 | **8,1%** |
+| Velo oscuro `--bg` al 40-60% | 1,00:1 | 59-61% |
+| Velo oscuro `--bg` al 85% | 4,72:1 | 0% |
+| Velo hueso `--ink` al 70% | 4,01:1 | 0% |
+
+Las dos lecciones, que son contraintuitivas y por eso se dejan por escrito:
+
+1. **Oscurecer la foto empeora el problema, no lo arregla.** El punto de fallo del `difference` está
+   a media luminancia —donde el resultado de la resta coincide con el propio fondo— así que un velo
+   oscuro hunde los tonos claros justo dentro de esa banda.
+2. **Lo único que llega al 0% borra la foto.** Hace falta un velo del 70-85% para sacar toda la
+   imagen de la banda peligrosa; a esa fuerza ya no hay fotografía que enseñar.
+
+Tampoco vale limitar el cruce al marco (donde el contraste sí es de 13:1, por ser hueso liso): la
+marquesina atraviesa la foto de lado a lado por definición, así que no hay recorrido que la esquive.
+
+**El coste subió al pasar a marquesina, y se anota**: la versión anterior —titular estático,
+superpuesto solo por el arranque de cada línea— dejaba un 4,1% del solape bajo 3:1. La marquesina
+barre la foto entera, y el número se dobla hasta el 8,1%. Es el precio de que la frase cruce en vez
+de posarse, y estaba sobre la mesa al decidirlo.
+
+**La decisión, tomada por Ismael con esta tabla delante**: se queda el negativo. El coste real es que
+ese ~8% de la franja barrida —los trazos que caen sobre medios tonos de la foto— baja del mínimo AA;
+la media es de 10,4:1 y fuera de la foto el titular es `--ink` sobre `--bg`, **13,63:1 medido**. Va
+en contra del principio 4 (*"Legible antes que impactante"*), y por eso aparece aquí como excepción
+declarada y no como descuido: es exactamente el tipo de límite que el sitio dice declarar en vez de
+esconder. **Atenuante real**: al moverse la frase, ningún trazo se queda parado en su punto malo — el
+mismo carácter que ahora es ilegible sobre un medio tono, dos segundos después está sobre el fondo
+liso a 13:1. La lectura se recupera sola; en un titular quieto no lo haría.
+
+Si una pasada futura quiere recuperar el cumplimiento sin perder el gesto, la única vía que las
+mediciones dejan abierta es **cambiar el fondo del cruce**: un bloque liso en `--ink` en lugar de la
+fotografía da el mismo negativo a 13:1 garantizado. Oscurecer, aclarar o velar la foto ya está
+probado y no lleva a ningún sitio.
+
+### Coreografía con la entrada
+
+El hero entero se revela en el mismo momento que el índice, dentro de la timeline de `entry.js`:
+donde antes decía `.to(['.hero-eyebrow', '.project-index'], ...)`, ahora dice
+`.to(['.hero-statement', '.project-index'], ...)` — un cambio de selector, no de tiempos. En visita
+repetida (sin entrada) el hero aparece directo, sin la coreografía delante; ver
+[La visita repetida](#la-visita-repetida).
+
+### La marquesina
+
+El titular no está quieto: cruza la pantalla **de lado a lado, en bucle y sin parar**, y la polaroid
+se queda fija a su izquierda. Es la pieza que da sentido al solape — una cosa que pasa por delante de
+una cosa que está.
+
+**Tipografía al doble.** `clamp(4.8rem, 10.4vw, 10.4rem)`: exactamente el doble del titular estático
+que había antes (149,8px contra 74,9px medidos a 1440 de ancho). Es una **excepción deliberada** al
+techo de 6rem/96px que `/impeccable` pone a los titulares, del mismo tipo que la de los saludos de la
+entrada: una frase que atraviesa la pantalla no tiene que caber, tiene que pasar.
+
+**Lento, para que se lea.** ~65 px/s. La duración no es "la velocidad": el carril mide distinto en
+cada viewport, así que va en una variable (`--marquee-dur`) que se ajusta por breakpoint (95s en
+escritorio, 55s por debajo de 1024, 32s por debajo de 600) para que los píxeles por segundo se
+parezcan en todos. Si se cambia el tamaño de letra, hay que revisar esas tres cifras.
+
+**Cómo no se ve la costura.** Cuatro copias idénticas de la frase en el carril, y un recorrido del
+50%: al terminar, las copias 3 y 4 están exactamente donde arrancaron la 1 y la 2, así que el salto
+de vuelta a cero cae en un fotograma idéntico. El margen de separación va **en cada copia** y no como
+`gap` del flex: con `gap` no hay hueco después de la última y el patrón deja de ser periódico. Dos
+copias tienen que sumar más que el viewport para que nunca se vea el final del carril — a 1440 cada
+copia mide ~3110px, así que sobra.
+
+**Dónde vive el `mix-blend-mode`, y por qué ahí.** En `.hero-marquee`, la caja de fuera, **no** en
+las copias de texto. El carril lleva un `transform` animado, y eso crea un contexto de apilamiento:
+un blend declarado dentro del carril solo vería el fondo del propio carril —transparente— y no la
+fotografía. Puesto en la caja de fuera, lo que se mezcla es el bloque entero contra el fondo de la
+sección, foto incluida. Es el mismo tropiezo que ya obligó a no poner `z-index` en el envoltorio del
+titular: cualquier cosa que cree un contexto de apilamiento entre la foto y el texto rompe el
+negativo.
+
+**Es CSS puro.** Una `@keyframes` y nada más: gira sin JavaScript, no depende de GSAP y no puede
+quedarse a medias. El titular real es el primer `<h1>`; las otras tres copias van `aria-hidden` para
+que un lector de pantalla no lea la misma frase cuatro veces seguidas.
+
+**Con `prefers-reduced-motion`** no se para la marquesina —eso dejaría media frase fuera de la
+pantalla—, sino que se sustituye: las copias se ocultan, el carril deja de ser un flex, y el titular
+queda entero, centrado, envuelto a varias líneas y a un tamaño que cabe, con la foto encima y sin
+blend. El estado final legible, no la animación congelada.
+
+### El reclamo de scroll
+
+Abajo y al centro de la banda, un reclamo que invita a bajar. Refuerza lo que ya dice la media fila
+asomando: una lo insinúa por composición, el otro lo señala.
+
+**No es un adorno: es un enlace real** al índice (`#trabajo`). Se tabula, se pulsa y lleva a donde
+señala; el nombre accesible lo pone un texto oculto ("Ir a los proyectos") porque la pista y el
+segmento son dibujo y van `aria-hidden`. Objetivo de 44×44px, holgado para el dedo.
+
+**Por qué no es la flecha que rebota.** La gramática de movimiento del sitio (ver [Motion](#motion))
+dice que el movimiento nunca deshace el recorrido, y rebotar es exactamente eso. Aquí un segmento
+baja por una pista de un píxel, se desvanece al final y reaparece arriba **ya invisible**: no se le
+ve subir nunca. La regla del sitio no se dobla para un adorno; se usa para elegir la forma del
+adorno. Con `prefers-reduced-motion` el segmento se queda posado a media pista, como una marca —el
+estado final, no la animación congelada en un punto cualquiera.
+
+**El salto usa Lenis**, la instancia que publica `motion.js`, expuesta precisamente para "saltar a un
+punto". Si Lenis no está —CDN caído, o `prefers-reduced-motion`, donde ni siquiera se inicializa— el
+evento no se toca y el ancla del HTML hace su trabajo de siempre: el enlace nunca depende del script.
+
+**Un detalle que costó encontrarlo y por eso se escribe**: a `lenis.scrollTo()` hay que pasarle un
+**número**, no el elemento. Con un `HTMLElement` esta versión (1.1.18) no se mueve y tampoco lanza
+ningún error — simplemente no pasa nada. La posición se resuelve antes
+(`destino.getBoundingClientRect().top + window.scrollY`).
+
+### Qué pasa con el `hero-eyebrow`
+
+Absorbido y retirado. `DESIGN.md` ya lo anotaba como andamiaje heredado del MVP pendiente de
+revisión (ver [Lo que NO es una excepción](#lo-que-no-es-una-excepción) — esa nota hablaba de otro
+`eyebrow`, el de las secciones de abajo; el `hero-eyebrow` nunca estuvo en esa lista, y ahora ya no
+existe). Su `view-transition-name` (`hero-eyebrow`) pasa al `<h1>` nuevo, renombrado a
+`hero-statement`, y se declara sobre el id `#hero-titular` y nunca sobre la clase que comparten las
+cuatro copias: dos elementos con el mismo nombre invalidan la transición entera. Ver
+[Transiciones de página](#transiciones-de-página).
 
 ## Transiciones de página
 
@@ -464,7 +699,9 @@ en `site.css`, con tres grupos de elementos nombrados:
   `site.css`, porque esas dos clases son comunes a las cinco. Sin foto activa (llegada directa,
   sin pasar por el índice), la imagen de la página nueva simplemente entra sola, sin réplica que
   morfear — degradación aceptable, no error.
-- **Los ítems del índice → `index-item-1`…`index-item-5`, y `hero-eyebrow`.** Solo existen en
+- **Los ítems del índice → `index-item-1`…`index-item-5`, y `hero-statement`.** Este último era
+  `hero-eyebrow` hasta el ticket [#51](https://github.com/i-casaca/portfolio-test-migration/issues/51)
+  (ver [Hero](#hero)); el renombre es mecánico, la coreografía no cambió. Solo existen en
   `index.html`, así que su CSS vive en el `<style>` de esa página, no en `site.css`. Salen hacia
   arriba en cascada corta (`::view-transition-old`, 0,32s, 40ms de diferencia entre ítems) mientras
   la foto se queda quieta. Las páginas de proyecto no tienen índice con el que emparejar una
@@ -527,6 +764,14 @@ saturado de la IA actual.
 Aquí el hueso es **tinta sobre una superficie oscura**, que es exactamente el caso contrario. La
 prohibición no aplica, y el token no se debe reemplazar por un blanco neutro "por seguridad".
 
+**Matiz introducido en el ticket [#51](https://github.com/i-casaca/portfolio-test-migration/issues/51)
+(ver [Hero](#hero)):** el marco de la polaroid del hero sí usa `--ink` como superficie — un objeto
+físico pequeño, no el fondo de la página. La prohibición de esta excepción es sobre el *fondo de
+página*, así que no aplica ahí tampoco, pero por una razón distinta a la del cuerpo de texto: no es
+que el hueso sea tinta en vez de superficie, es que esa superficie concreta no es la página. Si en
+algún momento se generaliza el hueso como superficie fuera de un objeto físico deliberado (una
+tarjeta, un panel), eso sí rompería la excepción y habría que revisarlo.
+
 ### 3. Una sola familia tipográfica
 
 `impeccable` desconfía de las páginas monofamiliares porque casi siempre lo son por reflejo, no por
@@ -539,6 +784,26 @@ recorrer los anchos de una familia, y la personalidad se concentra en las displa
 Un sistema sin accent color parece incompleto vista la lista de comprobación habitual. Aquí es el
 argumento entero: la fotografía de proyecto es el único color saturado del sitio, y meter un acento
 propio le quitaría ese trabajo. **No añadir un accent token.**
+
+### 5. El titular del hero en negativo sobre la foto
+
+La única de esta lista que **no** contradice un default de `/impeccable`, sino un compromiso del
+propio sitio: el de contraste AA de [PRODUCT.md](PRODUCT.md#accessibility--inclusion).
+
+Sobre la fotografía a plena fuerza, el `mix-blend-mode:difference` del titular deja en torno a un 8%
+de la franja que barre por debajo de 3:1 (media: 10,4:1). Está medido sobre los píxeles reales, con
+la tabla completa de intentos de rescate en
+[Hero](#el-titular-en-negativo-una-excepción-con-los-números-delante), y decidido por Ismael con esos
+números delante.
+
+**No se debe "corregir" oscureciendo, aclarando o velando la foto**: las tres vías están probadas y
+empeoran o borran la imagen. La única salida que dejan las mediciones, si algún día se quiere
+recuperar el cumplimiento, es cambiar el fondo del cruce por un bloque liso en `--ink` (13:1
+garantizado).
+
+Se lista aquí, y no escondida en una nota, porque el primer principio de marca es declarar el
+límite: el sitio prefiere decir en voz alta lo que le cuesta este gesto antes que dejarlo sin
+documentar.
 
 ### Lo que NO es una excepción
 
