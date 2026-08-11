@@ -405,8 +405,19 @@ if(sessionStorage.getItem('vt-on')){var s=document.createElement('script');s.src
      elementos con el mismo nombre en un documento invalidan la transición
      entera, y con cinco imágenes había que ir moviéndolo. Ver
      site.css > Transiciones de página para el otro lado del emparejamiento. */
+  /* `absolute`, NO `fixed`. Es la diferencia que impedia el morfismo de ida.
+     El diagnostico lo dejo aislado: en esa navegacion capturaron bien
+     `hero-statement` y los cinco `index-item` —todos en flujo— y el unico
+     nombre que no genero `::view-transition-old` fue este, el unico `fixed`.
+     Sin `old` no hay grupo, y sin grupo se ve el `new` apareciendo solo: el
+     fundido.
+
+     Absoluta respecto al documento (no hay ancestro posicionado: va como hijo
+     directo de <body>, fuera del .hero, que tiene `overflow:hidden` y la
+     recortaria). indice.js le suma el scroll en cada fotograma, asi que
+     visualmente se comporta igual que antes. */
   #index-float{
-    position:fixed;top:0;left:0;margin:0;pointer-events:none;
+    position:absolute;top:0;left:0;margin:0;pointer-events:none;
     width:clamp(360px, 34vw, 560px);aspect-ratio:4/3;
     z-index:45;                     /* delante de la mancha (40), detrás del chat (60) */
   }
@@ -443,18 +454,6 @@ if(sessionStorage.getItem('vt-on')){var s=document.createElement('script');s.src
      había que dejarle aire a la derecha; retirada la foto (#55), ese tope solo
      dejaba una franja muerta y desalineaba las filas del resto de la página,
      que respiran con el padding de 6vw del contenedor. */
-  /* El rótulo que abre la lista. Comparte el cuerpo del nombre de proyecto a
-     propósito —es la misma familia de tamaño— pero en el peso más estrecho y
-     con la tinta a media fuerza, para que anuncie sin competir con los cinco
-     títulos que vienen debajo. Alineado a la izquierda con la columna de
-     números, que es de donde arranca la lectura de toda la lista. */
-  .index-title{
-    margin:0 0 1.2rem;
-    font-family:var(--f);font-weight:500;font-stretch:75%;
-    font-size:clamp(1.6rem,3.4vw,2.6rem);line-height:1;
-    letter-spacing:-.01em;text-transform:uppercase;
-    opacity:var(--dim);
-  }
   /* La rejilla vive AQUÍ, no en cada fila. Puesta en `.index-item`, cada fila
      era una rejilla independiente y `max-content` se resolvía por separado: la
      descripción arrancaba en una x distinta en cada una (medido: 515, 574, 581,
@@ -827,12 +826,6 @@ if(sessionStorage.getItem('vt-on')){var s=document.createElement('script');s.src
        repetía los mismos 5 en filas alternadas se retiró por duplicado. En
        su lugar, cada ítem lleva su propia miniatura para móvil/táctil (ver
        .index-thumb), que es donde antes recaía esa responsabilidad. -->
-  <!-- El separador que abre la lista. Es UN rótulo grande y nombrado, no el
-       `eyebrow` en versalitas que el sitio está retirando: aquí marca el
-       cambio de mundo —del hero oscuro a los proyectos— y por eso tiene el
-       cuerpo de un titular, no el de una etiqueta. -->
-  <h2 class="index-title">Proyectos</h2>
-
   <nav class="project-index" id="project-index" aria-label="Índice de proyectos">
     <a class="index-item" data-idx="0" data-foto="./assets/images/manu-cardiel/hero.jpg" href="./manu-cardiel.html">
       <span class="index-num">01</span>

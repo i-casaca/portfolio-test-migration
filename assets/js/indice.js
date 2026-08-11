@@ -39,6 +39,11 @@
   // ---------------------------------------------------------------- flotante
 
   var activo = -1;
+  /* Se declara aquí, fuera del bloque de puntero fino, para que el foco de
+   * teclado pueda preguntar si existe. Solo se define cuando hay puntero fino
+   * y GSAP; en cualquier otro caso se queda sin definir y el teclado toma su
+   * propio camino. */
+  var colocar;
 
   function mostrar(i) {
     if (i === activo) return;
@@ -64,8 +69,26 @@
      * `pointermove`. El retardo (0,55 s con `power3`) es lo que hace que la
      * imagen "persiga" en vez de ir pegada — pegada al cursor no se lee como
      * un objeto, se lee como parte del puntero. */
-    var toX = gsap.quickTo(flotante, 'x', { duration: 0.55, ease: 'power3' });
-    var toY = gsap.quickTo(flotante, 'y', { duration: 0.55, ease: 'power3' });
+    /* El retardo se anima sobre un objeto, no sobre el elemento, y el
+     * `transform` lo escribe el ticker sumando el scroll.
+     *
+     * Por qué así: la imagen dejó de ser `position:fixed` —era lo que impedía
+     * el morfismo de ida— y una absoluta se queda quieta en el documento
+     * mientras la página se mueve. Sumando `scrollY` en cada fotograma se
+     * comporta exactamente como antes a la vista, pero el elemento que el
+     * navegador captura ya es una caja normal.
+     *
+     * Animar el objeto y no el elemento es lo que permite que el retardo viva
+     * en coordenadas de pantalla y el scroll se aplique después, sin que una
+     * cosa arrastre a la otra. */
+    var pos = { x: -9999, y: -9999 };
+    var toX = gsap.quickTo(pos, 'x', { duration: 0.55, ease: 'power3' });
+    var toY = gsap.quickTo(pos, 'y', { duration: 0.55, ease: 'power3' });
+
+    gsap.ticker.add(function () {
+      flotante.style.transform =
+        'translate3d(' + (pos.x + window.scrollX) + 'px,' + (pos.y + window.scrollY) + 'px,0)';
+    });
 
     /* El desfase saca la imagen de debajo del cursor: centrada, el propio
      * puntero tapa el centro de la foto y el `#cursor-dot` invierte justo ahí. */
@@ -87,10 +110,16 @@
       return v < MARGEN ? MARGEN : (v > max ? max : v);
     }
 
+    /* Único punto por el que se mueve la imagen. `yaEncajado` lo usa el foco de
+     * teclado, que calcula su sitio a partir de la fila y no necesita clamp. */
+    colocar = function (x, y, yaEncajado) {
+      if (yaEncajado) { toX(x); toY(y); return; }
+      toX(encajar(x, flotante.offsetWidth, window.innerWidth));
+      toY(encajar(y, flotante.offsetHeight, window.innerHeight));
+    };
+
     window.addEventListener('pointermove', function (e) {
-      var w = flotante.offsetWidth, h = flotante.offsetHeight;
-      toX(encajar(e.clientX + DX, w, window.innerWidth));
-      toY(encajar(e.clientY + DY, h, window.innerHeight));
+      colocar(e.clientX + DX, e.clientY + DY);
     }, { passive: true });
 
     items.forEach(function (item, i) {
@@ -140,11 +169,14 @@
       var r = item.getBoundingClientRect();
       var x = r.right - flotante.offsetWidth - 24;
       var y = r.top + 8;
-      /* `gsap.set` cuando está, `style.transform` cuando no: el segundo camino
-       * no es un apaño, es el que se usa sin GSAP, y tiene que dejar la imagen
-       * en el mismo sitio para que el morfismo salga desde donde se ve. */
-      if (hayGsap) gsap.set(flotante, { x: x, y: y });
-      else flotante.style.transform = 'translate3d(' + x + 'px,' + y + 'px,0)';
+      /* Se coloca por la misma vía que el seguimiento —`colocar`, que existe
+       * solo con puntero fino— o, si no la hay, escribiendo el `transform` a
+       * mano con el scroll ya sumado. Las dos tienen que dejar la imagen en el
+       * mismo sitio: es el origen del morfismo, y si no coincide con lo que se
+       * ve, el morfismo arranca de un sitio que no es. */
+      if (typeof colocar === 'function') colocar(x, y, true);
+      else flotante.style.transform =
+        'translate3d(' + (x + window.scrollX) + 'px,' + (y + window.scrollY) + 'px,0)';
       mostrar(i);
     });
     item.addEventListener('blur', esconder);
