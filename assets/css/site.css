@@ -310,6 +310,21 @@ html.is-entering #backdrop-blob{opacity:0;}
   animation-duration:var(--dur-move);
   animation-timing-function:var(--ease-move);
 }
+/* Sin esto, el grupo se mueve y cambia de tamaño pero las dos capturas de
+   dentro NO se reescalan: nacen con `block-size:auto`, o sea conservando su
+   proporción intrínseca. El efecto es justo el que se veía — la imagen se
+   planta en la posición final de un salto y no parece crecer.
+
+   Llenando el grupo y recortando con `object-fit:cover`, las dos capturas
+   siguen la caja mientras se anima, y el cambio de proporción (la flotante es
+   4:3, la portada del proyecto es panorámica) se resuelve recortando en vez de
+   deformando. Que es lo que hace la propia foto en las dos puntas. */
+::view-transition-old(project-cover),
+::view-transition-new(project-cover){
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+}
 
 /* Texto solo para lectores de pantalla (los enlaces del hero son puro dibujo). */
 .sr-only{

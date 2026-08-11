@@ -13,6 +13,15 @@
 
   var CLAVE = 'vt-debug';
 
+  /* El interruptor vive aquí y no en el cargador: `?vt` no sobrevive al clic
+   * hacia la página de proyecto, así que la primera visita con el parámetro lo
+   * deja apuntado en sessionStorage y a partir de ahí el diagnóstico sigue
+   * activo por toda la navegación. Sin él, el archivo no hace nada. */
+  try {
+    if (/[?&]vt\b/.test(location.search)) sessionStorage.setItem('vt-on', '1');
+    if (!sessionStorage.getItem('vt-on')) return;
+  } catch (e) { return; }
+
   function nombrados() {
     return [].slice.call(document.querySelectorAll('*'))
       .map(function (e) {
