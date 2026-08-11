@@ -100,6 +100,7 @@
   function cerrarMuro() {
     if (!muro) return;
     muro.hidden = true;
+    document.documentElement.classList.remove('muro-abierto');
     pendiente = null;
   }
 
@@ -110,6 +111,11 @@
     if (!muro || !window.crypto || !crypto.subtle) { location.href = item.getAttribute('href'); return; }
     pendiente = { item: item, i: i };
     muro.hidden = false;
+    /* La marca en la raíz es la que apaga el cursor propio, la mancha, la
+     * imagen flotante y los hovers del índice (ver site.css). Se pone aquí y no
+     * en el muro para que alcance a capas que viven fuera de él. */
+    document.documentElement.classList.add('muro-abierto');
+    esconder();
     var campo = document.getElementById('gate-input');
     var error = document.getElementById('gate-error');
     if (error) error.textContent = '';

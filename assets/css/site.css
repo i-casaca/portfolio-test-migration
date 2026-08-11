@@ -447,8 +447,30 @@ html.js .project-body .media:first-of-type{opacity:1;transform:none;}
    seguido; ahora la transicion solo ocurre cuando ya se puede ver. */
 .password-gate{
   display:none;position:fixed;inset:0;align-items:center;justify-content:center;padding:2rem;
-  background:rgba(32,25,21,.62);
-  }
+  /* z-index alto: el índice de proyectos es `position:relative; z-index:1`, así
+     que sin esto el muro quedaba POR DEBAJO de los títulos y las descripciones
+     y el texto se le cruzaba por encima. Va por delante de todo salvo el panel
+     de transición entre páginas (9998/10000). */
+  z-index:9995;
+  /* Opaco de verdad: con el velo translúcido se leía el índice a través del
+     muro y la pregunta competía con lo que estaba tapando. */
+  background:color-mix(in oklab, var(--c-negro) 93%, transparent);
+  backdrop-filter:blur(8px);
+}
+
+/* Con el muro abierto no queda nada vivo detrás: ni cursor propio, ni mancha,
+   ni imagen flotante, ni hovers del índice. Un modal que deja el fondo
+   reaccionando se lee como que el sitio no te ha oído. */
+html.muro-abierto{overflow:hidden;}
+html.muro-abierto #cursor-dot,
+html.muro-abierto #backdrop-blob,
+html.muro-abierto #index-float{opacity:0 !important;visibility:hidden !important;}
+html.muro-abierto .project-index,
+html.muro-abierto .nav{pointer-events:none;}
+/* El cursor a medida se apaga con el puntero del sistema de vuelta: dentro del
+   muro hay que poder apuntar un campo de texto. */
+html.muro-abierto .hero,
+html.muro-abierto .hero-statement{cursor:auto;}
 .gate-wrap.locked .password-gate{display:flex;}
 .gate-card{
   background:var(--surface1);border:1px solid var(--line);border-radius:10px;padding:2rem 2.2rem;

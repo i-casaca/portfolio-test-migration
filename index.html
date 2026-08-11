@@ -457,23 +457,37 @@
      contraseña. Y como el muro ahora salta en la home, la transición solo
      ocurre cuando ya se puede ver el proyecto. */
   #index-float .nda-estatica{display:none;position:absolute;inset:0;overflow:hidden;
-    border-radius:2px;place-items:center;}
+    border-radius:2px;place-content:center;justify-items:center;gap:.7rem;
+    /* Fondo negro propio, no el del sitio: una televisión sin señal no es
+       translúcida. Sin esto se veía el índice a través del ruido y parecía una
+       capa de suciedad en vez de una pantalla. */
+    background:#08080a;}
   #index-float.is-nda .nda-estatica{display:grid;}
   #index-float.is-nda img{visibility:hidden;}
-  /* Ruido EN COLOR, al contrario que el grano del sitio: aquí no es textura de
-     fondo sino una imagen que sustituye a otra, y en gris se leería como una
-     foto rota en vez de como una señal perdida. */
+  /* Ruido EN COLOR y OPACO. El `feTurbulence` genera también ruido en el canal
+     alfa, así que tal cual sale semitransparente y lavado; el `feFuncA` lo
+     aplasta a 1 y deja la estática densa. En gris leería como foto rota, no
+     como señal perdida — por eso no lleva el `saturate(0)` que sí lleva el
+     grano del sitio. */
   .nda-estatica::before{
     content:"";position:absolute;inset:-30%;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='e'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23e)'/%3E%3C/svg%3E");
-    animation:nda-ruido .45s steps(1,end) infinite;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='e'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='4' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23e)'/%3E%3C/svg%3E");
+    /* Oscurecido: el ruido crudo sale demasiado claro y la sigla no se
+       despegaba. `brightness` baja el nivel general y `contrast` mantiene el
+       grano vivo en vez de aplanarlo a gris. */
+    filter:brightness(.42) contrast(1.5);
+    animation:nda-ruido .4s steps(1,end) infinite;
   }
   /* Las bandas horizontales son lo que lo hace leer como televisión y no como
-     ruido digital sin más. */
+     ruido digital. Van más marcadas que antes, y con una banda ancha que cruza
+     despacio — el barrido de un tubo que no engancha la señal. */
   .nda-estatica::after{
     content:"";position:absolute;inset:0;
-    background:repeating-linear-gradient(to bottom,
-      rgba(0,0,0,.34) 0 1px, transparent 1px 3px);
+    background:
+      linear-gradient(to bottom, transparent 0 42%, rgba(255,255,255,.06) 46%, transparent 52% 100%),
+      repeating-linear-gradient(to bottom, rgba(0,0,0,.55) 0 1px, transparent 1px 3px);
+    background-size:100% 100%, 100% 3px;
+    animation:nda-barrido 3.2s linear infinite;
   }
   @keyframes nda-ruido{
     0%  {transform:translate(0,0);}
@@ -483,17 +497,41 @@
     80% {transform:translate(6%,5%);}
     100%{transform:translate(0,0);}
   }
-  /* Blanco con `difference`: la misma mecánica de inversión del punto de cursor
-     y de la mancha del #53. Sobre un ruido que cambia en cada fotograma es lo
-     único que garantiza que las tres letras se lean siempre — un color fijo se
-     perdería contra la mitad de los fotogramas. */
-  .nda-estatica span{
+  @keyframes nda-barrido{
+    from{background-position:0 -120%, 0 0;}
+    to  {background-position:0 220%, 0 0;}
+  }
+  /* Aberración cromática: la sigla en blanco con una copia roja y otra cian
+     desplazadas. Es el desajuste de convergencia de un tubo, y aquí hace además
+     un trabajo práctico — sobre un ruido que cambia en cada fotograma, los tres
+     canales separados garantizan que las letras se despeguen del fondo pase lo
+     que pase. Sustituye al `mix-blend-mode:difference` que llevaba antes: con
+     el fondo ya negro y opaco, invertir no aportaba y perdía el color. */
+  .nda-estatica .nda-sigla{
     position:relative;z-index:1;
     font-family:var(--f);font-weight:800;font-stretch:75%;
     font-size:clamp(1.6rem,3.4vw,2.8rem);letter-spacing:.22em;text-indent:.22em;
-    color:#fff;mix-blend-mode:difference;
+    color:#fff;
+    text-shadow:
+      -2px 0 0 rgba(255,0,72,.85),
+       2px 0 0 rgba(0,229,255,.85);
+    animation:nda-aberracion 2.6s steps(1,end) infinite;
   }
-  @media (prefers-reduced-motion: reduce){ .nda-estatica::before{animation:none;} }
+  @keyframes nda-aberracion{
+    0%,70%,100%{text-shadow:-2px 0 0 rgba(255,0,72,.85), 2px 0 0 rgba(0,229,255,.85);}
+    78%        {text-shadow:-5px 0 0 rgba(255,0,72,.9),  4px 0 0 rgba(0,229,255,.9);}
+    86%        {text-shadow:-1px 0 0 rgba(255,0,72,.8),  6px 0 0 rgba(0,229,255,.8);}
+  }
+  .nda-estatica .nda-nota{
+    position:relative;z-index:1;
+    font-size:var(--fs-micro);letter-spacing:.14em;text-transform:uppercase;
+    color:#fff;opacity:.82;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .nda-estatica::before,
+    .nda-estatica::after,
+    .nda-estatica .nda-sigla{animation:none;}
+  }
 
   /* Sin `max-width`: las filas ocupan todo el ancho del bloque. El tope de
      1040px venía de cuando el índice compartía sitio con la foto a sangre y
@@ -519,7 +557,7 @@
        celdas del barrido dentro de esa columna, el error se realimentaba.
        Ahora el nombre va a `max-content` sin nada que compita, y el hueco
        flexible es el de la descripción. */
-    grid-template-columns:3.5ch max-content minmax(0,1fr) max-content;
+    grid-template-columns:3.5ch minmax(0,1fr) max-content;
     column-gap:2.2rem;
   }
   /* Rejilla y no flex. Con flex, la descripción arrancaba justo detrás del
@@ -531,11 +569,23 @@
      `max-content` en el nombre: la columna la marca el título más largo, y todo
      lo demás se alinea después de él. Es lo que mantiene el bloque de texto
      pegado al nombre en vez de flotando en medio del ancho completo. */
+  /* La descripción va DEBAJO del nombre, no a su lado: es la disposición que
+     pidió Ismael y la que hace que la fila se lea como una entrada y no como
+     una tabla. El número y el meta se alinean con la línea del título, no con
+     el bloque entero, para que la primera línea de las cinco filas caiga a la
+     misma altura. */
   .index-item{
     display:grid;grid-column:1/-1;grid-template-columns:subgrid;
-    align-items:baseline;padding:1.3rem 0;
+    grid-template-areas:
+      "num nombre meta"
+      ".   desc   .";
+    align-items:baseline;row-gap:.55rem;padding:1.4rem 0 1.6rem;
     border-top:1px solid var(--line);text-decoration:none;color:var(--ink);
   }
+  .index-num{grid-area:num;}
+  .index-name{grid-area:nombre;}
+  .index-desc{grid-area:desc;}
+  .index-meta{grid-area:meta;}
   .index-item:last-child{border-bottom:1px solid var(--line);}
   .index-num{font-size:var(--fs-small);opacity:var(--dim-faint);font-variant-numeric:tabular-nums;flex:0 0 2.4ch;}
   .index-name{
@@ -567,11 +617,13 @@
      la pantalla es muy ancha: una línea de 46 caracteres se lee de un vistazo;
      de 90, ya no. */
   .index-desc{
-    min-width:0;
-    font-size:var(--fs-small);line-height:var(--lh-small);
+    min-width:0;max-width:62ch;
+    font-size:var(--fs-small);line-height:var(--lh-body);
     opacity:var(--dim);
-    /* Dos líneas como mucho; la tercera empezaría a competir con el nombre. */
-    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
+    /* Tres líneas: colgando del nombre ya no compite con él, así que cabe algo
+       más de texto sin que la fila se desequilibre. El tope en `ch` es lo que
+       impide que en pantallas anchas se estire a una sola línea larguísima. */
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;
   }
   .index-meta{
     justify-self:end;display:flex;align-items:center;gap:.9rem;
@@ -1104,7 +1156,7 @@
   </div>
 </div>
 
-<figure id="index-float" aria-hidden="true"><img alt="" decoding="async" /><div class="nda-estatica"><span>NDA</span></div></figure>
+<figure id="index-float" aria-hidden="true"><img alt="" decoding="async" /><div class="nda-estatica"><span class="nda-sigla">NDA</span><span class="nda-nota">Requiere contrase&#241;a</span></div></figure>
 
 <!-- La mancha que sigue al ratón (ticket #53). Va vacía: backdrop.js crea
      dentro los circulos que la forman, y no la monta siquiera sin puntero
