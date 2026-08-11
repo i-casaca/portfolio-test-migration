@@ -85,9 +85,72 @@
     var toX = gsap.quickTo(pos, 'x', { duration: 0.55, ease: 'power3' });
     var toY = gsap.quickTo(pos, 'y', { duration: 0.55, ease: 'power3' });
 
+    var saliendo = false;
+
     gsap.ticker.add(function () {
+      /* Durante la salida manda la animación de la fase 1, que escribe
+       * `left`/`top`/`width`/`height` directamente. Si el ticker siguiera
+       * pisando el `transform`, las dos se pelearían. */
+      if (saliendo) return;
       flotante.style.transform =
         'translate3d(' + (pos.x + window.scrollX) + 'px,' + (pos.y + window.scrollY) + 'px,0)';
+    });
+
+    /* ---------- fase 1 de la transición al proyecto ----------
+     * La imagen crece hasta llenar la pantalla y solo entonces se navega. La
+     * página de proyecto recoge el testigo con la portada ya a pantalla
+     * completa y la baja a su sitio (assets/js/entrada-proyecto.js).
+     *
+     * Por qué así y no con View Transitions: cuatro rondas de diagnóstico
+     * demostraron que el navegador NO captura la imagen flotante en el
+     * documento que sale — solo se creaba `::view-transition-new(project-cover)`,
+     * nunca el `old` ni el grupo, así que no había nada que morfear y se veía un
+     * fundido. Partirlo en dos animaciones, una dentro de cada página, elimina
+     * la dependencia: ninguna de las dos necesita que la otra capture nada.
+     *
+     * La vuelta (proyecto → índice) sí morfeaba y sigue haciéndolo por su
+     * cuenta con la transición nativa; esto solo gobierna la ida. */
+    items.forEach(function (item) {
+      item.addEventListener('click', function (e) {
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        if (!flotante.classList.contains('is-on') || saliendo) return;
+
+        var destino = item.getAttribute('href');
+        var r = flotante.getBoundingClientRect();
+        e.preventDefault();
+        saliendo = true;
+        gsap.killTweensOf(pos);
+
+        /* Se pasa a `fixed` conservando exactamente la posición que se ve: a
+         * partir de aquí la imagen ya no sigue al cursor ni al scroll, va a
+         * llenar la pantalla. */
+        flotante.style.position = 'fixed';
+        flotante.style.transform = 'none';
+        flotante.style.aspectRatio = 'auto';
+        flotante.style.left = r.left + 'px';
+        flotante.style.top = r.top + 'px';
+        flotante.style.width = r.width + 'px';
+        flotante.style.height = r.height + 'px';
+
+        gsap.to(flotante, {
+          left: 0, top: 0, width: window.innerWidth, height: window.innerHeight,
+          duration: 0.62, ease: 'power3.inOut',
+          onComplete: function () {
+            try { sessionStorage.setItem('entrada-proyecto', destino); } catch (err) {}
+            location.href = destino;
+          }
+        });
+      });
+    });
+
+    /* El bfcache devuelve el documento tal cual se dejó — con la imagen a
+     * pantalla completa y en `fixed`. Ya nos pasó una vez con estilos inline
+     * que sobrevivieron y descolocaron todo: aquí se limpian a mano. */
+    window.addEventListener('pageshow', function (e) {
+      if (!e.persisted) return;
+      saliendo = false;
+      flotante.classList.remove('is-on');
+      flotante.style.cssText = '';
     });
 
     /* El desfase saca la imagen de debajo del cursor: centrada, el propio
