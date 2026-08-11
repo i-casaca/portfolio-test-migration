@@ -443,9 +443,52 @@ if(sessionStorage.getItem('vt-on')){var s=document.createElement('script');s.src
      había que dejarle aire a la derecha; retirada la foto (#55), ese tope solo
      dejaba una franja muerta y desalineaba las filas del resto de la página,
      que respiran con el padding de 6vw del contenedor. */
-  .project-index{position:relative;z-index:1;width:100%;}
+  /* El rótulo que abre la lista. Comparte el cuerpo del nombre de proyecto a
+     propósito —es la misma familia de tamaño— pero en el peso más estrecho y
+     con la tinta a media fuerza, para que anuncie sin competir con los cinco
+     títulos que vienen debajo. Alineado a la izquierda con la columna de
+     números, que es de donde arranca la lectura de toda la lista. */
+  .index-title{
+    margin:0 0 1.2rem;
+    font-family:var(--f);font-weight:500;font-stretch:75%;
+    font-size:clamp(1.6rem,3.4vw,2.6rem);line-height:1;
+    letter-spacing:-.01em;text-transform:uppercase;
+    opacity:var(--dim);
+  }
+  /* La rejilla vive AQUÍ, no en cada fila. Puesta en `.index-item`, cada fila
+     era una rejilla independiente y `max-content` se resolvía por separado: la
+     descripción arrancaba en una x distinta en cada una (medido: 515, 574, 581,
+     619, 673). Con las columnas declaradas en el <nav> y las filas heredándolas
+     por `subgrid`, la columna es una sola para las cinco.
+
+     `subgrid` y no `display:contents` en la fila: la fila es un <a>, y
+     `contents` le borraría la caja — adiós borde, padding y superficie de
+     clic. */
+  .project-index{
+    position:relative;z-index:1;width:100%;
+    display:grid;
+    /* La descripción es la que cede, no el nombre. Con `1fr` al final y 42ch
+       de descripción, esas dos se repartían el ancho ANTES de que el nombre
+       cogiera el suyo y la columna del título quedaba en 176 px cuando "Manu
+       Cardiel" necesita 197: el nombre se desbordaba. Y como el JS remide las
+       celdas del barrido dentro de esa columna, el error se realimentaba.
+       Ahora el nombre va a `max-content` sin nada que compita, y el hueco
+       flexible es el de la descripción. */
+    grid-template-columns:3.5ch max-content minmax(0,1fr) max-content;
+    column-gap:2.2rem;
+  }
+  /* Rejilla y no flex. Con flex, la descripción arrancaba justo detrás del
+     nombre, así que empezaba en una x distinta en cada fila —"Manu Cardiel" y
+     "Nexahub" no miden lo mismo— y las cinco líneas quedaban escalonadas. En
+     una lista, lo que se lee de un vistazo es la columna, no la fila: las
+     cuatro piezas necesitan la misma x en las cinco filas.
+
+     `max-content` en el nombre: la columna la marca el título más largo, y todo
+     lo demás se alinea después de él. Es lo que mantiene el bloque de texto
+     pegado al nombre en vez de flotando en medio del ancho completo. */
   .index-item{
-    display:flex;align-items:baseline;gap:1.6rem;padding:1.3rem 0;
+    display:grid;grid-column:1/-1;grid-template-columns:subgrid;
+    align-items:baseline;padding:1.3rem 0;
     border-top:1px solid var(--line);text-decoration:none;color:var(--ink);
   }
   .index-item:last-child{border-bottom:1px solid var(--line);}
@@ -453,6 +496,9 @@ if(sessionStorage.getItem('vt-on')){var s=document.createElement('script');s.src
   .index-name{
     font-family:var(--f);font-weight:500;font-stretch:120%;
     font-size:clamp(2.1rem,6vw,4.2rem);line-height:1;
+    /* Nunca envuelve: es lo que hace que su `max-content` sea un número
+       estable y no dependa del ancho que le toque. */
+    white-space:nowrap;
     transition:opacity .3s ease, font-weight .28s var(--ease-move);
   }
   /* Cada carácter del nombre, en su propia caja de ancho fijo (indice.js mide
@@ -476,14 +522,14 @@ if(sessionStorage.getItem('vt-on')){var s=document.createElement('script');s.src
      la pantalla es muy ancha: una línea de 46 caracteres se lee de un vistazo;
      de 90, ya no. */
   .index-desc{
-    flex:0 1 46ch;min-width:0;
+    min-width:0;
     font-size:var(--fs-small);line-height:var(--lh-small);
     opacity:var(--dim);
     /* Dos líneas como mucho; la tercera empezaría a competir con el nombre. */
     display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
   }
   .index-meta{
-    margin-left:auto;display:flex;align-items:center;gap:.9rem;
+    justify-self:end;display:flex;align-items:center;gap:.9rem;
     font-size:var(--fs-small);opacity:var(--dim);white-space:nowrap;align-self:center;
   }
   .index-lock{
@@ -584,8 +630,9 @@ if(sessionStorage.getItem('vt-on')){var s=document.createElement('script');s.src
        verdad — la miniatura manda la altura y el texto se apila a su derecha.
        Con `flex-wrap` el nombre y el meta caían a líneas sueltas de ancho
        completo y la fila quedaba desarmada. */
+    .project-index{display:block;}
     .index-item{
-      display:grid;
+      display:grid;grid-column:auto;
       grid-template-columns:72px 1fr;
       grid-template-areas:
         "num   nombre"
@@ -780,6 +827,12 @@ if(sessionStorage.getItem('vt-on')){var s=document.createElement('script');s.src
        repetía los mismos 5 en filas alternadas se retiró por duplicado. En
        su lugar, cada ítem lleva su propia miniatura para móvil/táctil (ver
        .index-thumb), que es donde antes recaía esa responsabilidad. -->
+  <!-- El separador que abre la lista. Es UN rótulo grande y nombrado, no el
+       `eyebrow` en versalitas que el sitio está retirando: aquí marca el
+       cambio de mundo —del hero oscuro a los proyectos— y por eso tiene el
+       cuerpo de un titular, no el de una etiqueta. -->
+  <h2 class="index-title">Proyectos</h2>
+
   <nav class="project-index" id="project-index" aria-label="Índice de proyectos">
     <a class="index-item" data-idx="0" data-foto="./assets/images/manu-cardiel/hero.jpg" href="./manu-cardiel.html">
       <span class="index-num">01</span>

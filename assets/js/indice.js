@@ -97,34 +97,33 @@
       item.addEventListener('pointerenter', function () { mostrar(i); });
     });
 
-    /* Se congela la imagen en coordenadas de DOCUMENTO justo antes de navegar.
+    /* Aquí hubo un parche que congelaba la imagen con `left`/`top` inline justo
+     * antes de navegar, para probar si el problema del morfismo era que el
+     * elemento fuese `position:fixed`. **Se retira: causaba el fallo que
+     * pretendía arreglar.**
      *
-     * Por qué: la transición de vuelta (proyecto → índice) sí morfea, y la de
-     * ida no. La asimetría señala al lado que se va: al volver, el índice se
-     * restaura desde bfcache con la imagen todavía encendida, así que el
-     * elemento con nombre está en el documento que LLEGA y es de flujo normal;
-     * al ir, el elemento con nombre está en el documento que SALE y es
-     * `position:fixed` con un transform de GSAP encima. Es lo único
-     * estructural que cambió respecto al #42, que sí morfeaba: allí el nombre
-     * vivía en una imagen `absolute` dentro del flujo.
+     * Esos estilos inline sobreviven a la vuelta por bfcache. Al volver al
+     * índice, la imagen conservaba `left`/`top` de la visita anterior y GSAP le
+     * seguía sumando `x`/`y` encima: doble desplazamiento, fuera de pantalla, y
+     * el clamp gobernando un valor que ya no era la posición real. El
+     * diagnóstico lo enseñó en crudo — la imagen salía en y=892 midiendo 420 de
+     * alto, o sea acabando en 1312 con un viewport de ~1030.
      *
-     * Esto lo deja exactamente donde se ve —misma posición, mismo tamaño— pero
-     * como caja de flujo sin transform, que es lo que el #42 capturaba bien.
-     * Solo en el clic que de verdad navega: con modificadores o botón central
-     * el navegador abre en otra pestaña y esta no se descarga. */
-    items.forEach(function (item) {
-      item.addEventListener('click', function (e) {
-        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-        if (!flotante.classList.contains('is-on')) return;
-        var r = flotante.getBoundingClientRect();
-        flotante.style.position = 'absolute';
-        flotante.style.transform = 'none';
-        flotante.style.left = (r.left + window.scrollX) + 'px';
-        flotante.style.top = (r.top + window.scrollY) + 'px';
-        flotante.style.width = r.width + 'px';
-        flotante.style.height = r.height + 'px';
-      });
-    });
+     * Y de ahí venía el morfismo roto: una captura mayormente fuera del
+     * viewport sale vacía, y sin captura el navegador no crea
+     * `::view-transition-old(project-cover)`. Sin `old` no hay grupo, y sin
+     * grupo no hay morfismo — solo el `new` apareciendo, que es exactamente el
+     * fundido que se veía.
+     *
+     * La lección, escrita para no repetirla: **no dejar estado inline que
+     * sobreviva a una navegación**. El bfcache devuelve el documento tal cual
+     * se dejó, incluidos los estilos que se pusieron "solo un momento". */
+
+    /* Y NO se apaga la imagen al volver desde bfcache, aunque tiente: que siga
+     * encendida es exactamente lo que hace que el morfismo de vuelta funcione.
+     * El documento restaurado es el que LLEGA, y su `project-cover` tiene que
+     * existir para que haya con qué emparejar. Apagarla aquí rompería el único
+     * sentido que ya iba bien. */
     /* Un solo listener en el <nav> en vez de cinco `pointerleave`: salir de una
      * fila para entrar en la de al lado no debe apagar nada, y con listeners
      * por fila hay un fotograma en que ninguna está activa y la imagen
