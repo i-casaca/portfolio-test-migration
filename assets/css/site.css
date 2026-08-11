@@ -92,12 +92,11 @@
      nombre, así que 'power2.inOut' se aproxima con este cubic-bezier. Ver
      DESIGN.md > Transiciones de página. */
   --ease-move: cubic-bezier(.45,0,.55,1);
-  /* Subida de 0,6 s a 0,95 s en la revisión del #55: a 0,6 el morfismo de la
-     portada se resolvía antes de que el ojo lo siguiera y la página de
-     proyecto aparecía casi de golpe. Es la duración del cambio de página, no
-     de una microinteracción — aquí lo que se quiere es que se lea el
-     recorrido, no que termine pronto. */
-  --dur-move: .95s;
+  /* 0,75 s, punto medio al que se llegó mirándolo con Ismael: 0,6 resolvía el
+     morfismo antes de que el ojo lo siguiera, y 0,95 ya se sentía lento. Es la
+     duración de un cambio de página, no de una microinteracción — se quiere
+     que se lea el recorrido, pero sin esperar a que acabe. */
+  --dur-move: .75s;
 
   /* Escala tipográfica: un solo clamp() en la raíz (suelo y techo), y cada
      paso declarado en rem para que respire de golpe con el viewport. Ver

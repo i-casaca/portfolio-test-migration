@@ -21,6 +21,11 @@
      tapados. Va inline y en el <head> porque tiene que correr antes del primer
      pintado; si falla, simplemente no hay panel. -->
 <script>document.documentElement.className+=' js';</script>
+<!-- ANDAMIAJE (?vt): diagnóstico del morfismo entre páginas. Se retira antes
+     de fusionar el #55, junto con assets/js/vt-debug.js. Va síncrono y en el
+     <head> porque tiene que registrar `pagereveal` antes de que se dispare. -->
+<script>try{if(/[?&]vt\b/.test(location.search))sessionStorage.setItem('vt-on','1');
+if(sessionStorage.getItem('vt-on')){var s=document.createElement('script');s.src='./assets/js/vt-debug.js';document.head.appendChild(s);}}catch(e){}</script>
 <!-- Cimientos de motion (ticket #39): GSAP 3.13 + Lenis por CDN, sin build.
      `defer` en todo el bloque, en orden: los navegadores ejecutan los
      scripts `defer` en el orden del documento tras el parseo, así que no

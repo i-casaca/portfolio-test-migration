@@ -39,6 +39,11 @@
      tapados. Va inline y en el <head> porque tiene que correr antes del primer
      pintado; si falla, simplemente no hay panel. -->
 <script>document.documentElement.className+=' js';</script>
+<!-- ANDAMIAJE (?vt): diagnóstico del morfismo entre páginas. Se retira antes
+     de fusionar el #55, junto con assets/js/vt-debug.js. Va síncrono y en el
+     <head> porque tiene que registrar `pagereveal` antes de que se dispare. -->
+<script>try{if(/[?&]vt\b/.test(location.search))sessionStorage.setItem('vt-on','1');
+if(sessionStorage.getItem('vt-on')){var s=document.createElement('script');s.src='./assets/js/vt-debug.js';document.head.appendChild(s);}}catch(e){}</script>
 <!-- Cimientos de motion (ticket #39): GSAP 3.13 + Lenis por CDN, sin build.
      `defer` en todo el bloque, en orden: los navegadores ejecutan los
      scripts `defer` en el orden del documento tras el parseo, así que no
@@ -485,21 +490,21 @@
   @keyframes index-exit{ to{transform:translateY(-2.5rem);opacity:0;} }
   @keyframes index-enter{ from{transform:translateY(-2.5rem);opacity:0;} }
 
-  ::view-transition-old(hero-statement){animation:.48s var(--ease-move) both index-exit;}
-  ::view-transition-new(hero-statement){animation:.62s var(--ease-move) .15s both index-enter;}
+  ::view-transition-old(hero-statement){animation:.40s var(--ease-move) both index-exit;}
+  ::view-transition-new(hero-statement){animation:.50s var(--ease-move) .15s both index-enter;}
 
-  ::view-transition-old(index-item-1){animation:.48s var(--ease-move) both index-exit;}
-  ::view-transition-old(index-item-2){animation:.48s var(--ease-move) .06s both index-exit;}
-  ::view-transition-old(index-item-3){animation:.48s var(--ease-move) .12s both index-exit;}
-  ::view-transition-old(index-item-4){animation:.48s var(--ease-move) .18s both index-exit;}
-  ::view-transition-old(index-item-5){animation:.48s var(--ease-move) .24s both index-exit;}
+  ::view-transition-old(index-item-1){animation:.40s var(--ease-move) both index-exit;}
+  ::view-transition-old(index-item-2){animation:.40s var(--ease-move) .05s both index-exit;}
+  ::view-transition-old(index-item-3){animation:.40s var(--ease-move) .10s both index-exit;}
+  ::view-transition-old(index-item-4){animation:.40s var(--ease-move) .15s both index-exit;}
+  ::view-transition-old(index-item-5){animation:.40s var(--ease-move) .20s both index-exit;}
 
   /* La entrada rebobina el mismo gesto: el último en salir es el primero en volver. */
-  ::view-transition-new(index-item-5){animation:.62s var(--ease-move) both index-enter;}
-  ::view-transition-new(index-item-4){animation:.62s var(--ease-move) .06s both index-enter;}
-  ::view-transition-new(index-item-3){animation:.62s var(--ease-move) .12s both index-enter;}
-  ::view-transition-new(index-item-2){animation:.62s var(--ease-move) .18s both index-enter;}
-  ::view-transition-new(index-item-1){animation:.62s var(--ease-move) .24s both index-enter;}
+  ::view-transition-new(index-item-5){animation:.50s var(--ease-move) both index-enter;}
+  ::view-transition-new(index-item-4){animation:.50s var(--ease-move) .05s both index-enter;}
+  ::view-transition-new(index-item-3){animation:.50s var(--ease-move) .10s both index-enter;}
+  ::view-transition-new(index-item-2){animation:.50s var(--ease-move) .15s both index-enter;}
+  ::view-transition-new(index-item-1){animation:.50s var(--ease-move) .20s both index-enter;}
   /* Oculta en escritorio, donde la foto la pone la imagen flotante que sigue
      al cursor. En táctil no hay cursor al que atarla, así que la miniatura
      sigue siendo la respuesta a "no puede ser que en móvil no se vean las
