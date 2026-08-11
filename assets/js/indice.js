@@ -45,16 +45,113 @@
    * propio camino. */
   var colocar;
 
+  /* Los tres proyectos con NDA no enseñan su foto hasta que hay contraseña.
+   * La marca es la misma que usan las páginas de proyecto y el chatbot, así que
+   * acertarla en cualquier sitio abre los tres mientras dure la pestaña. */
+  function ndaAbierto() {
+    try { return sessionStorage.getItem('nda-ok') === '1'; } catch (e) { return false; }
+  }
+  function bloqueado(item) {
+    return item.classList.contains('is-locked') && !ndaAbierto();
+  }
+
   function mostrar(i) {
     if (i === activo) return;
     activo = i;
-    img.src = fotos[i];
+    if (bloqueado(items[i])) {
+      /* Ni siquiera se le pone el `src`: la foto de un proyecto bajo NDA no
+       * llega al navegador hasta que se ha desbloqueado. Enseñarla difuminada
+       * era una promesa falsa — estaba ahí, solo tapada. */
+      flotante.classList.add('is-nda');
+      img.removeAttribute('src');
+    } else {
+      flotante.classList.remove('is-nda');
+      img.src = fotos[i];
+    }
     flotante.classList.add('is-on');
   }
 
   function esconder() {
     activo = -1;
     flotante.classList.remove('is-on');
+  }
+
+  /* ---------- el muro de NDA, en la home ----------
+   * Toda la lógica vive aquí y no repartida entre el HTML y este archivo: el
+   * muro y lo que pasa después (reanudar la transición al proyecto que se
+   * pulsó) son la misma decisión, y separarlos obligaba a comunicarlos por
+   * globales.
+   *
+   * El hash y la marca de sesión son los mismos que usan las tres páginas de
+   * proyecto: acertar aquí las abre todas mientras dure la pestaña. */
+  var HASH = '16a6293c0df358beac52eef47093b535068570717895e7eb2998f5f6a383bf7d';
+  var muro = document.getElementById('gate-wrap');
+  var pendiente = null;
+
+  function sha256Hex(texto) {
+    var datos = new TextEncoder().encode(texto);
+    return crypto.subtle.digest('SHA-256', datos).then(function (d) {
+      return Array.prototype.map.call(new Uint8Array(d), function (b) {
+        return b.toString(16).padStart(2, '0');
+      }).join('');
+    });
+  }
+
+  function cerrarMuro() {
+    if (!muro) return;
+    muro.hidden = true;
+    pendiente = null;
+  }
+
+  function abrirMuro(item, i) {
+    /* Sin muro en el documento (o sin `crypto.subtle`, que exige contexto
+     * seguro), no se secuestra el clic: se deja navegar y la página de proyecto
+     * hace lo de siempre. Nunca se queda un enlace sin funcionar. */
+    if (!muro || !window.crypto || !crypto.subtle) { location.href = item.getAttribute('href'); return; }
+    pendiente = { item: item, i: i };
+    muro.hidden = false;
+    var campo = document.getElementById('gate-input');
+    var error = document.getElementById('gate-error');
+    if (error) error.textContent = '';
+    if (campo) { campo.value = ''; setTimeout(function () { campo.focus(); }, 40); }
+  }
+
+  if (muro) {
+    var formulario = document.getElementById('gate-form');
+    if (formulario) {
+      formulario.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        var campo = document.getElementById('gate-input');
+        var error = document.getElementById('gate-error');
+        sha256Hex(campo.value.trim()).then(function (h) {
+          if (h !== HASH) {
+            if (error) error.textContent = 'Contraseña incorrecta.';
+            campo.value = '';
+            campo.focus();
+            return;
+          }
+          try { sessionStorage.setItem('nda-ok', '1'); } catch (e) {}
+          var espera = pendiente;
+          cerrarMuro();
+          if (!espera) return;
+          /* Se rehace el hover para que la flotante cambie la estática por la
+           * foto de verdad, y se vuelve a pulsar: el mismo manejador de antes,
+           * ahora sin candado, hace la transición completa. Reanudar así evita
+           * duplicar la coreografía en dos sitios. */
+          activo = -1;
+          mostrar(espera.i);
+          espera.item.click();
+        });
+      });
+    }
+    /* Escape y clic fuera cierran. Un muro que solo se puede cerrar acertando
+     * es una trampa, no una puerta. */
+    muro.addEventListener('click', function (ev) {
+      if (ev.target === muro || ev.target.classList.contains('password-gate')) cerrarMuro();
+    });
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape' && !muro.hidden) cerrarMuro();
+    });
   }
 
   /* Sin GSAP no hay seguimiento ni colocación, pero el resto del archivo —las
@@ -110,12 +207,23 @@
      *
      * La vuelta (proyecto → índice) sí morfeaba y sigue haciéndolo por su
      * cuenta con la transición nativa; esto solo gobierna la ida. */
-    items.forEach(function (item) {
+    items.forEach(function (item, i) {
       item.addEventListener('click', function (e) {
         if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
         if (!flotante.classList.contains('is-on') || saliendo) return;
 
         var destino = item.getAttribute('href');
+
+        /* El muro salta AQUÍ, antes de navegar. Antes vivía solo en la página
+         * de proyecto: se veía entrar el proyecto con toda su transición y acto
+         * seguido taparse con el muro. Preguntando primero, la transición solo
+         * ocurre cuando ya hay algo que enseñar. */
+        if (bloqueado(item)) {
+          e.preventDefault();
+          abrirMuro(item, i);
+          return;
+        }
+
         var r = flotante.getBoundingClientRect();
         e.preventDefault();
         saliendo = true;
@@ -132,14 +240,21 @@
         flotante.style.width = r.width + 'px';
         flotante.style.height = r.height + 'px';
 
-        gsap.to(flotante, {
-          left: 0, top: 0, width: window.innerWidth, height: window.innerHeight,
-          duration: 0.62, ease: 'power3.inOut',
+        /* Crece, SE QUEDA, y entonces navega. La pausa no es relleno: es lo
+         * que convierte dos animaciones sueltas en una sola que continúa al
+         * otro lado. Sin ella, la imagen llegaba a pantalla completa y la
+         * página cambiaba en el mismo instante, y el corte se notaba. */
+        gsap.timeline({
           onComplete: function () {
             try { sessionStorage.setItem('entrada-proyecto', destino); } catch (err) {}
             location.href = destino;
           }
-        });
+        })
+        .to(flotante, {
+          left: 0, top: 0, width: window.innerWidth, height: window.innerHeight,
+          duration: 0.62, ease: 'power3.inOut'
+        })
+        .to({}, { duration: 0.34 });
       });
     });
 

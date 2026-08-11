@@ -447,6 +447,54 @@
   }
   #index-float.is-on img{opacity:1;transform:scale(1);}
 
+  /* ---------- proyectos bajo NDA: estática en vez de la foto ----------
+     Antes se enseñaba la foto real desenfocada. Era una promesa falsa: la foto
+     estaba ahí, solo tapada, y al llegar a la página saltaba el muro DESPUÉS de
+     la transición — se veía entrar el proyecto y acto seguido taparse, que es
+     justo el cuello raro que había que quitar.
+
+     La estática dice lo que pasa sin enseñar nada: no hay señal hasta que hay
+     contraseña. Y como el muro ahora salta en la home, la transición solo
+     ocurre cuando ya se puede ver el proyecto. */
+  #index-float .nda-estatica{display:none;position:absolute;inset:0;overflow:hidden;
+    border-radius:2px;place-items:center;}
+  #index-float.is-nda .nda-estatica{display:grid;}
+  #index-float.is-nda img{visibility:hidden;}
+  /* Ruido EN COLOR, al contrario que el grano del sitio: aquí no es textura de
+     fondo sino una imagen que sustituye a otra, y en gris se leería como una
+     foto rota en vez de como una señal perdida. */
+  .nda-estatica::before{
+    content:"";position:absolute;inset:-30%;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='e'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23e)'/%3E%3C/svg%3E");
+    animation:nda-ruido .45s steps(1,end) infinite;
+  }
+  /* Las bandas horizontales son lo que lo hace leer como televisión y no como
+     ruido digital sin más. */
+  .nda-estatica::after{
+    content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(to bottom,
+      rgba(0,0,0,.34) 0 1px, transparent 1px 3px);
+  }
+  @keyframes nda-ruido{
+    0%  {transform:translate(0,0);}
+    20% {transform:translate(-7%,4%);}
+    40% {transform:translate(5%,-6%);}
+    60% {transform:translate(-4%,-3%);}
+    80% {transform:translate(6%,5%);}
+    100%{transform:translate(0,0);}
+  }
+  /* Blanco con `difference`: la misma mecánica de inversión del punto de cursor
+     y de la mancha del #53. Sobre un ruido que cambia en cada fotograma es lo
+     único que garantiza que las tres letras se lean siempre — un color fijo se
+     perdería contra la mitad de los fotogramas. */
+  .nda-estatica span{
+    position:relative;z-index:1;
+    font-family:var(--f);font-weight:800;font-stretch:75%;
+    font-size:clamp(1.6rem,3.4vw,2.8rem);letter-spacing:.22em;text-indent:.22em;
+    color:#fff;mix-blend-mode:difference;
+  }
+  @media (prefers-reduced-motion: reduce){ .nda-estatica::before{animation:none;} }
+
   /* Sin `max-width`: las filas ocupan todo el ancho del bloque. El tope de
      1040px venía de cuando el índice compartía sitio con la foto a sangre y
      había que dejarle aire a la derecha; retirada la foto (#55), ese tope solo
@@ -1035,7 +1083,28 @@
      Las rutas viven en `data-foto` de cada fila, e indice.js las precarga al
      arrancar: sin eso, la primera vez que se apunta una fila el `src` cambia y
      la imagen llega en blanco justo cuando se está mirando. -->
-<figure id="index-float" aria-hidden="true"><img alt="" decoding="async" /></figure>
+
+<!-- El muro de NDA, ahora tambien en la home (ticket #55). Mismo marcado y
+     misma marca de sesion que el de las paginas de proyecto: acertar aqui las
+     abre las tres. Salta al pulsar un proyecto con candado, antes de navegar,
+     para que no se vea entrar la pagina y taparse despues. -->
+<div class="gate-wrap locked" id="gate-wrap" hidden>
+  <div class="password-gate">
+    <div class="gate-card">
+      <div class="lock-icon" aria-hidden="true">&#128274;</div>
+      <h3>Contenido bajo NDA</h3>
+      <p>Este proyecto es para un cliente y su contenido es confidencial. Introduce la contrase&#241;a para verlo.</p>
+      <form id="gate-form">
+        <input type="password" id="gate-input" placeholder="Contrase&#241;a" autocomplete="off" />
+        <button type="submit">Desbloquear</button>
+      </form>
+      <div class="gate-error" id="gate-error" role="alert"></div>
+      <div class="gate-contact">&#191;Necesitas la contrase&#241;a? <a href="https://www.linkedin.com/in/ismaelcasadoc/" target="_blank" rel="noopener">Escr&#237;beme por LinkedIn</a>.</div>
+    </div>
+  </div>
+</div>
+
+<figure id="index-float" aria-hidden="true"><img alt="" decoding="async" /><div class="nda-estatica"><span>NDA</span></div></figure>
 
 <!-- La mancha que sigue al ratón (ticket #53). Va vacía: backdrop.js crea
      dentro los circulos que la forman, y no la monta siquiera sin puntero
