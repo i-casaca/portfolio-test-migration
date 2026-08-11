@@ -438,7 +438,12 @@ if(sessionStorage.getItem('vt-on')){var s=document.createElement('script');s.src
      intentaría morfear una imagen invisible y a tamaño cero. */
   #index-float.is-on img{view-transition-name:project-cover;}
 
-  .project-index{position:relative;z-index:1;width:100%;max-width:1040px;}
+  /* Sin `max-width`: las filas ocupan todo el ancho del bloque. El tope de
+     1040px venía de cuando el índice compartía sitio con la foto a sangre y
+     había que dejarle aire a la derecha; retirada la foto (#55), ese tope solo
+     dejaba una franja muerta y desalineaba las filas del resto de la página,
+     que respiran con el padding de 6vw del contenedor. */
+  .project-index{position:relative;z-index:1;width:100%;}
   .index-item{
     display:flex;align-items:baseline;gap:1.6rem;padding:1.3rem 0;
     border-top:1px solid var(--line);text-decoration:none;color:var(--ink);
@@ -460,6 +465,22 @@ if(sessionStorage.getItem('vt-on')){var s=document.createElement('script');s.src
     display:inline-block;text-align:center;
     /* La caja la fija el JS en px; esto solo evita que un espacio colapse. */
     white-space:pre;
+  }
+  /* La descripción mínima que especificó el #54 y que se quedó sin llegar al
+     marcado: sale del `<meta name="description">` de cada página de proyecto,
+     condensada a una línea. No es copy nuevo — el mapa tiene "reescribir el
+     copy" fuera de alcance.
+
+     Se ancla a la línea base del nombre y ocupa el hueco que deja el ancho
+     completo, con un tope en `ch` para que no se estire hasta el meta cuando
+     la pantalla es muy ancha: una línea de 46 caracteres se lee de un vistazo;
+     de 90, ya no. */
+  .index-desc{
+    flex:0 1 46ch;min-width:0;
+    font-size:var(--fs-small);line-height:var(--lh-small);
+    opacity:var(--dim);
+    /* Dos líneas como mucho; la tercera empezaría a competir con el nombre. */
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
   }
   .index-meta{
     margin-left:auto;display:flex;align-items:center;gap:.9rem;
@@ -532,6 +553,7 @@ if(sessionStorage.getItem('vt-on')){var s=document.createElement('script');s.src
        en segundo plano. 0,42 sobre hueso devuelve 2,53:1, o sea el MISMO
        grado de atenuación a los dos extremos de la inversión. */
     .project-index:has(.index-item:hover) .index-item:not(:hover) .index-name,
+    .project-index:has(.index-item:hover) .index-item:not(:hover) .index-desc,
     .project-index:has(.index-item:hover) .index-item:not(:hover) .index-meta{
       opacity:calc(.32 + .10 * var(--tk));
     }
@@ -567,6 +589,7 @@ if(sessionStorage.getItem('vt-on')){var s=document.createElement('script');s.src
       grid-template-columns:72px 1fr;
       grid-template-areas:
         "num   nombre"
+        "thumb desc"
         "thumb meta";
       column-gap:1rem;row-gap:.45rem;
       align-items:start;padding:1.1rem 0;
@@ -594,6 +617,7 @@ if(sessionStorage.getItem('vt-on')){var s=document.createElement('script');s.src
     }
     /* `start` y no `center`: centrado en su celda, el meta flotaba a media
        altura de la miniatura, lejos del nombre al que pertenece. */
+    .index-desc{grid-area:desc;flex:none;max-width:none;-webkit-line-clamp:3;}
     .index-meta{grid-area:meta;margin-left:0;align-self:start;}
   }
 
@@ -761,30 +785,35 @@ if(sessionStorage.getItem('vt-on')){var s=document.createElement('script');s.src
       <span class="index-num">01</span>
       <img class="index-thumb" src="./assets/images/manu-cardiel/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
       <span class="index-name">Manu Cardiel</span>
+      <span class="index-desc">Exposición virtual de arte mural, con CMS para que el artista gestione su obra solo</span>
       <span class="index-meta">Personal · 2024</span>
     </a>
     <a class="index-item is-locked" data-idx="1" data-foto="./assets/images/adrenaline/hero.jpg" href="./adrenaline.html">
       <span class="index-num">02</span>
       <img class="index-thumb" src="./assets/images/adrenaline/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
       <span class="index-name">Adrenaline</span>
+      <span class="index-desc">App deportiva whitelabel: estadísticas, TV en vivo y VOD para clientes premium</span>
       <span class="index-meta">Cliente · 2023 <span class="index-lock">🔒 NDA</span></span>
     </a>
     <a class="index-item is-locked" data-idx="2" data-foto="./assets/images/arabvision/hero.jpg" href="./arabvision.html">
       <span class="index-num">03</span>
       <img class="index-thumb" src="./assets/images/arabvision/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
       <span class="index-name">Arabvision</span>
+      <span class="index-desc">OTT para móvil y Android TV con lectura RTL en árabe</span>
       <span class="index-meta">Cliente · 2023 <span class="index-lock">🔒 NDA</span></span>
     </a>
     <a class="index-item is-locked" data-idx="3" data-foto="./assets/images/nexahub/hero.jpg" href="./nexahub.html">
       <span class="index-num">04</span>
       <img class="index-thumb" src="./assets/images/nexahub/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
       <span class="index-name">Nexahub</span>
+      <span class="index-desc">CMS para que QA gestione tickets de JIRA sin salir del ecosistema</span>
       <span class="index-meta">Cliente · 2022 <span class="index-lock">🔒 NDA</span></span>
     </a>
     <a class="index-item" data-idx="4" data-foto="./assets/images/el-paraguas/hero.jpg" href="./el-paraguas.html">
       <span class="index-num">05</span>
       <img class="index-thumb" src="./assets/images/el-paraguas/hero.jpg" width="120" height="120" loading="lazy" decoding="async" alt="" />
       <span class="index-name">El Paraguas</span>
+      <span class="index-desc">Free tours con geolocalización e interfaz de voz; guías que cobran por adelantado</span>
       <span class="index-meta">Bootcamp · 2021</span>
     </a>
   </nav>

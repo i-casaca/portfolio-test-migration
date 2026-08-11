@@ -70,14 +70,60 @@
     /* El desfase saca la imagen de debajo del cursor: centrada, el propio
      * puntero tapa el centro de la foto y el `#cursor-dot` invierte justo ahí. */
     var DX = 28, DY = 24;
+    var MARGEN = 16;
+
+    /* La imagen no puede salirse de la pantalla. Sin esto, al apuntar las
+     * filas de abajo se iba por el borde inferior y desaparecía justo cuando
+     * se estaba mirando — el objeto perdía su razón de ser.
+     *
+     * El efecto secundario es el interesante y es el que se busca: cuando el
+     * cursor sigue bajando y la imagen ya no puede, **se queda pegada al borde
+     * y el cursor se separa de ella**. Esa distancia creciente entre puntero e
+     * imagen se lee como resistencia, como si el objeto tuviera peso y
+     * estuviera topando contra el marco. */
+    function encajar(v, tam, limite) {
+      var max = limite - tam - MARGEN;
+      if (max < MARGEN) return (limite - tam) / 2;   // pantallas más pequeñas que la imagen
+      return v < MARGEN ? MARGEN : (v > max ? max : v);
+    }
 
     window.addEventListener('pointermove', function (e) {
-      toX(e.clientX + DX);
-      toY(e.clientY + DY);
+      var w = flotante.offsetWidth, h = flotante.offsetHeight;
+      toX(encajar(e.clientX + DX, w, window.innerWidth));
+      toY(encajar(e.clientY + DY, h, window.innerHeight));
     }, { passive: true });
 
     items.forEach(function (item, i) {
       item.addEventListener('pointerenter', function () { mostrar(i); });
+    });
+
+    /* Se congela la imagen en coordenadas de DOCUMENTO justo antes de navegar.
+     *
+     * Por qué: la transición de vuelta (proyecto → índice) sí morfea, y la de
+     * ida no. La asimetría señala al lado que se va: al volver, el índice se
+     * restaura desde bfcache con la imagen todavía encendida, así que el
+     * elemento con nombre está en el documento que LLEGA y es de flujo normal;
+     * al ir, el elemento con nombre está en el documento que SALE y es
+     * `position:fixed` con un transform de GSAP encima. Es lo único
+     * estructural que cambió respecto al #42, que sí morfeaba: allí el nombre
+     * vivía en una imagen `absolute` dentro del flujo.
+     *
+     * Esto lo deja exactamente donde se ve —misma posición, mismo tamaño— pero
+     * como caja de flujo sin transform, que es lo que el #42 capturaba bien.
+     * Solo en el clic que de verdad navega: con modificadores o botón central
+     * el navegador abre en otra pestaña y esta no se descarga. */
+    items.forEach(function (item) {
+      item.addEventListener('click', function (e) {
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        if (!flotante.classList.contains('is-on')) return;
+        var r = flotante.getBoundingClientRect();
+        flotante.style.position = 'absolute';
+        flotante.style.transform = 'none';
+        flotante.style.left = (r.left + window.scrollX) + 'px';
+        flotante.style.top = (r.top + window.scrollY) + 'px';
+        flotante.style.width = r.width + 'px';
+        flotante.style.height = r.height + 'px';
+      });
     });
     /* Un solo listener en el <nav> en vez de cinco `pointerleave`: salir de una
      * fila para entrar en la de al lado no debe apagar nada, y con listeners
