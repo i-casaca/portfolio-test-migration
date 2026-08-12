@@ -15,11 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wdth,wght@25..151,100..1000&display=swap" rel="stylesheet">
-<!-- La display de este proyecto, subsetada con `text=` a su propio nombre: unos
-     cientos de bytes, no decenas de kB. Ver DESIGN.md > Páginas de proyecto. -->
-<link href="https://fonts.googleapis.com/css2?family=Yeseva+One&text=El%20Paraguas&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./assets/css/site.css">
-<style>:root{--f-display:"Yeseva One",var(--f);}</style>
 <link rel="stylesheet" href="./assets/css/chat-bubble.css">
 <!-- Marca puesta por la página anterior: si venimos de una transición, entrar
      tapados. Va inline y en el <head> porque tiene que correr antes del primer
@@ -42,6 +38,7 @@
 <script src="./assets/js/backdrop.js" defer></script>
 <!-- Las letras de aeropuerto (compartidas con el indice desde el #56) y el
      Prev/Next del pie. flap.js va ANTES, que es quien lo consume. -->
+<script src="./assets/js/flotante.js" defer></script>
 <script src="./assets/js/flap.js" defer></script>
 <script src="./assets/js/nav-proyecto.js" defer></script>
 </head>
@@ -128,28 +125,29 @@
 </div>
 
 
-<!-- Salir del proyecto (ticket #56). Va FUERA del .gate-wrap a proposito: en
-     las paginas con NDA el contenido protegido queda desenfocado y sin
-     puntero mientras el muro esta echado, pero la navegacion no es contenido
-     del proyecto y tiene que seguir viva. El listado es circular en los dos
-     sentidos, asi que desde cualquier proyecto se llega a los otros cuatro. -->
+<!-- Salir del proyecto (ticket #56). Estructura de navegacion —anterior a la
+     izquierda, siguiente a la derecha, con el rotulo siempre visible— y la
+     interaccion del indice de la home: el hover revela el nombre (barrido de
+     letras) y la foto persigue al cursor.
+
+     Va FUERA del .gate-wrap a proposito: en las paginas con NDA el contenido
+     protegido queda desenfocado y sin puntero mientras el muro esta echado,
+     pero la navegacion no es contenido del proyecto y tiene que seguir viva.
+     El listado es circular en los dos sentidos. -->
 <nav class="project-nav project-wrap" aria-label="Otros proyectos">
   <a class="pnav pnav-prev" href="./nexahub.html" data-nda>
-    <span class="pnav-word"><span class="pnav-arrow" aria-hidden="true">&#8598;</span><span>Prev</span></span>
-    <span class="pnav-name" aria-hidden="true">Nexahub</span>
-    <span class="sr-only">Proyecto anterior: Nexahub</span>
+    <span class="pnav-rol">Proyecto anterior</span>
+    <span class="pnav-destino">
+      <span class="pnav-num">04</span>
+      <span class="pnav-name">Nexahub</span>
+    </span>
   </a>
-  <!-- Un solo preview para las dos salidas: solo se puede apuntar una a la vez.
-       La estatica (.nda-estatica, en site.css desde el #56) se enciende con
-       .is-nda para los proyectos que no ensenan su foto. -->
-  <figure class="pnav-preview" aria-hidden="true">
-    <img alt="" decoding="async" />
-    <div class="nda-estatica"><i class="nda-desgarro" aria-hidden="true"></i><span class="nda-sigla">NDA</span><span class="nda-nota">Requiere contrase&#241;a</span></div>
-  </figure>
   <a class="pnav pnav-next" href="./manu-cardiel.html" data-foto="./assets/images/manu-cardiel/hero.jpg">
-    <span class="pnav-word"><span>Next</span><span class="pnav-arrow" aria-hidden="true">&#8599;</span></span>
-    <span class="pnav-name" aria-hidden="true">Manu Cardiel</span>
-    <span class="sr-only">Siguiente proyecto: Manu Cardiel</span>
+    <span class="pnav-rol">Proyecto siguiente</span>
+    <span class="pnav-destino">
+      <span class="pnav-num">01</span>
+      <span class="pnav-name">Manu Cardiel</span>
+    </span>
   </a>
 </nav>
 
@@ -176,6 +174,11 @@
 <!-- La mancha que sigue al ratón (ticket #53). Va vacía: backdrop.js crea
      dentro los circulos que la forman, y no la monta siquiera sin puntero
      fino. Delante del grano y del contenido, detras de la burbuja del chat. -->
+<!-- La imagen que persigue al cursor al apuntar una de las dos salidas: la
+     misma pieza que el hover del indice (.foto-flotante en site.css,
+     seguimiento en flotante.js). Hija directa de <body> y `absolute`, para que
+     ningun contenedor con overflow la recorte. -->
+<figure id="pnav-float" class="foto-flotante" aria-hidden="true"><img alt="" decoding="async" /><div class="nda-estatica"><i class="nda-desgarro" aria-hidden="true"></i><span class="nda-sigla">NDA</span><span class="nda-nota">Requiere contrase&#241;a</span></div></figure>
 <div id="backdrop-blob" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
 </body>

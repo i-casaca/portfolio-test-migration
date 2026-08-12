@@ -485,28 +485,25 @@ html.js .project-body .media:first-of-type{opacity:1;transform:none;}
 .project-num{
   font-size:var(--fs-small);opacity:var(--dim-faint);font-variant-numeric:tabular-nums;
 }
-/* El título lleva la display de SU proyecto (ticket #56). Cada página declara
-   `--f-display` en su <head> con la fuente que ya tenía asignada desde el MVP —
-   Bungee, Anton, Bodoni Moda, Unbounded, Yeseva One—, subsetada con `?text=` a
-   su propio nombre. Estaban cargándose en index.html sin que las pintara nadie
-   desde que el #41 retiró el hero-grid; aquí vuelven a titular.
+/* El título es **la fila del índice en su estado de hover**, a mayor cuerpo.
+   Nada nuevo: los mismos tokens que `.index-name` cuando se apunta —Roboto
+   Flex, `wdth 120%`, `wght 850`— que es exactamente el aspecto que tenía el
+   nombre en el instante de pulsarlo. Por eso la cabecera se lee como esa fila
+   que ha crecido y no como otra pieza.
 
-   El reparto con la fila del índice es deliberado: la **continuidad** la llevan
-   el número y el eyebrow del `.project-kicker`, que repiten el tratamiento del
-   índice al pie de la letra; la **personalidad** la lleva el título, que es lo
-   único que cambia de página a página. Si los dos hicieran lo mismo, o las
-   cinco páginas serían intercambiables o no se parecerían al índice en nada.
+   Se probó antes con una display propia por proyecto (las cinco del MVP:
+   Bungee, Anton, Bodoni Moda…) y se descartó al verlo: demasiado cuerpo y
+   demasiado peso, y rompía el parentesco con el índice justo donde hacía falta
+   sostenerlo. El sistema tiene una familia y siete anchos — el sitio para la
+   personalidad es el ancho y el peso, no una familia nueva (excepción
+   deliberada nº 3).
 
-   `--f-display` cae a `var(--f)` donde no se declare, así que una página de
-   proyecto nueva funciona sin fuente propia y el fallback de cada `<head>`
-   cubre el caso de que Google no sirva la suya.
-
-   Sin `font-stretch` ni `font-weight`: estas cinco no son variables y el
-   navegador las sintetizaría (falso ancho, falso peso), que es justo el
-   aspecto sucio que el sistema evita en el resto del sitio. */
+   El cuerpo sube por encima del techo del índice (4,2rem) porque aquí el
+   nombre no comparte fila con nada: es el titular de la página. */
 .project-header h1{
-  font-family:var(--f-display, var(--f));
-  font-size:var(--fs-h1);line-height:var(--lh-h1);margin:0 0 1.2rem;letter-spacing:-.01em;
+  font-family:var(--f);font-weight:850;font-stretch:120%;
+  font-size:clamp(2.6rem,7vw,5.2rem);line-height:1;
+  margin:0 0 1.2rem;letter-spacing:-.015em;
 }
 .meta-row{display:flex;gap:2.5rem;flex-wrap:wrap;font-size:var(--fs-small);border-top:1px solid var(--line);padding-top:1rem;}
 /* .58/.6 fijos, la misma historia que `.eyebrow` de arriba: medidos una vez
@@ -517,11 +514,23 @@ html.js .project-body .media:first-of-type{opacity:1;transform:none;}
 
 /* ---------- salir del proyecto: anterior y siguiente ----------
    Sustituye al `.next-project` heredado del MVP (un enlace pequeño, solo hacia
-   adelante, pegado al final del texto). Decidido en el #56 sobre una referencia
-   que trajo Ismael: las dos salidas ocupan el ancho de la página, una a cada
-   lado, y el proyecto al que llevan se enseña al apuntarlas.
+   adelante, pegado al final del texto).
 
-   Dos cosas que cambian respecto al anterior, y no son cosméticas:
+   **La estructura es de navegación; la interacción es la del índice.** Dos
+   salidas, una a cada lado —anterior a la izquierda, siguiente a la derecha—,
+   con su rótulo siempre visible: eso es lo que dice de qué va este bloque sin
+   tener que tocar nada. Lo que el hover revela es **a dónde** vas: el número y
+   el nombre del proyecto aparecen con el barrido de letras y su foto persigue al
+   cursor. Ni el gesto ni sus piezas son nuevos — son `.foto-flotante` y
+   `flap.js`, los mismos que el índice de la home, que es donde el visitante ya
+   ha aprendido que apuntar un proyecto lo enseña.
+
+   El salto de escala es el premio del hover: el rótulo es micro en mayúsculas
+   (el escalón de `.eyebrow`), el nombre entra al cuerpo de `.index-name`. Por eso
+   el nombre vive siempre en el flujo y solo cambia de opacidad: reservar su
+   caja evita que la fila salte de alto al aparecer.
+
+   Cambia respecto al `.next-project`, y no es cosmético:
    - **Se puede ir hacia atrás.** El listado es circular en los dos sentidos
      (01 ← 05 y 05 → 01), así que desde cualquier proyecto se llega a los otros
      cuatro sin volver al índice.
@@ -531,91 +540,120 @@ html.js .project-body .media:first-of-type{opacity:1;transform:none;}
      además te deja encerrado en la página sería una trampa, la misma razón por
      la que se cierra con Escape (#55). */
 .project-nav{
-  position:relative;
-  display:grid;grid-template-columns:1fr 1fr;align-items:center;
-  /* Alto generoso a propósito: el preview se pinta centrado ENTRE las dos
-     salidas, así que la fila tiene que dejarle sitio sin empujar nada. */
-  min-height:min(56vh,440px);
-  margin-top:12vh;border-top:1px solid var(--line);
+  display:grid;grid-template-columns:1fr 1fr;gap:2rem;
+  margin-top:12vh;padding:clamp(2.6rem,6vh,4.4rem) 0;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
 }
-.pnav{display:flex;flex-direction:column;gap:.55rem;position:relative;z-index:1;}
-.pnav-prev{align-items:flex-start;}
-.pnav-next{align-items:flex-end;}
+.pnav{display:flex;flex-direction:column;gap:.7rem;color:var(--ink);min-width:0;}
+.pnav-prev{align-items:flex-start;text-align:left;}
+.pnav-next{align-items:flex-end;text-align:right;}
 
-/* La palabra, grande y subrayada. En `var(--f)` y no en la display del
-   proyecto: la display es lo que identifica a ESTA página (ver el h1 más
-   arriba), y estas dos salidas son las mismas en las cinco. */
-.pnav-word{
-  display:flex;align-items:center;gap:.24em;
-  font-family:var(--f);font-weight:400;font-stretch:100%;
-  font-size:clamp(2.2rem,6.5vw,5.2rem);line-height:1;letter-spacing:-.01em;
-  border-bottom:1px solid currentColor;padding-bottom:.08em;
+/* El rótulo, siempre visible. Mismo escalón que `.eyebrow`. */
+.pnav-rol{
+  font-size:var(--fs-micro);line-height:var(--lh-micro);letter-spacing:.1em;
+  text-transform:uppercase;opacity:var(--dim);
 }
-/* La flecha se separa hacia su lado al apuntar: es la dirección del enlace
-   dicha con el movimiento, no otra etiqueta que leer. Va en su propio <span>
-   para poder moverla sin arrastrar la palabra ni el subrayado. */
-.pnav-arrow{display:inline-block;transition:transform .3s var(--ease-move);}
-.pnav-prev:hover .pnav-arrow,
-.pnav-prev:focus-visible .pnav-arrow{transform:translate(-.2em,-.2em);}
-.pnav-next:hover .pnav-arrow,
-.pnav-next:focus-visible .pnav-arrow{transform:translate(.2em,-.2em);}
 
-/* El nombre del proyecto aparece debajo al apuntar, entre llaves. Las llaves
-   son pseudos y no texto: el barrido de letras (flap.js) vacía y repuebla el
-   `textContent` del elemento, así que cualquier carácter que tenga que
-   sobrevivir al barrido no puede vivir ahí dentro. */
+/* El número y el nombre, el grupo que revela el hover. */
+.pnav-destino{
+  display:flex;align-items:baseline;gap:.7rem;min-width:0;
+  opacity:0;transform:translateY(.25em);
+  transition:opacity .32s var(--ease-move), transform .32s var(--ease-move);
+}
+.pnav:hover .pnav-destino,
+.pnav:focus-visible .pnav-destino{opacity:1;transform:none;}
+
+/* Mismo tratamiento que `.index-num`. */
+.pnav-num{font-size:var(--fs-small);opacity:var(--dim-faint);font-variant-numeric:tabular-nums;}
+
+/* Mismo tratamiento que `.index-name`, y ya en `wght 850`: aquí no hay estado de
+   reposo que engordar —el nombre no existe hasta que se apunta—, así que entra
+   directamente con el peso que el índice alcanza al apuntarlo. El cuerpo se
+   queda por debajo del titular de la página, que es el mismo token a mayor
+   escala: esto es a dónde puedes ir, no dónde estás. */
 .pnav-name{
-  font-size:var(--fs-small);letter-spacing:.02em;
-  opacity:0;transform:translateY(-.4em);
-  transition:opacity .3s var(--ease-move), transform .3s var(--ease-move);
+  font-family:var(--f);font-weight:850;font-stretch:120%;
+  font-size:clamp(1.6rem,4vw,2.8rem);line-height:1;white-space:nowrap;
 }
-.pnav-name::before{content:"{ ";}
-.pnav-name::after{content:" }";}
-.pnav:hover .pnav-name,
-.pnav:focus-visible .pnav-name{opacity:var(--dim);transform:none;}
-/* Cada carácter en su caja de ancho congelado, igual que en el índice: sin
-   esto el barrido movería el nombre, porque Roboto Flex no es monoespaciada. */
+/* Cada carácter en su caja de ancho congelado (flap.js la mide y la fija), o el
+   barrido movería la palabra: Roboto Flex no es monoespaciada. */
 .pnav-name .flap{display:inline-block;text-align:center;white-space:pre;}
 
-.pnav:focus-visible{outline:none;}
-.pnav:focus-visible .pnav-word{border-bottom-width:3px;}
-
-/* El preview, centrado entre las dos salidas. `pointer-events:none` para que
-   no se coma el hover del enlace que lo ha invocado. */
-.pnav-preview{
-  position:absolute;left:50%;top:50%;translate:-50% -50%;margin:0;
-  width:min(38vw,440px);aspect-ratio:16/10;
-  overflow:hidden;border-radius:2px;pointer-events:none;
-  opacity:0;transition:opacity .34s var(--ease-move);
+/* Atenuar la salida que NO se apunta, exactamente como el índice: el mismo
+   `calc(.32 + .10 * var(--tk))` medido en los dos extremos del eje del tema
+   (2,55:1 en oscuro, 2,53:1 en claro — el mismo grado de atenuación a los dos
+   lados). Ver DESIGN.md > Color > El suelo de opacidad no se hereda. */
+.project-nav:has(.pnav:hover) .pnav:not(:hover) .pnav-rol{
+  opacity:calc(.32 + .10 * var(--tk));
 }
-.pnav-preview.is-on{opacity:1;}
-.pnav-preview img{
-  width:100%;height:100%;object-fit:cover;display:block;
-  transform:scale(.94);transition:transform .34s var(--ease-move);
-  /* Las dos señales cruzadas por el eje del tema, igual que la flotante del
-     índice: la sombra manda en claro y el filo claro en oscuro, así que
-     siempre hay exactamente una separando la foto del fondo. */
+
+.pnav:focus-visible{outline:none;}
+.pnav:focus-visible .pnav-rol{text-decoration:underline;text-underline-offset:.3em;}
+
+/* Sin hover no hay nada que revele el destino, así que el nombre se queda
+   puesto: en táctil las dos salidas tienen que decir a dónde van. */
+@media (hover: none), (pointer: coarse){
+  .pnav-destino{opacity:1;transform:none;}
+}
+@media (prefers-reduced-motion: reduce){
+  .pnav-destino{transition:none;}
+}
+@media (max-width: 620px){
+  /* En una columna estrecha las dos salidas no caben lado a lado sin partir los
+     nombres: se apilan, y la siguiente se alinea a la izquierda como la otra. */
+  .project-nav{grid-template-columns:1fr;gap:2.4rem;}
+  .pnav-next{align-items:flex-start;text-align:left;}
+  .pnav-name{white-space:normal;}
+}
+
+
+
+/* ---------- la imagen flotante que persigue al cursor ----------
+   Decidida en el #55 para el hover del índice y construida dentro del <style> de
+   index.html. Sube aquí en el #56, cuando el Prev/Next de las páginas de
+   proyecto pide el mismo objeto: es el gesto del sitio para "apuntar un
+   proyecto", así que las dos instancias tienen que ser la misma pieza y no dos
+   parecidas. El seguimiento está en assets/js/flotante.js.
+
+   `absolute`, NO `fixed`. Es la diferencia que impedía el morfismo de ida en el
+   #55: el diagnóstico lo dejó aislado — en esa navegación capturaron bien todo
+   lo que estaba en flujo y el único nombre que no generó
+   `::view-transition-old` fue este, el único `fixed`. Absoluta respecto al
+   documento (va como hijo directo de <body>, fuera de contenedores con
+   `overflow:hidden` que la recortarían); flotante.js le suma el scroll en cada
+   fotograma, así que a la vista se comporta igual. */
+.foto-flotante{
+  position:absolute;top:0;left:0;margin:0;pointer-events:none;
+  width:clamp(360px, 34vw, 560px);aspect-ratio:4/3;
+}
+/* El reparto de responsabilidades entre los dos elementos no es cosmético.
+   GSAP toma el <figure> para el seguimiento y **absorbe cualquier `scale`
+   declarado en CSS dentro de su propia matriz de transform** — se probó
+   poniéndolo aquí y quedaba congelado en el valor inicial, sin animar nunca.
+   Así que el <figure> es solo posición (GSAP) y el <img> solo aspecto (CSS).
+   Cada uno con su transform, sin pisarse. */
+.foto-flotante img{
+  width:100%;height:100%;object-fit:cover;display:block;border-radius:2px;
+  opacity:0;transform:scale(.86);transform-origin:50% 50%;
+  transition:opacity .32s var(--ease-move), transform .32s var(--ease-move);
+  /* Que se lea como que está POR ENCIMA de todo lo demás. La sombra sola no
+     basta: sobre el extremo oscuro una sombra oscura es invisible. Así que hay
+     dos señales cruzadas por el eje del tema — la sombra crece con `--t` (manda
+     en claro) y el filo claro se apaga con él (manda en oscuro), de modo que
+     siempre hay exactamente una haciendo el trabajo. */
   box-shadow:
     0 calc(10px + 16px * var(--t)) calc(28px + 36px * var(--t)) -6px
       color-mix(in oklab, transparent, var(--c-negro) calc(22% + 26% * var(--t))),
     0 2px 6px color-mix(in oklab, transparent, var(--c-negro) 28%);
   outline:1px solid color-mix(in oklab, transparent, var(--c-hueso) calc(16% - 16% * var(--t)));
+  outline-offset:0;
 }
-.pnav-preview.is-on img{transform:scale(1);}
-
-/* Sin hover no hay nada que disparar el preview, y la estática es cara: no se
-   pinta siquiera. Las dos salidas siguen siendo dos enlaces normales. */
-@media (hover: none), (pointer: coarse){
-  .pnav-preview{display:none;}
-  .pnav-name{opacity:var(--dim);transform:none;}
-  .project-nav{min-height:0;padding:3.5rem 0;}
-}
+.foto-flotante.is-on img{opacity:1;transform:scale(1);}
+/* Aparece y desaparece sin interpolar. El seguimiento ni se engancha con
+   `prefers-reduced-motion` (lo comprueba flotante.js), así que aquí solo hay
+   que quitar la transición del <img>, que es donde vive. */
 @media (prefers-reduced-motion: reduce){
-  .pnav-preview img{transform:none;transition:none;}
-  .pnav-arrow{transition:none;}
-}
-@media (max-width: 620px){
-  .pnav-word{font-size:clamp(1.6rem,9vw,2.4rem);}
+  .foto-flotante img{transition:none;}
 }
 
 /* ---------- proyectos bajo NDA: estática de televisión en vez de la foto ----------

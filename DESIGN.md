@@ -986,64 +986,98 @@ Ahora lo repite con el mismo tratamiento —tamaño, opacidad `var(--dim-faint)`
 del `.eyebrow`, en un `.project-kicker`. No se animó el propio número: la continuidad la da la
 tipografía, no un morfismo nuevo que mantener.
 
-### El título: una display por proyecto
+### El título: el nombre del índice, en grande
 
-Revisando el ticket, Ismael pidió más personalidad en el titular. **La fuente ya estaba elegida**: el
-MVP asignó una display a cada proyecto —Bungee, Anton, Bodoni Moda, Unbounded y Yeseva One— para el
-`hero-grid` de seis celdas de la home, cada una pedida con `?text=` para que Google devuelva solo los
-caracteres de ese nombre. Ese grid desapareció con el índice numerado
-([#41](https://github.com/i-casaca/portfolio-test-migration/issues/41)) y desde entonces `index.html`
-descargaba **seis fuentes que no pintaba nadie** (las cinco más Fraunces). No era una decisión nueva
-que tomar: era una decisión ya tomada que se había quedado sin sitio.
+Revisando el ticket, Ismael pidió más presencia en el titular. **El título es la
+fila del índice en su estado de hover**, a mayor cuerpo: los mismos tokens que
+`.index-name` cuando se apunta —Roboto Flex, `wdth 120%`, `wght 850`—, que es
+exactamente el aspecto que tenía el nombre en el instante de pulsarlo. Por eso la
+cabecera se lee como esa fila que ha crecido y no como otra pieza. El cuerpo sube
+por encima del techo del índice (4,2rem) porque aquí el nombre no comparte fila
+con nada: es el titular de la página.
 
-Cada `<link>` se muda a la página del proyecto que titula, que declara `--f-display` en su `<head>`;
-`site.css` lo aplica al `h1` con `var(--f-display, var(--f))`, así que una página sin fuente propia
-sigue funcionando. Los `<link>` de la home se retiran.
+**Descartado por el camino: una display propia por proyecto.** El MVP había
+asignado una a cada uno —Bungee, Anton, Bodoni Moda, Unbounded, Yeseva One,
+subsetadas con `?text=` a su propio nombre— para el `hero-grid` de seis celdas,
+que desapareció con el índice numerado
+([#41](https://github.com/i-casaca/portfolio-test-migration/issues/41)).
+Se probaron en las cinco páginas y se retiraron al verlas: demasiado cuerpo y
+demasiado peso, y rompían el parentesco con el índice justo donde hacía falta
+sostenerlo. El sistema tiene una familia y siete anchos — el sitio para la
+personalidad es el ancho y el peso, no una familia nueva (excepción deliberada
+nº 3).
 
-**El reparto con la fila del índice es deliberado.** La *continuidad* la lleva el `.project-kicker`
-—número y eyebrow, tratamiento idéntico al del índice—; la *personalidad* la lleva el título, que es
-lo único que cambia de una página a otra. Si las dos cosas hicieran lo mismo, o las cinco páginas
-serían intercambiables o no se parecerían al índice en nada.
+Queda anotado que `index.html` **sigue cargando seis fuentes que no pinta nadie**
+(las cinco display más Fraunces, que era el "Sobre mí" del mismo grid muerto).
+No se retiran aquí porque no es lo que este ticket decide; es basura del #41 que
+merece su propia línea.
 
-El `h1` pierde su `font-weight`/`font-stretch`: estas cinco no son variables y el navegador
-sintetizaría el ancho y el peso, que es justo el aspecto sucio que el sistema evita en todo lo demás.
+### Salir del proyecto: anterior y siguiente
 
-**Fraunces sigue cargándose sin uso en `index.html`** — era el "Sobre mí" del mismo hero-grid. Se
-deja anotado aquí en vez de arreglarlo de paso: no tiene dónde mudarse todavía.
+Sustituye al `.next-project` del MVP (un enlace pequeño, solo hacia adelante,
+pegado al final del texto).
 
-### Salir del proyecto: Prev y Next
+**La estructura es de navegación; la interacción es la del índice.** Dos salidas,
+una a cada lado —anterior a la izquierda, siguiente a la derecha—, con su rótulo
+siempre visible: eso es lo que dice de qué va este bloque sin tener que tocar
+nada. Lo que el hover revela es **a dónde** vas: el número y el nombre del
+proyecto aparecen con el barrido de letras, y su foto persigue al cursor.
 
-Sustituye al `.next-project` del MVP (un enlace pequeño, solo hacia adelante, pegado al final del
-texto). La forma sale de una referencia que trajo Ismael: las dos salidas ocupan el ancho de la
-página, una a cada lado, y **el proyecto al que llevan se enseña al apuntarlas**, centrado entre las
-dos.
+Ni el gesto ni sus piezas son nuevos, y ese es el punto: son `.foto-flotante` y
+`flap.js`, los mismos del índice de la home, que es donde el visitante ya ha
+aprendido que apuntar un proyecto lo enseña. El salto de escala es el premio del
+hover — el rótulo es micro en mayúsculas (el escalón de `.eyebrow`), el nombre
+entra al cuerpo de `.index-name`. El nombre vive siempre en el flujo y solo cambia
+de opacidad: reservar su caja evita que la fila salte de alto al aparecer.
 
-Reutiliza el hover del índice ([#55](https://github.com/i-casaca/portfolio-test-migration/issues/55))
-en vez de inventar otro gesto: el nombre del vecino barre el alfabeto y se asienta, entre llaves,
-debajo de la palabra. Ese barrido vivía dentro del IIFE de `indice.js`; sale a `assets/js/flap.js`
-(`window.Flap`) porque ahora hay dos sitios que lo piden, y duplicarlo sería justo lo que este ticket
-acaba de deshacer con el CSS del muro. Las llaves son pseudoelementos: `Flap.preparar` vacía y
-repuebla el `textContent`, así que nada que deba sobrevivir al barrido puede vivir ahí dentro.
+**Una primera versión copiaba una referencia y se descartó**: "Prev" y "Next" a
+gran cuerpo con un preview centrado y fijo entre ambos. Enseñaba lo mismo pero
+con un vocabulario que el sitio no tenía —un preview que no persigue al cursor no
+es el objeto del índice, es otro— y con dos palabras en inglés que no dicen qué
+proyecto hay detrás. La forma final dice el rol en castellano y reserva el hover
+para el destino.
 
 Tres decisiones que no son estéticas:
 
-- **Se puede ir hacia atrás, y el listado es circular** (01 ← 05, 05 → 01). Desde cualquier proyecto
-  se llega a los otros cuatro sin volver al índice.
-- **La navegación vive fuera del `.gate-wrap`.** En las tres páginas con NDA el contenido protegido
-  va desenfocado y sin puntero mientras el muro está echado; la navegación no es contenido del
-  proyecto y tiene que seguir viva. Un muro que además te deja encerrado en la página sería una
-  trampa — la misma razón por la que se cierra con Escape.
-- **Los vecinos con NDA no traen `data-foto` en absoluto**, y enseñan la estática. Es la regla del
-  #55 llevada hasta el final: su imagen no llega al navegador hasta que hay contraseña. Verificado
-  en el panel de red — apuntando desde Arabvision, cuyos dos vecinos llevan NDA, no se pide ninguna
-  de las dos fotos. Por eso la estática sube de `index.html` a `site.css` y se hace genérica
-  (`.is-nda`, sin atarse a `#index-float`): son dos capas las que la usan.
+- **Se puede ir hacia atrás, y el listado es circular** (01 ← 05, 05 → 01). Desde
+  cualquier proyecto se llega a los otros cuatro sin volver al índice.
+- **La navegación vive fuera del `.gate-wrap`.** En las tres páginas con NDA el
+  contenido protegido va desenfocado y sin puntero mientras el muro está echado;
+  la navegación no es contenido del proyecto y tiene que seguir viva. Un muro que
+  además te deja encerrado en la página sería una trampa — la misma razón por la
+  que se cierra con Escape.
+- **Los vecinos con NDA no traen `data-foto` en absoluto**, y enseñan la
+  estática. Es la regla del #55 llevada hasta el final: su imagen no llega al
+  navegador hasta que hay contraseña. Verificado en el panel de red — apuntando
+  desde Arabvision, cuyos dos vecinos llevan NDA, no se pide ninguna de las dos
+  fotos.
 
-La flecha se separa hacia su lado al apuntar, en vez de saltar de lado a lado como en la referencia:
-dice la misma dirección sin mover el subrayado ni la palabra.
+Sin puntero fino el hover no existe, así que **el nombre se queda puesto**: en
+táctil las dos salidas dicen a dónde van sin que haya que descubrirlo.
 
-Sin puntero fino no hay hover que dispare nada, así que el preview no se pinta y **los nombres se
-quedan visibles**: en táctil las dos salidas son dos enlaces normales que ya dicen a dónde van.
+### Dos piezas que salen a archivo propio
+
+El hover de un proyecto son dos gestos —la imagen que persigue al cursor y el
+barrido de letras— y a partir de este ticket ocurren en dos sitios: el índice de
+la home y el pie de cada página de proyecto. Los dos vivían dentro del IIFE de
+`indice.js`, así que o se comparten o se duplican, y duplicar es exactamente lo
+que este ticket acaba de deshacer con el CSS del muro.
+
+- **`assets/js/flotante.js`** (`window.Flotante.crear`) se queda con el
+  seguimiento y nada más: el retardo de 0,55 s sobre un objeto, la suma del
+  scroll en el ticker y el clamp contra los bordes. Lo que cuelga de él sigue en
+  su archivo — la fase 1 de la transición y el muro de NDA en `indice.js`, el
+  barrido de nombres en `nav-proyecto.js`—, porque eso sí es distinto en cada
+  sitio. Expone `pausar()` porque la fase 1 necesita quitarle el `transform` sin
+  que las dos animaciones se peleen.
+- **`assets/js/flap.js`** (`window.Flap`) se queda con el barrido, con sus tres
+  pasos separados a propósito: `preparar` trocea, `medir` congela los anchos con
+  `document.fonts.ready` y `barrer` anima.
+
+El CSS sigue el mismo camino: el aspecto de la flotante sube de `index.html` a
+`site.css` como `.foto-flotante`, y en la home solo queda su `z-index`, que es lo
+único propio de esa instancia (delante de la mancha, detrás del chat).
+
 
 ### La foto sobre hueso
 
@@ -1059,8 +1093,9 @@ tocarse para que la foto siguiera leyéndose como la fuente de color.
 (oklab → sRGB → luminancia relativa WCAG) contra el fondo claro real, no supuesto: seis reglas de
 `site.css` llevaban una opacidad de texto **fija**, calibrada mirando solo el extremo oscuro y nunca
 medida en claro porque hasta este ticket ningún elemento con esa clase vivía ahí —
-`.eyebrow`(.62→4,45:1), `.disclaimer`(.6→4,19:1), `.meta-row div span`(.58→3,95:1), `.next-project
-span`(.58→3,95:1), `.site-footer .eyebrow`(.58→3,95:1) y `.footer-base`(.6→4,19:1) — las seis por
+`.eyebrow`(.62→4,45:1), `.disclaimer`(.6→4,19:1), `.meta-row div span`(.58→3,95:1), el rótulo del
+`.next-project` de entonces (.58→3,95:1), `.site-footer .eyebrow`(.58→3,95:1) y
+`.footer-base`(.6→4,19:1) — las seis por
 debajo del mínimo de 4.5:1 para texto que no es grande. Pasan todas a `opacity:var(--dim)`, el mismo
 escalón que ya interpola con `--tk` para `--dim-faint`/`--dim` desde el #54 (ver
 [Color > El suelo de opacidad no se hereda](#el-suelo-de-opacidad-no-se-hereda)): 5,35:1 en claro,

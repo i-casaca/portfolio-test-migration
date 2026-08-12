@@ -166,38 +166,17 @@
    * a `gsap.set` más abajo lanzaría y se llevaría por delante el barrido. */
   var hayGsap = !!window.gsap;
 
-  if (hayGsap && punteroFino && !reducido) {
-    /* `quickTo` en vez de un tween por evento: devuelve una función que
-     * reapunta el mismo tween en marcha, así que no se crean objetos en cada
-     * `pointermove`. El retardo (0,55 s con `power3`) es lo que hace que la
-     * imagen "persiga" en vez de ir pegada — pegada al cursor no se lee como
-     * un objeto, se lee como parte del puntero. */
-    /* El retardo se anima sobre un objeto, no sobre el elemento, y el
-     * `transform` lo escribe el ticker sumando el scroll.
-     *
-     * Por qué así: la imagen dejó de ser `position:fixed` —era lo que impedía
-     * el morfismo de ida— y una absoluta se queda quieta en el documento
-     * mientras la página se mueve. Sumando `scrollY` en cada fotograma se
-     * comporta exactamente como antes a la vista, pero el elemento que el
-     * navegador captura ya es una caja normal.
-     *
-     * Animar el objeto y no el elemento es lo que permite que el retardo viva
-     * en coordenadas de pantalla y el scroll se aplique después, sin que una
-     * cosa arrastre a la otra. */
-    var pos = { x: -9999, y: -9999 };
-    var toX = gsap.quickTo(pos, 'x', { duration: 0.55, ease: 'power3' });
-    var toY = gsap.quickTo(pos, 'y', { duration: 0.55, ease: 'power3' });
+  /* El seguimiento —retardo, suma del scroll y clamp contra los bordes— vive en
+   * assets/js/flotante.js desde el #56, compartido con el Prev/Next de las
+   * páginas de proyecto. El porqué de cada pieza está allí. Aquí se queda lo que
+   * SÍ es propio del índice: el muro de NDA y la fase 1 de la transición. */
+  var seguidor = (hayGsap && punteroFino && !reducido)
+    ? window.Flotante && window.Flotante.crear(flotante)
+    : null;
 
+  if (seguidor) {
+    colocar = seguidor.colocar;
     var saliendo = false;
-
-    gsap.ticker.add(function () {
-      /* Durante la salida manda la animación de la fase 1, que escribe
-       * `left`/`top`/`width`/`height` directamente. Si el ticker siguiera
-       * pisando el `transform`, las dos se pelearían. */
-      if (saliendo) return;
-      flotante.style.transform =
-        'translate3d(' + (pos.x + window.scrollX) + 'px,' + (pos.y + window.scrollY) + 'px,0)';
-    });
 
     /* ---------- fase 1 de la transición al proyecto ----------
      * La imagen crece hasta llenar la pantalla y solo entonces se navega. La
@@ -233,7 +212,9 @@
         var r = flotante.getBoundingClientRect();
         e.preventDefault();
         saliendo = true;
-        gsap.killTweensOf(pos);
+        /* A partir de aquí manda la fase 1: el seguidor suelta el `transform`
+         * para no pelearse con el `left`/`top`/`width`/`height` de la timeline. */
+        seguidor.pausar(true);
 
         /* Se pasa a `fixed` conservando exactamente la posición que se ve: a
          * partir de aquí la imagen ya no sigue al cursor ni al scroll, va a
@@ -271,40 +252,8 @@
       if (!e.persisted) return;
       saliendo = false;
       flotante.classList.remove('is-on');
-      flotante.style.cssText = '';
+      seguidor.reset();
     });
-
-    /* El desfase saca la imagen de debajo del cursor: centrada, el propio
-     * puntero tapa el centro de la foto y el `#cursor-dot` invierte justo ahí. */
-    var DX = 28, DY = 24;
-    var MARGEN = 16;
-
-    /* La imagen no puede salirse de la pantalla. Sin esto, al apuntar las
-     * filas de abajo se iba por el borde inferior y desaparecía justo cuando
-     * se estaba mirando — el objeto perdía su razón de ser.
-     *
-     * El efecto secundario es el interesante y es el que se busca: cuando el
-     * cursor sigue bajando y la imagen ya no puede, **se queda pegada al borde
-     * y el cursor se separa de ella**. Esa distancia creciente entre puntero e
-     * imagen se lee como resistencia, como si el objeto tuviera peso y
-     * estuviera topando contra el marco. */
-    function encajar(v, tam, limite) {
-      var max = limite - tam - MARGEN;
-      if (max < MARGEN) return (limite - tam) / 2;   // pantallas más pequeñas que la imagen
-      return v < MARGEN ? MARGEN : (v > max ? max : v);
-    }
-
-    /* Único punto por el que se mueve la imagen. `yaEncajado` lo usa el foco de
-     * teclado, que calcula su sitio a partir de la fila y no necesita clamp. */
-    colocar = function (x, y, yaEncajado) {
-      if (yaEncajado) { toX(x); toY(y); return; }
-      toX(encajar(x, flotante.offsetWidth, window.innerWidth));
-      toY(encajar(y, flotante.offsetHeight, window.innerHeight));
-    };
-
-    window.addEventListener('pointermove', function (e) {
-      colocar(e.clientX + DX, e.clientY + DY);
-    }, { passive: true });
 
     items.forEach(function (item, i) {
       item.addEventListener('pointerenter', function () { mostrar(i); });
