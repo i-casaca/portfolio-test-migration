@@ -39,13 +39,6 @@
      tapados. Va inline y en el <head> porque tiene que correr antes del primer
      pintado; si falla, simplemente no hay panel. -->
 <script>document.documentElement.className+=' js';</script>
-<!-- ANDAMIAJE (?vt): diagnóstico del morfismo entre páginas. Se retira antes
-     de fusionar el #55, junto con assets/js/vt-debug.js. Síncrono y sin
-     `defer` a propósito: creado por JS se carga en asíncrono y llega TARDE a
-     `pagereveal`, que es justo el evento que tiene que escuchar — por eso el
-     primer intento no capturaba nada al llegar. El propio archivo decide si
-     hace algo. -->
-<script src="./assets/js/vt-debug.js"></script>
 <!-- Cimientos de motion (ticket #39): GSAP 3.13 + Lenis por CDN, sin build.
      `defer` en todo el bloque, en orden: los navegadores ejecutan los
      scripts `defer` en el orden del documento tras el parseo, así que no
@@ -458,79 +451,91 @@
      ocurre cuando ya se puede ver el proyecto. */
   #index-float .nda-estatica{display:none;position:absolute;inset:0;overflow:hidden;
     border-radius:2px;place-content:center;justify-items:center;gap:.7rem;
-    /* Fondo negro propio, no el del sitio: una televisión sin señal no es
-       translúcida. Sin esto se veía el índice a través del ruido y parecía una
-       capa de suciedad en vez de una pantalla. */
-    background:#08080a;}
+    background:#000;}
   #index-float.is-nda .nda-estatica{display:grid;}
   #index-float.is-nda img{visibility:hidden;}
-  /* Ruido EN COLOR y OPACO. El `feTurbulence` genera también ruido en el canal
-     alfa, así que tal cual sale semitransparente y lavado; el `feFuncA` lo
-     aplasta a 1 y deja la estática densa. En gris leería como foto rota, no
-     como señal perdida — por eso no lleva el `saturate(0)` que sí lleva el
-     grano del sitio. */
+
+  /* ---------- la capa de ruido ----------
+     `numOctaves` a 1 con `baseFrequency` alta da mota fina de un solo tamaño,
+     que es lo que hace grano de televisión; con más octavas salen manchas
+     grandes y parece humo. El `feFuncA` aplasta el alfa a 1 — sin él el
+     turbulence sale semitransparente y lavado.
+
+     El contraste es lo que hace el trabajo: a 5,5 el gris medio se parte en
+     blanco puro y negro puro y aparece la mota dura de "sin señal". Con valores
+     suaves esto era una textura bonita, y aquí no hace falta una textura. */
   .nda-estatica::before{
-    content:"";position:absolute;inset:-30%;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='e'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='4' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23e)'/%3E%3C/svg%3E");
-    /* Oscurecido: el ruido crudo sale demasiado claro y la sigla no se
-       despegaba. `brightness` baja el nivel general y `contrast` mantiene el
-       grano vivo en vez de aplanarlo a gris. */
-    filter:brightness(.42) contrast(1.5);
-    animation:nda-ruido .4s steps(1,end) infinite;
+    content:"";position:absolute;inset:-40%;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='e'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.15' numOctaves='1' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23e)'/%3E%3C/svg%3E");
+    filter:grayscale(1) contrast(5.5) brightness(1.25);
+    /* 20 fps: por debajo se ve el bucle, por encima se emborrona en gris. */
+    animation:nda-ruido .05s steps(1,end) infinite;
   }
-  /* Las bandas horizontales son lo que lo hace leer como televisión y no como
-     ruido digital. Van más marcadas que antes, y con una banda ancha que cruza
-     despacio — el barrido de un tubo que no engancha la señal. */
-  .nda-estatica::after{
-    content:"";position:absolute;inset:0;
+
+  /* ---------- los desgarros ----------
+     Las bandas que saltan de sitio son lo que separa "ruido" de "señal rota".
+     Van en su propio elemento y no en un pseudo porque necesitan su propia
+     línea de tiempo: el ruido tiembla continuo, los desgarros van a tirones. */
+  .nda-desgarro{
+    position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;
     background:
-      linear-gradient(to bottom, transparent 0 42%, rgba(255,255,255,.06) 46%, transparent 52% 100%),
-      repeating-linear-gradient(to bottom, rgba(0,0,0,.55) 0 1px, transparent 1px 3px);
-    background-size:100% 100%, 100% 3px;
-    animation:nda-barrido 3.2s linear infinite;
+      repeating-linear-gradient(to bottom, rgba(255,255,255,.9) 0 2px, transparent 2px 9px),
+      repeating-linear-gradient(to bottom, rgba(255,255,255,.5) 0 1px, transparent 1px 4px);
+    background-size:100% 42px, 100% 17px;
+    animation:nda-desgarro .28s steps(1,end) infinite;
   }
+  /* Rayado fino encima de todo, siempre igual: es la trama del tubo, no un
+     efecto, y por eso no se anima. */
+  .nda-estatica::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(to bottom, rgba(0,0,0,.62) 0 1px, transparent 1px 3px);
+  }
+
   @keyframes nda-ruido{
     0%  {transform:translate(0,0);}
-    20% {transform:translate(-7%,4%);}
-    40% {transform:translate(5%,-6%);}
-    60% {transform:translate(-4%,-3%);}
-    80% {transform:translate(6%,5%);}
-    100%{transform:translate(0,0);}
+    25% {transform:translate(-13%,7%);}
+    50% {transform:translate(9%,-11%);}
+    75% {transform:translate(-6%,-8%);}
+    100%{transform:translate(11%,5%);}
   }
-  @keyframes nda-barrido{
-    from{background-position:0 -120%, 0 0;}
-    to  {background-position:0 220%, 0 0;}
+  /* El eje X es el desgarro horizontal: la imagen se parte y se desplaza de
+     golpe, como una línea que pierde el enganche. */
+  @keyframes nda-desgarro{
+    0%  {transform:translate(0,0);opacity:.5;}
+    18% {transform:translate(-9%,-34%);opacity:.85;}
+    34% {transform:translate(6%,12%);opacity:.35;}
+    52% {transform:translate(-14%,48%);opacity:.9;}
+    68% {transform:translate(3%,-19%);opacity:.45;}
+    84% {transform:translate(11%,27%);opacity:.75;}
+    100%{transform:translate(-4%,-6%);opacity:.55;}
   }
-  /* Aberración cromática: la sigla en blanco con una copia roja y otra cian
-     desplazadas. Es el desajuste de convergencia de un tubo, y aquí hace además
-     un trabajo práctico — sobre un ruido que cambia en cada fotograma, los tres
-     canales separados garantizan que las letras se despeguen del fondo pase lo
-     que pase. Sustituye al `mix-blend-mode:difference` que llevaba antes: con
-     el fondo ya negro y opaco, invertir no aportaba y perdía el color. */
+
+  /* Aberración cromática en la sigla. El bloque negro detrás no es decoración:
+     con la estática a este contraste, sin él las letras se picaban y dejaban de
+     leerse — la misma regla dura que se aplicó al logotipo en el #40. */
   .nda-estatica .nda-sigla{
     position:relative;z-index:1;
     font-family:var(--f);font-weight:800;font-stretch:75%;
     font-size:clamp(1.6rem,3.4vw,2.8rem);letter-spacing:.22em;text-indent:.22em;
-    color:#fff;
-    text-shadow:
-      -2px 0 0 rgba(255,0,72,.85),
-       2px 0 0 rgba(0,229,255,.85);
+    color:#fff;padding:.15em .5em;background:rgba(0,0,0,.72);
+    text-shadow:-2px 0 0 rgba(255,0,72,.9), 2px 0 0 rgba(0,229,255,.9);
     animation:nda-aberracion 2.6s steps(1,end) infinite;
   }
   @keyframes nda-aberracion{
-    0%,70%,100%{text-shadow:-2px 0 0 rgba(255,0,72,.85), 2px 0 0 rgba(0,229,255,.85);}
-    78%        {text-shadow:-5px 0 0 rgba(255,0,72,.9),  4px 0 0 rgba(0,229,255,.9);}
-    86%        {text-shadow:-1px 0 0 rgba(255,0,72,.8),  6px 0 0 rgba(0,229,255,.8);}
+    0%,70%,100%{text-shadow:-2px 0 0 rgba(255,0,72,.9), 2px 0 0 rgba(0,229,255,.9);transform:translateX(0);}
+    76%        {text-shadow:-6px 0 0 rgba(255,0,72,.95), 5px 0 0 rgba(0,229,255,.95);transform:translateX(-3px);}
+    82%        {text-shadow:-1px 0 0 rgba(255,0,72,.85), 7px 0 0 rgba(0,229,255,.85);transform:translateX(4px);}
   }
   .nda-estatica .nda-nota{
     position:relative;z-index:1;
     font-size:var(--fs-micro);letter-spacing:.14em;text-transform:uppercase;
-    color:#fff;opacity:.82;
+    color:#fff;padding:.2em .6em;background:rgba(0,0,0,.72);
   }
   @media (prefers-reduced-motion: reduce){
     .nda-estatica::before,
-    .nda-estatica::after,
+    .nda-desgarro,
     .nda-estatica .nda-sigla{animation:none;}
+  }
   }
 
   /* Sin `max-width`: las filas ocupan todo el ancho del bloque. El tope de
@@ -1156,7 +1161,7 @@
   </div>
 </div>
 
-<figure id="index-float" aria-hidden="true"><img alt="" decoding="async" /><div class="nda-estatica"><span class="nda-sigla">NDA</span><span class="nda-nota">Requiere contrase&#241;a</span></div></figure>
+<figure id="index-float" aria-hidden="true"><img alt="" decoding="async" /><div class="nda-estatica"><i class="nda-desgarro" aria-hidden="true"></i><span class="nda-sigla">NDA</span><span class="nda-nota">Requiere contrase&#241;a</span></div></figure>
 
 <!-- La mancha que sigue al ratón (ticket #53). Va vacía: backdrop.js crea
      dentro los circulos que la forman, y no la monta siquiera sin puntero
