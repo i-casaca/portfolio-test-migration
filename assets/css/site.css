@@ -86,8 +86,17 @@
      el mismo par, alfa 0,55 da 4,97:1 sobre negro pero solo 3,62:1 sobre
      hueso, y el mínimo para AA 4,5:1 sube de 0,52 a 0,63. Por eso interpolan
      en vez de quedarse fijos: si se quedaran en el valor del tema oscuro,
-     cuatro reglas de texto secundario caerían por debajo de AA al invertir. */
-  --dim-faint: calc(.5 + .13 * var(--tk));
+     cuatro reglas de texto secundario caerían por debajo de AA al invertir.
+
+     El extremo oscuro de `--dim-faint` era 0,50 hasta el ticket #46, y ese
+     valor incumplía el suelo de 0,55 que este mismo bloque declara: medido en
+     el navegador sobre el par real, daba **4,34:1** en `.index-num` (01–05) y
+     en `.project-num`, por debajo del mínimo de 4,5:1 para texto que no es
+     grande. Se calibró mirando solo el extremo claro —donde 0,63 da 4,59:1 y
+     pasa— y el otro extremo nunca se volvió a medir. Sube a 0,55 (4,97:1) sin
+     tocar el valor claro: el escalón pasa a ser `.55 + .08`, que en `--tk` = 1
+     sigue dando exactamente 0,63. */
+  --dim-faint: calc(.55 + .08 * var(--tk));
   --dim:       calc(.6 + .08 * var(--tk));
 
   /* El rojo de error (`.gate-error`, muro de NDA) es la única tercera
@@ -180,9 +189,12 @@ a{color:inherit;text-decoration:none;}
    `position:fixed` sin z-index explícito, pinta por encima del contenido sin
    z-index propio por orden de documento — no hace falta tocarles el z-index a
    las secciones normales. Lo que SÍ sigue por delante, porque lleva su propio
-   z-index más alto y así conviene: el punto de cursor (9999), el panel de
-   transición entre páginas (9998/10000) y la burbuja del chat (60/61). Si
-   algún día se mueve el div de sitio en el HTML, hay que devolverlo al final. */
+   z-index más alto y así conviene: el punto de cursor (9999), el muro de NDA
+   (9995), la imagen flotante (45 en la home) y la burbuja del chat (60/61).
+   Si algún día se mueve el div de sitio en el HTML, hay que devolverlo al final.
+   (Hasta el ticket #46 esta lista citaba "el panel de transición entre páginas
+   (9998/10000)". Ese panel era `page-transition.js`, que el #42 borró al pasar
+   a View Transitions nativas: ya no hay tal capa.) */
 .grain{
   position:fixed;inset:-25%;width:150%;height:150%;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch' result='noise'/%3E%3CfeColorMatrix in='noise' type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -799,8 +811,10 @@ html.js .project-body .media:first-of-type{opacity:1;transform:none;}
   display:none;position:fixed;inset:0;align-items:center;justify-content:center;padding:2rem;
   /* z-index alto: el índice de proyectos es `position:relative; z-index:1`, así
      que sin esto el muro quedaba POR DEBAJO de los títulos y las descripciones
-     y el texto se le cruzaba por encima. Va por delante de todo salvo el panel
-     de transición entre páginas (9998/10000). */
+     y el texto se le cruzaba por encima. Va por delante de todo salvo el punto
+     de cursor (9999), que de todas formas se apaga con `html.muro-abierto`.
+     (Decía "salvo el panel de transición entre páginas (9998/10000)" hasta el
+     ticket #46; ese panel lo borró el #42.) */
   z-index:9995;
   /* Opaco de verdad: con el velo translúcido se leía el índice a través del
      muro y la pregunta competía con lo que estaba tapando. */
@@ -818,9 +832,16 @@ html.muro-abierto #index-float{opacity:0 !important;visibility:hidden !important
 html.muro-abierto .project-index,
 html.muro-abierto .nav{pointer-events:none;}
 /* El cursor a medida se apaga con el puntero del sistema de vuelta: dentro del
-   muro hay que poder apuntar un campo de texto. */
-html.muro-abierto .hero,
-html.muro-abierto .hero-statement{cursor:auto;}
+   muro hay que poder apuntar un campo de texto.
+   Lleva `.js` además de `.muro-abierto` (ticket #46) por especificidad, no por
+   condición: desde el #46 el `cursor:none` de index.html va guardado por
+   `html.js` para no dejar sin puntero a quien no tiene JS, y con eso los dos
+   selectores empataban en (0,2,1) — el <style> de la página va después del
+   <link> a este archivo, así que el empate lo ganaba `none` y el muro se
+   quedaba sin puntero con el que apuntar el campo. `muro-abierto` solo la pone
+   indice.js, así que exigir `.js` no cambia cuándo aplica: solo la desempata. */
+html.js.muro-abierto .hero,
+html.js.muro-abierto .hero-statement{cursor:auto;}
 .gate-wrap.locked .password-gate{display:flex;}
 .gate-card{
   background:var(--surface1);border:1px solid var(--line);border-radius:10px;padding:2rem 2.2rem;

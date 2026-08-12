@@ -29,11 +29,37 @@
   /* Las fotos que ya estaban en el HTML como <img> apiladas ahora son solo
    * rutas. Se precargan al vuelo: sin esto, la primera fila que se apunta
    * cambia el `src` y la imagen tarda en llegar, que es justo el momento en
-   * que se está mirando. */
+   * que se está mirando.
+   *
+   * Dos condiciones, y las dos son correcciones del ticket #46:
+   *
+   * 1. **Nunca las de un proyecto con NDA sin desbloquear.** Esta precarga
+   *    incondicional deshacía por detrás la garantía que `mostrar()` defiende
+   *    treinta líneas más abajo: allí se evita ponerle el `src` a la flotante
+   *    "para que la foto no llegue al navegador hasta que hay contraseña", y
+   *    aquí se pedían igualmente con `new Image()`. Verificado en el panel de
+   *    red: cargando la home sin contraseña salían las cinco a 200, las tres
+   *    con candado incluidas (574 kB de fotografía confidencial). El guardia
+   *    es el mismo `bloqueado()` que usa el resto del archivo, así que al
+   *    acertar la contraseña se precargan en ese momento (ver el submit).
+   *
+   * 2. **Solo con puntero fino y GSAP.** La precarga existe para que la
+   *    imagen flotante no llegue en blanco, y la flotante solo se monta con
+   *    `hayGsap && punteroFino && !reducido`. En táctil no hay hover que la
+   *    dispare y las miniaturas de la fila ya bajan por su cuenta con
+   *    `loading="lazy"`, que es lo que decide qué hace falta y cuándo. */
+  var puedePrecargar = !!window.gsap && punteroFino && !reducido;
+  var precargadas = {};
+  function precargar(item, src) {
+    if (!src || !puedePrecargar || precargadas[src]) return;
+    if (bloqueado(item)) return;
+    precargadas[src] = true;
+    var p = new Image();
+    p.src = src;
+  }
+
   var fotos = items.map(function (item) {
-    var src = item.getAttribute('data-foto');
-    if (src) { var p = new Image(); p.src = src; }
-    return src;
+    return item.getAttribute('data-foto');
   });
 
   // ---------------------------------------------------------------- flotante
@@ -54,6 +80,15 @@
   function bloqueado(item) {
     return item.classList.contains('is-locked') && !ndaAbierto();
   }
+
+  /* Una pasada por todas las filas: `precargar` decide fila a fila. Va aquí y
+   * no arriba porque necesita `bloqueado()` ya definida — y se vuelve a llamar
+   * al abrir el muro, que es cuando las tres con candado pasan a ser
+   * precargables. */
+  function precargarTodas() {
+    items.forEach(function (item, i) { precargar(item, fotos[i]); });
+  }
+  precargarTodas();
 
   function mostrar(i) {
     if (i === activo) return;
