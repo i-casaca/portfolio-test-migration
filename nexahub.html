@@ -68,6 +68,14 @@
   <div class="navlinks"><a href="./index.html#trabajo">Trabajo</a><a href="./index.html#sobre-mi">Sobre mí</a><a href="#contacto">Contacto</a><a href="./assets/cv/isma-casado-cv-es.pdf" download>Descargar CV</a></div>
 </div>
 
+<!-- El landmark principal (ticket #46). Las seis paginas tenian `nav` y
+     `contentinfo` pero ninguna `main`, asi que un lector de pantalla no tenia
+     forma de saltarse la cabecera de una vez. Abarca la ficha, el cuerpo del
+     proyecto y las dos salidas; deja fuera el pie y las capas sueltas del
+     final del <body> (la flotante tiene que seguir siendo hija directa de
+     <body>, y el grano el ultimo hijo). Es un envoltorio semantico: `<main>`
+     es `display:block` y no anade ni caja ni contexto de apilamiento. -->
+<main>
 <div class="project-header project-wrap" id="ficha">
   <div class="project-kicker">
     <span class="project-num">04</span>
@@ -133,7 +141,7 @@
       <h3>Contenido bajo NDA</h3>
       <p>Este proyecto es para un cliente y su contenido es confidencial. Introduce la contraseña para verlo.</p>
       <form id="gate-form">
-        <input type="password" id="gate-input" placeholder="Contraseña" autocomplete="off" />
+        <input type="password" id="gate-input" placeholder="Contraseña" aria-label="Contraseña del proyecto" autocomplete="off" />
         <button type="submit">Desbloquear</button>
         <div class="gate-error" id="gate-error"></div>
       </form>
@@ -167,6 +175,8 @@
     </span>
   </a>
 </nav>
+
+</main>
 
 <footer class="site-footer" id="contacto">
   <span class="eyebrow">Contacto</span>

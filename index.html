@@ -17,13 +17,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wdth,wght@25..151,100..1000&display=swap" rel="stylesheet">
 <!-- Las cinco display por proyecto (Bungee, Anton, Bodoni Moda, Unbounded,
      Yeseva One) vivían aquí, para el hero-grid de seis celdas. Ese grid
-     desapareció con el índice numerado (#41) y desde entonces se descargaban
-     seis fuentes que no pintaba nadie. En el #56 se mudan a la página de cada
-     proyecto, que es donde ahora titulan — misma asignación de siempre, ahora
-     renderizada. Ver DESIGN.md > Páginas de proyecto > El título. -->
-<!-- "Sobre mí" comparte el mismo truco de display-por-nombre que los 5 proyectos,
-     así que sigue pidiendo Fraunces solo para sus propios caracteres en vez de
-     depender del <link> general, que el ticket #38 retiró. -->
+     desapareció con el índice numerado (#41). El #56 las probó como titular de
+     cada página de proyecto y **las retiró al verlas** —demasiado cuerpo, y
+     rompían el parentesco con el índice—, así que hoy no se cargan en ninguna
+     página: el titular de proyecto es Roboto Flex en `wdth 120 / wght 850`,
+     los mismos tokens que `.index-name` al apuntarlo.
+     Ver DESIGN.md > Páginas de proyecto > El título. -->
+<!-- Fraunces era el "Sobre mí" de ese mismo grid muerto. **Sigue pidiéndose y
+     no la pinta nadie** (comprobado en el ticket #46: ninguna regla del sitio
+     la nombra en `font-family`). Cuesta 2.424 B de woff2 + 447 B de CSS y una
+     hoja de estilo bloqueante más en el <head>. No se retira aquí porque es
+     una decisión pendiente del mapa —si el sitio quiere una display en alguna
+     parte— y no de este ticket. -->
+<!-- ATENCIÓN: si algún día se retira este <link>, hay que quitar también esta
+     nota y la línea de DESIGN.md > Páginas de proyecto > El título. -->
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,500&text=Sobre%20m%C3%AD&display=swap" rel="stylesheet">
 <!-- Las cuatro displays de la entrada (ticket #40), una por fragmento de la
      frase — igual truco de `?text=` que arriba. -->
@@ -518,9 +525,17 @@
     justify-self:end;display:flex;align-items:center;gap:.9rem;
     font-size:var(--fs-small);opacity:var(--dim);white-space:nowrap;align-self:center;
   }
+  /* Sin `opacity` propia (ticket #46). Llevaba un .85 que se COMPONÍA sobre el
+     `var(--dim)` de `.index-meta`, su contenedor: .6 × .85 = .51 en oscuro y
+     .68 × .85 = .58 en claro. Medido en el navegador, eso daba **4,46:1** en
+     oscuro y **3,93:1** en claro, por debajo del mínimo de 4,5:1 — el único
+     texto del sitio que fallaba a los DOS extremos del eje.
+     Es exactamente el modo de fallo contra el que ya avisa `.navlinks` en
+     site.css: una opacidad de contenedor no sustituye a la de dentro, se
+     multiplica con ella. Heredando `--dim` limpio sube a 5,66:1 / 5,35:1. */
   .index-lock{
     display:inline-flex;align-items:center;gap:.4em;font-size:var(--fs-micro);
-    border:1px solid var(--line);padding:4px 10px;border-radius:999px;opacity:.85;
+    border:1px solid var(--line);padding:4px 10px;border-radius:999px;
   }
 
   /* ---------- coreografía de salida hacia la página de proyecto (ticket #42) ----------
@@ -565,8 +580,17 @@
   .index-thumb{display:none;}
 
   @media (hover:hover) and (pointer:fine){
-    .hero-statement,
-    .hero{cursor:none;}
+    /* `html.js` no es decorativo aquí (ticket #46). Esconder el puntero del
+       sistema solo es legítimo si algo lo sustituye, y quien lo sustituye es
+       `#cursor-dot`, que arranca en `opacity:0` y solo lo mueve el script
+       inline del final del <body>. Sin JS —o con el CDN caído, que es el mismo
+       caso— ese punto nunca se enciende y el visitante se quedaba **sin cursor
+       visible** sobre la banda del hero y sobre el índice entero: comprobado
+       en el navegador contra una copia de la página sin ningún script.
+       Con la guardia, sin JS vuelve el puntero del sistema. Es la misma regla
+       de mejora progresiva que ya protege `.media` y `.entry`. */
+    html.js .hero-statement,
+    html.js .hero{cursor:none;}
     /* El nombre engorda al apuntarlo, no se inclina. La cursiva era la marca
        del #41; con el barrido de letras encima se leían como dos efectos
        compitiendo, y la inclinación además peleaba con el ancho fijo de cada
@@ -762,6 +786,18 @@
   </div>
 </section>
 
+<!-- El landmark principal (ticket #46). Las seis páginas tenían `nav` y
+     `contentinfo` pero ninguna `main`, así que un lector de pantalla no tenía
+     forma de saltarse la cabecera de una vez. Empieza DESPUÉS de la entrada
+     —que va `aria-hidden` y es coreografía, no contenido— y termina antes del
+     pie. Deja fuera a propósito las capas sueltas del final del <body>
+     (`#cursor-dot`, `#index-float`, `#backdrop-blob`, `.grain`, el muro): la
+     flotante tiene que seguir siendo hija directa de <body> para no caer en un
+     contenedor con `overflow:hidden`, y el grano tiene que seguir siendo el
+     último hijo. Es un envoltorio semántico: `<main>` es `display:block` y no
+     introduce ni caja ni contexto de apilamiento nuevos. -->
+<main>
+
 <!-- El hero (ticket #51): la afirmación del sitio, entre la entrada y el
      índice. Sustituye al hero-eyebrow ("Product Design & UX"). La polaroid en
      su columna y la frase en la suya, sin superponerse — el porqué (con las
@@ -909,6 +945,8 @@
   </div>
 </section>
 
+</main>
+
 <footer class="site-footer" id="contacto">
   <span class="eyebrow">Contacto</span>
   <p class="footer-lead">¿Trabajamos <em>juntos?</em></p>
@@ -1029,7 +1067,7 @@
       <h3>Contenido bajo NDA</h3>
       <p>Este proyecto es para un cliente y su contenido es confidencial. Introduce la contrase&#241;a para verlo.</p>
       <form id="gate-form">
-        <input type="password" id="gate-input" placeholder="Contrase&#241;a" autocomplete="off" />
+        <input type="password" id="gate-input" placeholder="Contrase&#241;a" aria-label="Contrase&#241;a del proyecto" autocomplete="off" />
         <button type="submit">Desbloquear</button>
       </form>
       <div class="gate-error" id="gate-error" role="alert"></div>

@@ -7,12 +7,21 @@
 (function () {
   'use strict';
 
-  /* La portada del proyecto se queda fuera: es el destino del morfismo desde
-   * el índice (`project-cover`), vive por encima del pliegue, y el CSS ya la
-   * declara visible. Crearle un trigger no la rompería —este script anima
-   * HACIA visible, así que sería un no-op— pero dejarlo daría a entender que
-   * participa del reveal, y es justo lo contrario: revelarla por scroll fue lo
-   * que dejó la transición de entrada sin destino visible. Ver site.css. */
+  /* La portada del proyecto se queda fuera del reveal: vive por encima del
+   * pliegue y es el destino de la fase 2 de la transición
+   * (assets/js/entrada-proyecto.js), así que revelarla por scroll la dejaba
+   * invisible justo cuando tenía que estar ahí.
+   *
+   * OJO (revisado en el ticket #46): este filtro **ya no filtra nada**. Se
+   * escribió cuando la portada llevaba `view-transition-name: project-cover`,
+   * y el #55 retiró ese nombre del sitio entero al sacar la ida de las View
+   * Transitions. Hoy quien de verdad deja la portada visible es la regla
+   * `html.js .project-body .media:first-of-type` de site.css, no esta línea.
+   * Se conserva —es inocua: este script solo anima HACIA visible— porque
+   * quitarla ahora tocaría el reveal de las cinco páginas sin necesidad, y
+   * porque la vuelta proyecto→índice sigue pendiente de decidir si recupera el
+   * morfismo de la foto. Si se recupera, el nombre vuelve aquí y el filtro
+   * vuelve a tener sentido; si se descarta, esta línea se va con él. */
   var els = [].slice.call(document.querySelectorAll('.media'))
     .filter(function (el) { return getComputedStyle(el).viewTransitionName !== 'project-cover'; });
   if (!els.length) return;
