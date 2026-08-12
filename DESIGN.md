@@ -37,13 +37,37 @@ viendo un prototipo real contra las fotos de los proyectos — no eligiendo sobr
 --c-hueso: oklch(92% 0.018 78);   /* #EBE3D8 */
 ```
 
-Son los **únicos literales de color del sitio**. Todo lo demás —fondo, tinta, superficies, líneas—
-se deriva de ellos y del eje `--t` (ver [La inversión](#la-inversión)).
+Son los dos colores del **sistema**: fondo, tinta, superficies y líneas se derivan solo de ellos y
+del eje `--t` (ver [La inversión](#la-inversión)). Ninguna superficie ni ningún texto del sitio
+introduce un color propio.
+
+**Corregido en el [#46](https://github.com/i-casaca/portfolio-test-migration/issues/46).** Hasta ese
+ticket esta línea decía que eran los *únicos literales de color del sitio*, y eso ya no era cierto —
+ni lo había sido nunca del todo. Lo que hay fuera del par, y por qué cada cosa está fuera:
+
+| Dónde | Literales | Por qué no pasa por los tokens |
+|---|---|---|
+| `--c-error-oscuro` / `--c-error-claro` | `#E8776A`, `oklch(45% .18 25)` | Tercera pareja **documentada** (ver [El contraste no se heredó](#el-contraste-no-se-heredó-se-midió)): un error tiene que leerse como error, y un rojo no se resuelve intercambiando dos tokens |
+| `#cursor-dot`, los círculos de la mancha | `#fff` | **Blanco puro es la técnica**, no un color: con `mix-blend-mode:difference`, blanco sobre X da el negativo exacto de X. Cualquier otro valor daría un tinte |
+| La estática de NDA | `#000`, `#fff`, `rgba(255,255,255,…)`, `rgba(0,0,0,…)` | Es una **imagen de otro medio** —un tubo sin señal—, no una superficie del sitio. Teñirla con la paleta la convertiría en decoración de marca, que es justo lo que no es |
+| La aberración de la sigla NDA | `rgba(255,0,72,…)`, `rgba(0,229,255,…)` | Separación de canales RGB, la misma familia que las dos copias del glitch del logotipo |
+| Los fantasmas del logotipo (`.naming-ghost`) | `#ff3b30`, `#34c759` | Igual: canales que asoman por los cantos durante el glitch |
+| Sombras (`.gate-card`, `.hero-portrait`) | `rgba(0,0,0,.35/.55)` | Ver la nota sobre sombras en [La inversión](#la-inversión) |
+| `assets/css/chat-bubble.css` | tokens `--cb-*` | **Desacoplado a propósito** en el [#38](https://github.com/i-casaca/portfolio-test-migration/issues/38). Sigue con la paleta del MVP y espera su propio ticket |
+
+Ninguno de estos es un color de marca ni contradice la
+[excepción nº 4](#4-ausencia-de-color-de-acento): no hay un token de acento, y la fotografía de
+proyecto sigue siendo la única fuente de color saturado. Son **artefactos de una técnica** (negativo,
+señal rota, separación de canales) que por definición no pueden expresarse con dos tonos cálidos.
+La regla que sí sigue viva, y en esos términos hay que leerla: *ninguna superficie, texto, línea o
+borde del sitio usa un color que no salga de `--c-negro` y `--c-hueso`*.
 
 **Solo dos, deliberadamente.** No hay un tercer color de acento: la fotografía de proyecto es la
-única fuente de color saturado del sitio. Ver [Excepciones deliberadas](#excepciones-deliberadas).
-Sustituye por completo a la paleta crema/menta del MVP (`--cream`, `--mint`, `--ink` en
-`assets/css/site.css`), que desaparece de `:root`.
+única fuente de color saturado del sitio.
+
+Ver [Excepciones deliberadas](#excepciones-deliberadas). Sustituye por completo a la paleta
+crema/menta del MVP (`--cream`, `--mint`, `--ink` en `assets/css/site.css`), que desaparece de
+`:root`.
 
 ### La inversión
 
@@ -72,10 +96,25 @@ cálculos.
 
 **Los dos colores intercambian su papel, no se añade ninguno.** El hueso deja de ser tinta y pasa a
 ser superficie. Por eso el contraste sale idéntico en los dos extremos —**13,63:1**— sin calibrar
-una paleta nueva: es literalmente el mismo par. Y las superficies, derivadas empujando el fondo
-*hacia* la tinta, cambian de sentido solas: en oscuro un paso elevado sale más claro, en claro más
-oscuro, sin dos juegos de valores. La elevación sigue construyéndose moviendo luminosidad, nunca con
-una sombra.
+una paleta nueva: es literalmente el mismo par. (Remedido en el
+[#46](https://github.com/i-casaca/portfolio-test-migration/issues/46) sobre el sitio corriendo:
+`--c-negro` resuelve a `rgb(32,25,21)` y `--c-hueso` a `rgb(235,227,216)`, **13,63:1** exacto.) Y las
+superficies, derivadas empujando el fondo *hacia* la tinta, cambian de sentido solas: en oscuro un
+paso elevado sale más claro, en claro más oscuro, sin dos juegos de valores.
+
+**La elevación se construye moviendo luminosidad, no con sombras.** Matizado en el #46, porque tal
+cual estaba escrito ("nunca con una sombra") el código lo desmentía en tres sitios. La regla vale
+para la **elevación del sistema** —`--surface1`/`--surface2`, el paso elevado del pie, la tarjeta del
+muro— y ahí se cumple entera. Lo que sí lleva sombra son **tres objetos que se leen como cosas
+físicas por encima de la página**, no como un escalón de superficie:
+
+- `.hero-portrait`, el marco de la polaroid: una foto impresa dejada sobre la página.
+- `.foto-flotante`, la imagen que persigue al cursor: tiene que leerse despegada, y su sombra está
+  **derivada de `--c-negro` y cruzada con `--t`** (crece en claro, y en oscuro manda un filo claro
+  que se apaga con ella), así que sigue el eje en vez de ignorarlo.
+- `.gate-card`, la tarjeta del muro: es un modal, y flota sobre su propio scrim.
+
+Si una pasada futura ve una sombra en un elemento que no sea uno de esos tres, es una regresión.
 
 Se mezcla **en oklab**: el camino recto entre los dos pasa por grises neutros en vez de por un marrón
 sucio a mitad de recorrido.
@@ -121,9 +160,37 @@ secundario caían por debajo de AA al invertir. Por eso los escalones interpolan
 quedarse fijos:
 
 ```css
---dim-faint: calc(.5 + .13 * var(--tk));   /* numeración del índice */
---dim:       calc(.6 + .08 * var(--tk));   /* metadatos, pies, notas */
+--dim-faint: calc(.55 + .08 * var(--tk));  /* numeración del índice */
+--dim:       calc(.6  + .08 * var(--tk));  /* metadatos, pies, notas */
 ```
+
+**`--dim-faint` valía `.5 + .13` hasta el
+[#46](https://github.com/i-casaca/portfolio-test-migration/issues/46), y eso incumplía el suelo de
+0,55 que este mismo apartado declara tres párrafos más arriba.** No es una errata de redacción: el
+escalón se calibró contra el extremo *claro* —donde 0,63 da 4,59:1 y pasa— y el extremo oscuro no se
+volvió a medir después. Medido en el navegador sobre el par real, 0,50 daba **4,34:1** en los cinco
+`.index-num` de la home y en el `.project-num` de las cinco páginas de proyecto: por debajo del
+mínimo de 4,5:1 para texto que no es grande. Con `.55 + .08` sube a **4,97:1** en oscuro y el valor
+claro no se mueve (sigue siendo exactamente 0,63 → 4,59:1).
+
+La lección es la del propio apartado, aplicada a sí mismo: **medir un extremo no exime de medir el
+otro, y eso vale también para los escalones que ya interpolan.** Que un token varíe con `--tk` no
+garantiza que sus dos puntas pasen; hay que comprobar las dos.
+
+**Un segundo caso, del mismo #46, que el escalón no cubría:** `.index-lock` (el candado `🔒 NDA`)
+llevaba `opacity:.85` *propia* dentro de `.index-meta`, que ya va a `var(--dim)`. Las dos se
+**multiplican**: .6 × .85 = .51 en oscuro y .68 × .85 = .58 en claro, o sea **4,46:1 y 3,93:1** — el
+único texto del sitio que fallaba a los dos lados del eje. Es exactamente el modo de fallo contra el
+que ya avisaba el comentario de `.navlinks` en `site.css` ("la opacidad va en cada enlace, no en el
+contenedor, porque compondría en vez de sustituir"), aplicado aquí sin darse cuenta. Retirada la
+opacidad propia, hereda `--dim` limpio: 5,66:1 y 5,35:1.
+
+**Regla añadida, y es la que faltaba:** una opacidad de texto no se declara nunca dentro de un
+elemento que ya tenga otra. Si hace falta atenuar más, se atenúa **en vez de**, no **encima de**.
+
+Con las dos correcciones, el barrido completo de la home mide **134 elementos de texto y ninguno por
+debajo de AA en ninguno de los dos extremos**. El peor caso del sitio es `.index-num` a 4,59:1 en
+claro.
 
 El atenuado del hover del índice sigue la misma regla por el mismo motivo:
 `calc(.32 + .10 * var(--tk))`, que da 2,55:1 en oscuro y 2,53:1 en claro — el mismo grado de
@@ -226,16 +293,30 @@ Se usan **solo** en la secuencia de entrada, un saludo cada una, y en ningún ot
 Están elegidas por disparidad —cada una destaca en un eje distinto— para que ninguna se parezca a la
 de al lado:
 
-| Aporta | Familia | Licencia | Peso |
-|---|---|---|---|
-| Masa | Rubik Mono One | OFL 1.1 | 916 B |
-| Gesto | Rock Salt | **Apache 2.0** | 1.576 B |
-| Proporción | Bebas Neue | OFL 1.1 | 1.072 B |
-| Estructura | Monoton | OFL 1.1 | 696 B |
+| Aporta | Familia | Licencia | Peso al elegirlas (#37) | Remedido (#46, 2026-08-12) |
+|---|---|---|---|---|
+| Masa | Rubik Mono One | OFL 1.1 | 916 B | 912 B |
+| Gesto | Rock Salt | **Apache 2.0** | 1.576 B | **3.776 B** |
+| Proporción | Bebas Neue | OFL 1.1 | 1.072 B | 1.048 B |
+| Estructura | Monoton | OFL 1.1 | 696 B | **1.312 B** |
 
-**4,2 kB las cuatro juntas**, porque se piden con `?text=` y solo llegan los glifos de su propia
-palabra — el mismo truco que ya usan los heroes de proyecto. Rock Salt es Apache 2.0 y no OFL: no
-cambia nada en la práctica, pero no se debe escribir "todas OFL" en ningún sitio.
+**6,9 kB las cuatro juntas**, no los 4,2 kB que decía esta tabla. Se piden con `?text=` y solo llegan
+los glifos de su propia palabra — el mismo truco que ya usan los heroes de proyecto.
+
+**Por qué la cifra cambió sin que nadie tocara nada, y qué hacer con eso.** Rock Salt más que dobla y
+Monoton casi dobla; las otras dos están clavadas. El `?text=` no ha cambiado, así que lo que cambió
+está al otro lado: Google recorta el subset en su servidor y puede volver a hacerlo mañana. **El peso
+de estas cuatro no es un número del sistema, es una medición con fecha.** Si vuelve a importar, se
+remide; no se copia de aquí. Aun a 6,9 kB siguen siendo despreciables al lado de los 59,7 kB de
+Roboto Flex, así que la decisión del #37 no se toca — pero la tabla ya no miente.
+
+Rock Salt es Apache 2.0 y no OFL: no cambia nada en la práctica, pero no se debe escribir "todas OFL"
+en ningún sitio.
+
+**Roboto Flex, remedido en el mismo barrido: 59.696 B en el subset `latin`** — los 59,7 kB de arriba,
+exactos. Google sirve además `latin-ext` (42,6 kB), `cyrillic` (32,0), `greek` (22,8),
+`cyrillic-ext` (21,4) y `vietnamese` (15,8), pero el `unicode-range` de cada `@font-face` hace que un
+visitante en castellano solo descargue `latin`.
 
 Dos cosas que hay que respetar al tocar los `<link>`:
 
@@ -308,13 +389,22 @@ texto controlada por párrafo, no por contenedor.
 
 Sustituye a la rejilla interactiva de 6 celdas que ocupaba el hero de la home. Es una lista
 numerada (`01`–`05`), un ítem por proyecto: número, nombre a gran tamaño, y categoría/año alineados
-a la derecha. Al pasar el cursor o dar foco a un ítem, la foto de ese proyecto (`hero.jpg`) aparece
-**a sangre, ocupando todo el hero, detrás de la lista**, a un 50% de opacidad con un velo en
-gradiente (más fuerte a la izquierda, donde vive el texto) para que el índice y la meta se sigan
-leyendo encima. El ítem apuntado pasa a cursiva; el resto baja a 0,32 de opacidad — todo con
-`:has()`, sin JavaScript de por medio salvo para decidir qué foto encender.
+a la derecha.
 
-**Sin hover**: superficie oscura lisa, sin foto — no hay un proyecto "por defecto" que insinuar.
+> **Lo que sigue describía el hover tal como lo dejó este ticket, y el
+> [#55](https://github.com/i-casaca/portfolio-test-migration/issues/55) lo sustituyó entero.** El #46
+> lo marca en vez de borrarlo, porque el porqué del cambio se entiende viendo de dónde viene:
+> ~~la foto aparece a sangre ocupando todo el hero, a un 50% de opacidad con un velo en gradiente; el
+> ítem apuntado pasa a cursiva~~. Hoy la foto es **un objeto que persigue al cursor** y el nombre
+> **engorda a `wght 850` mientras barre el alfabeto**, en vez de inclinarse. Ni la foto a sangre ni su
+> velo ni la cursiva existen ya en el código. La descripción vigente está en
+> [El hover del índice](#el-hover-del-índice).
+
+Lo que sí sigue en pie de este ticket: el resto de las filas baja a 0,32 de opacidad al apuntar una
+(hoy `calc(.32 + .10 * var(--tk))`, que mantiene ese mismo grado de atenuación en los dos extremos
+del eje del tema), y esa parte se resuelve con `:has()` sin JavaScript de por medio.
+
+**Sin hover**: superficie lisa, sin foto — no hay un proyecto "por defecto" que insinuar.
 
 **Solo 5 proyectos, no 6.** "Sobre mí" ya no vive en este índice — el nav ya enlaza a esa sección, y
 el ticket lo pedía enfocado solo en los proyectos.
@@ -326,10 +416,16 @@ un prototipo real. El índice de arriba es ahora el único listado de proyectos 
 `#trabajo` (el ancla del nav) apunta directamente al hero.
 
 Sin el works-section como respaldo, el requisito de "que no puede ser 'no se ven las imágenes' en
-móvil" recae en el propio índice: cada `.index-item` lleva una miniatura fija (`.index-thumb`,
-56×56px) junto al número, oculta en escritorio (ahí la foto es la de sangre) y visible solo bajo
+móvil" recae en el propio índice: cada `.index-item` lleva una miniatura fija (`.index-thumb`) junto
+al número, oculta en escritorio (ahí la foto la pone la imagen flotante) y visible solo bajo
 `(hover:none), (max-width:760px)`. Los 3 proyectos con NDA la llevan difuminada (`blur(5px)`), el
 mismo lenguaje visual que ya usaba el `work-media.is-locked` retirado.
+
+**Mide 72×72 px, no los 56×56 que decía esta línea** (medido en el #46 a 375 px de ancho). Creció al
+reordenarse la fila en móvil, cuando la miniatura pasó de ser un apoyo junto al número a mandar la
+altura de una rejilla de dos columnas. Y sobre el `blur(5px)`: es el único sitio del sitio donde
+sobrevive la "foto difuminada" que el #55 declaró promesa falsa — ver
+[Hasta dónde llega esa promesa](#hasta-dónde-llega-esa-promesa-medido).
 
 **Los 3 proyectos con NDA** llevan su candado (`🔒 NDA`) como una etiqueta más dentro de la línea de
 meta, no como una marca aparte que rompa el ritmo de la lista.
@@ -349,10 +445,31 @@ Este ticket no diseña ningún movimiento nuevo — pone la base sobre la que se
 
 GSAP 3.13 (núcleo + ScrollTrigger + SplitText + TextPlugin — GSAP 3.13 liberó los plugins que antes
 eran de pago del Club GreenSock) y Lenis, servidos por CDN (`jsdelivr`), sin build ni bundler. Las
-seis páginas cargan el mismo bloque de `<script defer>`, en este orden: GSAP → ScrollTrigger →
-SplitText → TextPlugin → Lenis → `assets/js/motion.js` → `page-transition.js` → `reveal.js`. Todo
-`defer`, no bloqueante: los navegadores ejecutan los scripts `defer` en orden de documento tras el
-parseo, así que no hace falta bloquear el primer pintado para garantizar el orden.
+seis páginas cargan el mismo bloque de `<script defer>`. Todo `defer`, no bloqueante: los navegadores
+ejecutan los scripts `defer` en orden de documento tras el parseo, así que no hace falta bloquear el
+primer pintado para garantizar el orden.
+
+**Orden real, comprobado en las seis páginas en el
+[#46](https://github.com/i-casaca/portfolio-test-migration/issues/46)** (esta lista decía
+`… → motion.js → page-transition.js → reveal.js`, y `page-transition.js` lo borró el
+[#42](https://github.com/i-casaca/portfolio-test-migration/issues/42) al pasar a View Transitions
+nativas — llevaba dos tickets nombrando un archivo que no existe):
+
+| | |
+|---|---|
+| **Común a las seis** | GSAP → ScrollTrigger → SplitText → TextPlugin → Lenis → `motion.js` → `reveal.js` |
+| **Solo `index.html`** | … → `backdrop.js` → `tema.js` → `flotante.js` → `flap.js` → `indice.js` → `entry.js` |
+| **Solo las 5 de proyecto** | … → `entrada-proyecto.js` → `backdrop.js` → `flotante.js` → `flap.js` → `nav-proyecto.js` |
+
+`tema.js` **solo se carga en la home**, que es donde hay un tramo de scroll que invertir; las páginas
+de proyecto fijan el extremo claro desde CSS (ver
+[Páginas de proyecto](#claras-de-un-tirón-sin-eje-que-mover)). `flotante.js` y `flap.js` van siempre
+antes de quien los consume (`indice.js` en la home, `nav-proyecto.js` en las de proyecto).
+
+Los tres scripts del chatbot (`chat-corpus-tags.js` → `chat-corpus.js` → `chat-bubble.js`) van al
+final del `<body>` y **sin `defer`**, heredado del MVP. Son 15,2 kB gzip que bloquean el parser en
+ese punto; no rompen nada porque ya no queda contenido detrás, pero es lo primero que mirar cuando la
+burbuja tenga su ticket.
 
 `assets/js/motion.js` es el único sitio que registra los plugins de GSAP, engancha Lenis al ticker
 de GSAP (`lenis.on('scroll', ScrollTrigger.update)` + `gsap.ticker.add(...)`, con `lagSmoothing(0)`)
@@ -371,6 +488,23 @@ Motion.dur  = { enter: 0.8,          exit: 0.5,          move: 0.6 };
 `move` es para transiciones de página y cambios de tamaño, no para entradas/salidas de contenido.
 `back.out`/`elastic.out` no tienen token propio a propósito — son toques de personalidad puntuales
 que cada ticket que los use debe escribir explícitos, nunca un default que se herede sin pensarlo.
+
+**Quién se sale de la tabla, y por qué (auditado en el
+[#46](https://github.com/i-casaca/portfolio-test-migration/issues/46)).** Tal como estaba escrito,
+`move` era el ease de "las transiciones de página" y la transición de página real usa otro. No es una
+infracción: es que los tokens se fijaron en el #39 sin nada construido encima, y lo que se construyó
+después pidió curvas más marcadas. Se anota para que nadie las "corrija" hacia la tabla:
+
+| Dónde | Valor | Por qué |
+|---|---|---|
+| `indice.js` (fase 1) · `entrada-proyecto.js` (fase 2) | `power3.inOut`, 0,62 s / 0,72 s | Las dos mitades de la ida tienen que **casar entre sí a través de una navegación**, no con el resto del sitio. Afinadas en vivo en el #55 |
+| `flotante.js` | `power3`, 0,55 s | El retardo de la imagen que persigue al cursor. No es una entrada ni una salida: es peso |
+| `flap.js` | 520 ms, 34 ms de escalón | El barrido de letras va en un `requestAnimationFrame` propio, sin GSAP |
+| `--ease-move` / `--dur-move` (`site.css`) | `cubic-bezier(.45,0,.55,1)`, 0,75 s | La traducción a CSS de `move`, para las View Transitions y las transiciones de CSS. La duración sube de 0,6 a 0,75 por decisión en vivo del #42 |
+
+La tabla sigue siendo el **default de contenido**: entradas y salidas de texto e imagen (`entry.js`,
+`reveal.js`) la usan tal cual. Lo que se sale es el vocabulario de *navegación y objeto*, que nació
+después.
 
 ### La gramática de texto
 
@@ -418,6 +552,28 @@ El compromiso de accesibilidad vive en
 `Motion.reduced`, Lenis no se inicializa (scroll nativo) y `reveal.js` muestra todas las `.media` de
 golpe por clase, sin crear ningún trigger ni tween. No es la ausencia de animación con el contenido
 a medias: es la versión quieta del estado final.
+
+**Cobertura real, extraída del CSS y comprobada en el
+[#46](https://github.com/i-casaca/portfolio-test-migration/issues/46)**: 18 reglas bajo
+`@media (prefers-reduced-motion: reduce)`, y la mayoría **sustituyen** en vez de apagar. La
+marquesina se convierte en el titular entero, centrado, envuelto y a un cuerpo que cabe, con las tres
+copias `aria-hidden` en `display:none` (medido: 631×229 px, dentro de pantalla, en vez de una frase
+de 3.110 px cortada por los bordes) y sin `mix-blend-mode` — lo que de paso **desactiva la
+[excepción nº 5](#5-el-titular-del-hero-en-negativo-sobre-la-foto)**: con menos movimiento, el
+titular no pasa por el negativo y no hay contraste que declarar. El segmento del reclamo de scroll se
+queda posado a media pista. La polaroid conserva su ángulo y pierde el desplazamiento. El grano se
+queda quieto con su textura puesta. La entrada, la mancha y el morfismo de página no se montan.
+
+**Un hueco, encontrado en el #46 y no corregido aquí porque pide una decisión de diseño.** Con
+`prefers-reduced-motion` **y ratón**, apuntar una fila del índice no enseña **nada**: los
+`pointerenter` que llaman a `mostrar()` viven dentro del `if (seguidor)` de `indice.js`, y `seguidor`
+es `null` con menos movimiento. `nav-proyecto.js` repite el patrón en el Prev/Next. No es la versión
+quieta del estado final: es su ausencia, que es exactamente lo que
+[PRODUCT.md](PRODUCT.md#accessibility--inclusion) pide no hacer. El foco de teclado sí se salva (su
+manejador está fuera de ese bloque). La salida no es obvia —una imagen que no persigue al cursor
+tiene que aparecer *en algún sitio*, y elegirlo es diseñar—, así que se anota como pregunta abierta
+y no se improvisa. La miniatura de la fila, que en táctil ya resuelve lo mismo, es el primer sitio
+donde mirar.
 
 ## Entrada del sitio
 
@@ -788,13 +944,26 @@ en `site.css`, con tres grupos de elementos nombrados:
 - **`.nav` → `nav`.** Idéntica en las seis páginas: con el mismo nombre a los dos lados, el
   navegador la trata como una sola pieza que persiste, en vez de cruzar-desvanecer dos capturas
   casi iguales (que se leería como un parpadeo).
-- **La imagen compartida → `project-cover`.** En el índice, solo la foto que está `.is-on` la
-  lleva (nunca varias a la vez: dos elementos con el mismo nombre en un documento invalida la
-  transición entera, y `.is-on` ya es un estado exclusivo por el JS existente). En las cinco
-  páginas de proyecto, la primera `.media` dentro de `.project-body` — una sola regla en
-  `site.css`, porque esas dos clases son comunes a las cinco. Sin foto activa (llegada directa,
-  sin pasar por el índice), la imagen de la página nueva simplemente entra sola, sin réplica que
-  morfear — degradación aceptable, no error.
+- **La imagen compartida → `project-cover`. ⚠️ ESTE NOMBRE YA NO EXISTE EN EL CÓDIGO.**
+  Lo comprobó el [#46](https://github.com/i-casaca/portfolio-test-migration/issues/46) buscándolo en
+  todo el repo: **no hay ni una sola declaración `view-transition-name: project-cover`**, ni en el
+  índice ni en las cinco páginas de proyecto. `site.css` conserva el comentario de cuatro párrafos
+  que describe la regla, pero la regla se borró en el #55 (commit `1a4bec0`) junto con el resto del
+  andamiaje de la ida.
+
+  **La consecuencia, dicha entera:** la vuelta proyecto → índice **no morfea la foto**. Lo único que
+  persiste de verdad en esa navegación es `.nav`; los cinco `index-item` y el `hero-statement`
+  reaparecen con su cascada de entrada, y la portada del proyecto se cruza-desvanece como cualquier
+  otro elemento sin nombre. El apartado [La ida, en dos fases](#la-ida-en-dos-fases) afirma que "la
+  vuelta sigue con la transición nativa", y eso es cierto —la transición nativa corre— pero **sin el
+  morfismo de la foto**, que es lo que aquel párrafo daba a entender.
+
+  Que se borrara junto con la ida es coherente (el nombre tenía que estar a los dos lados o no
+  servía de nada), pero **nadie decidió que la vuelta perdiera el morfismo**: se cayó por arrastre.
+  Queda como pregunta abierta, no como decisión: o se le devuelve el nombre a la portada y a la
+  fila de destino —y entonces `reveal.js` vuelve a tener un filtro con sentido—, o se escribe aquí
+  que la vuelta es un cruce-desvanecido y se retira el comentario huérfano de `site.css`. Lo que no
+  puede seguir es el documento describiendo un mecanismo que no está.
 - **Los ítems del índice → `index-item-1`…`index-item-5`, y `hero-statement`.** Este último era
   `hero-eyebrow` hasta el ticket [#51](https://github.com/i-casaca/portfolio-test-migration/issues/51)
   (ver [Hero](#hero)); el renombre es mecánico, la coreografía no cambió. Solo existen en
@@ -805,6 +974,15 @@ en `site.css`, con tres grupos de elementos nombrados:
   previa que deshacer — la propia asimetría del par old/new da "la vuelta es el espejo exacto" que
   pedía el ticket sin escribirlo dos veces. La entrada rebobina el gesto: el último ítem en salir
   (`index-item-5`) es el primero en volver.
+
+  **Media coreografía está muerta desde el #55, y el #46 lo anota:** las reglas
+  `::view-transition-old(index-item-N)` y `::view-transition-old(hero-statement)` **no llegan a
+  correr nunca**. La única navegación que las dispararía es índice → proyecto, y esa ya no la hace
+  el navegador: `indice.js` hace `preventDefault()` y monta la fase 1 a mano. En la vuelta,
+  `index.html` es el documento *nuevo*, así que de él solo se usan las `::view-transition-new`, que
+  esas sí corren. Se conservan porque son el espejo de las que sí funcionan y porque la ida podría
+  volver a las View Transitions si algún día el navegador captura la imagen flotante — pero **hoy
+  son diez reglas sin efecto**, y quien las lea tiene que saberlo antes de "ajustar" sus tiempos.
 
 `--ease-move`/`--dur-move` en `site.css` traducen `Motion.ease.move`/`Motion.dur.move` (GSAP,
 `assets/js/motion.js`) a un `cubic-bezier` — las View Transitions son CSS puro y no pueden llamar a
@@ -1007,10 +1185,23 @@ sostenerlo. El sistema tiene una familia y siete anchos — el sitio para la
 personalidad es el ancho y el peso, no una familia nueva (excepción deliberada
 nº 3).
 
-Queda anotado que `index.html` **sigue cargando seis fuentes que no pinta nadie**
-(las cinco display más Fraunces, que era el "Sobre mí" del mismo grid muerto).
-No se retiran aquí porque no es lo que este ticket decide; es basura del #41 que
-merece su propia línea.
+**Corregido en el [#46](https://github.com/i-casaca/portfolio-test-migration/issues/46).** Este
+párrafo decía que `index.html` "sigue cargando seis fuentes que no pinta nadie". Comprobado sobre el
+código y sobre la red, ya no es cierto, y hay que contarlo con precisión porque lo que queda es
+distinto de lo que decía:
+
+- **Las cinco display por proyecto** (Bungee, Anton, Bodoni Moda, Unbounded, Yeseva One) **no se
+  cargan en ninguna página del sitio.** El propio #56 las sacó de `index.html` para probarlas como
+  titular de proyecto, las descartó al verlas, y no volvieron. No hay un solo `<link>` que las pida
+  ni una sola regla que las nombre. Ese trozo de basura del #41 se limpió solo.
+- **Fraunces sí sigue cargándose, y sigue sin pintar nada.** Un `<link>` en el `<head>` de
+  `index.html`, subseteado con `?text=Sobre mí`. Medido: **2.424 B de woff2 + 447 B de CSS**, más una
+  hoja bloqueante extra en el `<head>`. Ninguna regla del sitio la nombra en `font-family`: el
+  `↳ Sobre mí` que iba a usarla es hoy un `<span class="eyebrow">` en Roboto Flex.
+
+Sigue sin retirarse, y a propósito: **la niebla del mapa no pregunta si sobra, pregunta si el sitio
+quiere una display en alguna parte.** Retirar el `<link>` cierra esa pregunta por la vía rápida en vez
+de contestarla. Lo que sí queda cerrado es el inventario: la deuda son 2,4 kB y una fuente, no seis.
 
 ### Salir del proyecto: anterior y siguiente
 
@@ -1137,18 +1328,74 @@ excepción funcional de color:
 
 Los tres proyectos con NDA **no enseñan su foto: enseñan estática de televisión** con la sigla NDA y
 «requiere contraseña». Antes se enseñaba la foto real desenfocada, y era una promesa falsa — la
-imagen estaba ahí, solo tapada. Ahora **ni siquiera se le pone el `src`**, así que no llega al
-navegador hasta que hay contraseña.
+imagen estaba ahí, solo tapada.
+
+### Hasta dónde llega esa promesa, medido
+
+Este apartado decía, sin matices, que a la foto de un proyecto con NDA «ni siquiera se le pone el
+`src`, así que no llega al navegador hasta que hay contraseña». El
+[#46](https://github.com/i-casaca/portfolio-test-migration/issues/46) lo comprobó **en el panel de
+red**, que es el único sitio donde eso se puede afirmar, y la frase era cierta en una de las tres
+superficies donde la foto puede aparecer. Ahora son dos de tres, y la tercera hay que decirla en voz
+alta en vez de dejarla implícita:
+
+| Superficie | Antes del #46 | Ahora |
+|---|---|---|
+| **La imagen flotante del índice** (escritorio) | `mostrar()` evitaba el `src`… pero `indice.js` precargaba las cinco fotos con `new Image()` al arrancar, candado incluido: **las tres salían a 200 en la home, sin contraseña** | ✅ **No sale.** La precarga pregunta por el candado. Verificado: sin contraseña la home pide 2 fotos, no 5 |
+| **La miniatura de la fila** (`.index-thumb`, táctil y < 760 px) | `src` real + `filter: blur(5px)` | ⚠️ **Igual.** Sigue siendo la promesa falsa literal — la imagen llega entera y solo se desenfoca en el cliente |
+| **Las `.media` de la página de proyecto** | `src` real dentro de `.gate-wrap.locked`, que solo aplica `filter: blur(14px)` | ⚠️ **Igual.** Entrando directo a `adrenaline.html` se descargan las cuatro imágenes del proyecto con el muro echado |
+
+**Las dos que quedan no se arreglan en este ticket, y no por pereza.** Cada una tiene un motivo
+propio y una decisión de diseño detrás:
+
+- **La miniatura** existe porque el [#41](https://github.com/i-casaca/portfolio-test-migration/issues/41)
+  retiró el `works-section` y dejó escrito que *"no puede ser 'no se ven las imágenes' en móvil"*.
+  Quitarle el `src` a las tres con candado deja tres huecos en la lista justo en el dispositivo que
+  no tiene hover. La salida buena es enseñar **la misma estática** que ya enseña la flotante —la
+  pieza es genérica desde el #56 y se puede reutilizar—, pero eso es diseñar una fila nueva en
+  móvil, no corregir una deriva.
+- **Las `.media` de la página** necesitarían no traer el `src` en el HTML y ponerlo al desbloquear.
+  Es un cambio de mecanismo del muro, y el muro está fuera del alcance de este ticket.
+
+**Y el límite honesto, que conviene escribir aquí y no en una nota al pie:** el muro es una
+contraseña de cliente, con el hash y el mecanismo a la vista en el JS. Nunca fue seguridad, y
+`PRODUCT.md` ya lo declara como carácter de marca (*"el muro de contraseña dice que no es seguridad
+real"*). Lo que el #55 sí prometía era algo más modesto y sí alcanzable: **que la imagen no viaje
+antes de tiempo.** Esa promesa hoy se cumple en la superficie principal y no en las otras dos.
 
 **El muro salta en la home, al pulsar, no al llegar al proyecto.** Antes se veía entrar la página con
 toda su transición y taparse acto seguido. Preguntando primero, la transición solo ocurre cuando ya
 hay algo que enseñar. Acertando, se rehace el hover para cambiar la estática por la foto y se vuelve
 a pulsar: el mismo manejador hace la transición completa, sin duplicar la coreografía.
 
+**Con una condición que no estaba escrita, y conviene que lo esté
+([#46](https://github.com/i-casaca/portfolio-test-migration/issues/46)):** ese manejador vive dentro
+del `if (seguidor)` de `indice.js`, y `seguidor` solo existe con **GSAP cargado, puntero fino y sin
+`prefers-reduced-motion`**. En táctil, con menos movimiento o con el CDN caído, pulsar un proyecto
+con candado **navega directamente** y el muro aparece en la página de destino — el comportamiento de
+antes del #55. No es un fallo: es la degradación correcta, porque en esos casos tampoco hay
+transición que proteger. Pero significa que "el muro salta en la home" describe el camino
+principal, no el único, y que el muro de las páginas de proyecto sigue siendo necesario y en uso.
+
 Con el muro abierto **no queda nada vivo detrás**: se apagan el cursor propio, la mancha, la imagen
 flotante y los hovers del índice, y se bloquea el scroll. Un modal que deja el fondo reaccionando se
 lee como que el sitio no te ha oído. Se cierra con Escape y con clic fuera — un muro que solo se
 cierra acertando es una trampa, no una puerta.
+
+**Eso vale para el muro de la home, que es el que decidió el #55. En las páginas de proyecto no.**
+Comprobado en el #46 entrando directo a `adrenaline.html`: el muro se pinta (lo trae el HTML con
+`.gate-wrap.locked`), pero **`html.muro-abierto` no se pone nunca** — esa clase la escribe
+`indice.js`, que solo vive en la home. Así que ahí el scroll no se bloquea, la página se mueve por
+detrás del muro, y el cursor propio y la mancha siguen corriendo. Es la costura entre el camino que
+el #55 rediseñó (pulsar desde el índice) y el que heredó sin tocar (llegar por URL, por buscador o
+recargando).
+
+Se anota y no se arregla aquí: igualar los dos caminos es tocar el mecanismo del muro, que este
+ticket tiene fuera de alcance. Pero **el modo de fallo hay que verlo entero**, porque el muro no es
+solo visual: sin `muro-abierto` tampoco se apagan los `pointer-events` del `.nav`, y el foco de
+teclado nunca se queda dentro de la tarjeta —no hay `aria-modal` ni trampa de foco en ninguno de los
+dos caminos—, así que con el tabulador se sale del muro al contenido desenfocado de detrás. Quien
+retome el muro tiene ahí tres cosas del mismo tamaño: la clase, el foco y el `src` de las `.media`.
 
 **Cómo se construye la estática** (tres capas, y ninguna es sutil a propósito):
 
@@ -1245,10 +1492,94 @@ exactamente la de antes. Nada del contenido depende de esto.
 **Contraste, medido en los dos lados del borde**: 13,63:1 fuera de la mancha y **13,59:1 dentro**.
 La inversión lo conserva, así que el texto cumple AA también donde la mancha lo cubre.
 
+## Peso y rendimiento, medido
+
+Barrido del [#46](https://github.com/i-casaca/portfolio-test-migration/issues/46) al cerrar el mapa.
+Son bytes contados, no estimaciones: el texto propio con `gzip -9`, el CDN pidiéndolo con
+`Accept-Encoding: gzip`, y las fuentes descargando el subset que el navegador pediría de verdad.
+
+**La home, primera visita, sin caché:**
+
+| Bloque | Peso | Nota |
+|---|---|---|
+| `index.html` | 23,8 kB gzip | 66,5 kB en crudo — más de la mitad son comentarios de decisión |
+| `site.css` + `chat-bubble.css` | 19,5 kB gzip | |
+| JS propio del sitio (9 archivos) | 24,6 kB gzip | |
+| JS del chatbot (3 archivos) | 15,2 kB gzip | Sin `defer`, al final del `<body>` |
+| GSAP 3.13 (núcleo + 3 plugins) + Lenis | **56,8 kB gzip** | 147,7 kB en crudo, desde jsDelivr |
+| Roboto Flex, subset `latin` | 59,7 kB | Un `<link>`, siete escalones |
+| Las 4 display de la entrada | 6,9 kB | Subseteadas con `?text=` |
+| Fraunces | 2,4 kB | **No la pinta nadie** — ver [El título](#el-título-el-nombre-del-índice-en-grande) |
+| Fotografía | **~440 kB** | El retrato del hero (127 kB) + las 2 fotos de proyecto sin candado |
+
+En total, **algo menos de 650 kB** para la home completa. El reparto es el que cabía esperar de las
+decisiones tomadas: **la fotografía y GSAP son el 75%**, y todo el sistema visual —CSS, tokens,
+grano, inversión de tema— cabe en 19,5 kB porque no hay ni un asset de imagen en él.
+
+**Lo que se quitó midiendo, en el propio #46:** `indice.js` precargaba las cinco fotos de proyecto al
+arrancar, las tres con NDA incluidas. Ahora precarga solo lo que se puede enseñar, y solo con puntero
+fino. Son **561 kB menos** en la primera carga de la home para quien no ha puesto la contraseña — que
+son todos, la primera vez. La cifra de fotografía de la tabla ya lleva la corrección aplicada; antes
+era ~1,0 MB.
+
+**Lo que no se puede medir aquí, y no se inventa.** Los fps de la mancha, del grano y de la
+marquesina, la fluidez de la inversión de tema al hacer scroll y el empalme de las dos fases de la
+transición **no se han vuelto a medir en este ticket**. El panel de navegador que se usó para todo lo
+demás estrangula `requestAnimationFrame`, así que cualquier número de fps que saliera de ahí sería
+falso. Los 120 fps de la mancha son los del
+[#53](https://github.com/i-casaca/portfolio-test-migration/issues/53), medidos con un contador
+delante en una sesión en vivo, y siguen siendo la última medición buena. **Eso pide ojos humanos
+sobre el sitio corriendo, no otra pasada de herramienta.**
+
+## Piezas del MVP que siguen sin rediseñar
+
+Las tres que el mapa deja en la niebla. El
+[#46](https://github.com/i-casaca/portfolio-test-migration/issues/46) las **midió** —para que quien
+las retome parta de números— y no las tocó.
+
+**El cursor a medida.** Sigue siendo `#cursor-dot`: 24 px, blanco puro, `mix-blend-mode:difference`,
+`z-index:9999`. Al quedar dentro de la mancha se lee como una pupila, que es la relación que hay que
+rehacer si crece o cambia. El #46 le corrigió **un fallo real, no su diseño**: el `cursor:none` que
+lo acompaña no estaba guardado por `html.js`, así que sin JavaScript —o con el CDN caído— el
+visitante se quedaba sin ningún cursor visible sobre la banda del hero y sobre el índice entero.
+
+**El muro de contraseña.** Contraste medido sobre el fondo claro real: título 11,69:1, párrafo
+5,59:1, el rojo de error **5,51:1** (exactamente lo que calculó el #56), el enlace de contacto
+4,97:1 y el botón 13,63:1. **Todo pasa AA.** Lo que no pasa es lo que no es color: no hay
+`aria-modal` ni trampa de foco, y `html.muro-abierto` no llega a las páginas de proyecto (ver
+[Proyectos bajo NDA](#proyectos-bajo-nda)). El #46 le puso nombre accesible al campo de contraseña,
+que solo tenía `placeholder`.
+
+**La burbuja del chat.** Sigue con sus tokens `--cb-*` heredados del MVP (`--cb-ink: #1C1B19`), al
+margen del eje del tema. Medido: el texto dentro del lanzador contrasta **15,29:1** y el objetivo es
+de 56×56 px, de sobra. Pero el círculo contra el fondo **oscuro** de la home mide **1,01:1** — o sea,
+es invisible salvo por el borde-parche que le puso el
+[#38](https://github.com/i-casaca/portfolio-test-migration/issues/38). Ese parche es hoy lo único que
+lo sostiene, y es la primera cosa que resuelve su ticket. Dos apuntes más de la misma medición: el
+botón lanzador **no tiene nombre accesible** (solo un `<svg aria-hidden>` dentro), y el campo de la
+pregunta tampoco tiene etiqueta. Van con su ticket, no con este.
+
 ## Excepciones deliberadas
 
 Decisiones de este sitio que contradicen los defaults de `/impeccable`. **No son descuidos y no se
 deben "corregir".** Si una pasada del skill propone quitar algo de esta lista, la respuesta es no.
+
+> **Repaso del [#46](https://github.com/i-casaca/portfolio-test-migration/issues/46): las cinco
+> siguen en pie.** El ticket pedía comprobar que ninguna pasada de `/impeccable` las hubiera
+> "corregido" por el camino. Ninguna cayó, y ninguna hizo falta restaurar. Verificado en el código:
+>
+> | # | Excepción | Dónde se comprueba hoy |
+> |---|---|---|
+> | 1 | Índice y navegación numerados | `.index-num` 01–05 en la home, `.project-num` en las cinco fichas, `.pnav-num` en las salidas |
+> | 2 | El hueso como tinta **y** superficie | `--c-hueso` es tinta con `--t:0` y fondo con `--t:1`; y `.hero-portrait{background:var(--ink)}` |
+> | 3 | Una sola familia | Roboto Flex en todo. El #56 **reforzó** la excepción: probó cinco display en los titulares de proyecto y las retiró |
+> | 4 | Sin color de acento | No hay token de acento. Los literales del glitch y de la estática no lo son — ver la tabla de [Los dos colores](#los-dos-colores) |
+> | 5 | Titular del hero en negativo | `mix-blend-mode:difference` en `.hero-marquee`. Con `prefers-reduced-motion` no aplica, y ahí el contraste vuelve a 13,63:1 |
+>
+> Lo único que cambió es cuánta gente las contradice sin quererlo, y eso se corrigió en el propio
+> #46: la nº 4 parecía rota por los literales de color de la estática de NDA y del glitch del
+> logotipo, y no lo estaba — faltaba escribir la diferencia entre *un acento* y *un artefacto de una
+> técnica*. Ahora está escrita.
 
 ### 1. El índice numerado de proyectos y la navegación numerada
 
@@ -1327,8 +1658,39 @@ documentar.
 
 ### Lo que NO es una excepción
 
-El `eyebrow` en mayúsculas y espaciado que hoy encabeza cada sección de `index.html` (`↳ Trabajo`,
-`↳ Sobre mí`, `↳ Cómo trabajo`, `Contacto`) **no** está en esta lista. Es el patrón que `impeccable`
-identifica como andamiaje repetido, y aquí se está usando exactamente así: encima de todas las
-secciones, sin que ninguna lo necesite. Queda pendiente de revisión; no lo defiendas como voz de
-marca.
+El `eyebrow` en mayúsculas y espaciado que hoy encabeza cada sección de `index.html` **no** está en
+esta lista. Es el patrón que `impeccable` identifica como andamiaje repetido, y aquí se está usando
+exactamente así: encima de todas las secciones, sin que ninguna lo necesite. Queda pendiente de
+revisión; no lo defiendas como voz de marca.
+
+**Inventario exacto al cerrar el mapa
+([#46](https://github.com/i-casaca/portfolio-test-migration/issues/46)), porque la lista de esta nota
+ya no era la de verdad.** Quedan **tres instancias**, todas en `index.html` y todas como
+`<span class="eyebrow">`:
+
+| Texto | Sección |
+|---|---|
+| `↳ Sobre mí` | `<section class="about" id="sobre-mi">` |
+| `↳ Cómo trabajo` | `<section class="about" id="metodologia">` |
+| `Contacto` | `<footer class="site-footer" id="contacto">` |
+
+Las otras dos que esta nota nombraba **ya no existen y se fueron solas, cada una con su sección**:
+`↳ Trabajo` cayó con el works-section en el
+[#41](https://github.com/i-casaca/portfolio-test-migration/issues/41), y el `hero-eyebrow`
+("Product Design & UX") lo absorbió el hero en el
+[#51](https://github.com/i-casaca/portfolio-test-migration/issues/51). De cuatro a tres a dos
+tickets vista: el patrón se está vaciando por consecuencia de otras decisiones, no por una pasada que
+lo ataque.
+
+**El #46 lo comprobó y no lo resolvió, a propósito** — el ticket lo pedía así, y la pregunta sigue
+viva en la niebla del mapa. Pero deja medido **el coste que no era visual**, para que quien la
+resuelva lo tenga sobre la mesa: al ser `<span>` y no encabezados, **`index.html` no tiene ni un solo
+`<h2>` propio** y su esquema salta de `<h1>` a `<h3>`. Las tres secciones de abajo son invisibles
+para la navegación por encabezados de un lector de pantalla. En las páginas de proyecto no pasa: allí
+ese texto vive dentro del `<h2>` (ver [Lo que no hizo falta tocar](#lo-que-no-hizo-falta-tocar)), que
+es justamente la forma que aquí falta.
+
+Convertirlos en `<h2 class="eyebrow">` arreglaría el esquema sin mover un píxel, pero **eso es
+contestar la pregunta por la vía rápida**: si la respuesta acaba siendo que el sitio no quiere un
+rótulo encima de cada sección, el encabezado hay que ponerlo en otro sitio, no maquillar el que
+sobra. Se deja como está y se anota el coste.
