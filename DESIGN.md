@@ -986,6 +986,65 @@ Ahora lo repite con el mismo tratamiento —tamaño, opacidad `var(--dim-faint)`
 del `.eyebrow`, en un `.project-kicker`. No se animó el propio número: la continuidad la da la
 tipografía, no un morfismo nuevo que mantener.
 
+### El título: una display por proyecto
+
+Revisando el ticket, Ismael pidió más personalidad en el titular. **La fuente ya estaba elegida**: el
+MVP asignó una display a cada proyecto —Bungee, Anton, Bodoni Moda, Unbounded y Yeseva One— para el
+`hero-grid` de seis celdas de la home, cada una pedida con `?text=` para que Google devuelva solo los
+caracteres de ese nombre. Ese grid desapareció con el índice numerado
+([#41](https://github.com/i-casaca/portfolio-test-migration/issues/41)) y desde entonces `index.html`
+descargaba **seis fuentes que no pintaba nadie** (las cinco más Fraunces). No era una decisión nueva
+que tomar: era una decisión ya tomada que se había quedado sin sitio.
+
+Cada `<link>` se muda a la página del proyecto que titula, que declara `--f-display` en su `<head>`;
+`site.css` lo aplica al `h1` con `var(--f-display, var(--f))`, así que una página sin fuente propia
+sigue funcionando. Los `<link>` de la home se retiran.
+
+**El reparto con la fila del índice es deliberado.** La *continuidad* la lleva el `.project-kicker`
+—número y eyebrow, tratamiento idéntico al del índice—; la *personalidad* la lleva el título, que es
+lo único que cambia de una página a otra. Si las dos cosas hicieran lo mismo, o las cinco páginas
+serían intercambiables o no se parecerían al índice en nada.
+
+El `h1` pierde su `font-weight`/`font-stretch`: estas cinco no son variables y el navegador
+sintetizaría el ancho y el peso, que es justo el aspecto sucio que el sistema evita en todo lo demás.
+
+**Fraunces sigue cargándose sin uso en `index.html`** — era el "Sobre mí" del mismo hero-grid. Se
+deja anotado aquí en vez de arreglarlo de paso: no tiene dónde mudarse todavía.
+
+### Salir del proyecto: Prev y Next
+
+Sustituye al `.next-project` del MVP (un enlace pequeño, solo hacia adelante, pegado al final del
+texto). La forma sale de una referencia que trajo Ismael: las dos salidas ocupan el ancho de la
+página, una a cada lado, y **el proyecto al que llevan se enseña al apuntarlas**, centrado entre las
+dos.
+
+Reutiliza el hover del índice ([#55](https://github.com/i-casaca/portfolio-test-migration/issues/55))
+en vez de inventar otro gesto: el nombre del vecino barre el alfabeto y se asienta, entre llaves,
+debajo de la palabra. Ese barrido vivía dentro del IIFE de `indice.js`; sale a `assets/js/flap.js`
+(`window.Flap`) porque ahora hay dos sitios que lo piden, y duplicarlo sería justo lo que este ticket
+acaba de deshacer con el CSS del muro. Las llaves son pseudoelementos: `Flap.preparar` vacía y
+repuebla el `textContent`, así que nada que deba sobrevivir al barrido puede vivir ahí dentro.
+
+Tres decisiones que no son estéticas:
+
+- **Se puede ir hacia atrás, y el listado es circular** (01 ← 05, 05 → 01). Desde cualquier proyecto
+  se llega a los otros cuatro sin volver al índice.
+- **La navegación vive fuera del `.gate-wrap`.** En las tres páginas con NDA el contenido protegido
+  va desenfocado y sin puntero mientras el muro está echado; la navegación no es contenido del
+  proyecto y tiene que seguir viva. Un muro que además te deja encerrado en la página sería una
+  trampa — la misma razón por la que se cierra con Escape.
+- **Los vecinos con NDA no traen `data-foto` en absoluto**, y enseñan la estática. Es la regla del
+  #55 llevada hasta el final: su imagen no llega al navegador hasta que hay contraseña. Verificado
+  en el panel de red — apuntando desde Arabvision, cuyos dos vecinos llevan NDA, no se pide ninguna
+  de las dos fotos. Por eso la estática sube de `index.html` a `site.css` y se hace genérica
+  (`.is-nda`, sin atarse a `#index-float`): son dos capas las que la usan.
+
+La flecha se separa hacia su lado al apuntar, en vez de saltar de lado a lado como en la referencia:
+dice la misma dirección sin mover el subrayado ni la palabra.
+
+Sin puntero fino no hay hover que dispare nada, así que el preview no se pinta y **los nombres se
+quedan visibles**: en táctil las dos salidas son dos enlaces normales que ya dicen a dónde van.
+
 ### La foto sobre hueso
 
 Las fotos de proyecto no cambiaron de tratamiento: siguen siendo la única fuente de color saturado

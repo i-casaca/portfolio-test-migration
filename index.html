@@ -15,14 +15,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wdth,wght@25..151,100..1000&display=swap" rel="stylesheet">
-<!-- Una display distinta por proyecto para el hero. Cada petición lleva `text=`,
-     así Google devuelve solo los caracteres de ese nombre y cada fuente pesa
-     unos cientos de bytes en vez de decenas de kB. -->
-<link href="https://fonts.googleapis.com/css2?family=Bungee&text=Manu%20Cardiel&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Anton&text=Adrenaline&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@700&text=Arabvision&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700&text=Nexahub&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Yeseva+One&text=El%20Paraguas&display=swap" rel="stylesheet">
+<!-- Las cinco display por proyecto (Bungee, Anton, Bodoni Moda, Unbounded,
+     Yeseva One) vivían aquí, para el hero-grid de seis celdas. Ese grid
+     desapareció con el índice numerado (#41) y desde entonces se descargaban
+     seis fuentes que no pintaba nadie. En el #56 se mudan a la página de cada
+     proyecto, que es donde ahora titulan — misma asignación de siempre, ahora
+     renderizada. Ver DESIGN.md > Páginas de proyecto > El título. -->
 <!-- "Sobre mí" comparte el mismo truco de display-por-nombre que los 5 proyectos,
      así que sigue pidiendo Fraunces solo para sus propios caracteres en vez de
      depender del <link> general, que el ticket #38 retiró. -->
@@ -54,6 +52,9 @@
 <script src="./assets/js/reveal.js" defer></script>
 <script src="./assets/js/backdrop.js" defer></script>
 <script src="./assets/js/tema.js" defer></script>
+<!-- Las letras de aeropuerto, compartidas desde el #56 con el Prev/Next de las
+     páginas de proyecto. Va ANTES de indice.js, que las consume. -->
+<script src="./assets/js/flap.js" defer></script>
 <script src="./assets/js/indice.js" defer></script>
 <!-- Solo en la home: la secuencia de saludos de la entrada (ticket #40). -->
 <script src="./assets/js/entry.js" defer></script>
@@ -440,103 +441,6 @@
   }
   #index-float.is-on img{opacity:1;transform:scale(1);}
 
-  /* ---------- proyectos bajo NDA: estática en vez de la foto ----------
-     Antes se enseñaba la foto real desenfocada. Era una promesa falsa: la foto
-     estaba ahí, solo tapada, y al llegar a la página saltaba el muro DESPUÉS de
-     la transición — se veía entrar el proyecto y acto seguido taparse, que es
-     justo el cuello raro que había que quitar.
-
-     La estática dice lo que pasa sin enseñar nada: no hay señal hasta que hay
-     contraseña. Y como el muro ahora salta en la home, la transición solo
-     ocurre cuando ya se puede ver el proyecto. */
-  #index-float .nda-estatica{display:none;position:absolute;inset:0;overflow:hidden;
-    border-radius:2px;place-content:center;justify-items:center;gap:.7rem;
-    background:#000;}
-  #index-float.is-nda .nda-estatica{display:grid;}
-  #index-float.is-nda img{visibility:hidden;}
-
-  /* ---------- la capa de ruido ----------
-     `numOctaves` a 1 con `baseFrequency` alta da mota fina de un solo tamaño,
-     que es lo que hace grano de televisión; con más octavas salen manchas
-     grandes y parece humo. El `feFuncA` aplasta el alfa a 1 — sin él el
-     turbulence sale semitransparente y lavado.
-
-     El contraste es lo que hace el trabajo: a 5,5 el gris medio se parte en
-     blanco puro y negro puro y aparece la mota dura de "sin señal". Con valores
-     suaves esto era una textura bonita, y aquí no hace falta una textura. */
-  .nda-estatica::before{
-    content:"";position:absolute;inset:-40%;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='e'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.15' numOctaves='1' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23e)'/%3E%3C/svg%3E");
-    filter:grayscale(1) contrast(5.5) brightness(1.25);
-    /* 20 fps: por debajo se ve el bucle, por encima se emborrona en gris. */
-    animation:nda-ruido .05s steps(1,end) infinite;
-  }
-
-  /* ---------- los desgarros ----------
-     Las bandas que saltan de sitio son lo que separa "ruido" de "señal rota".
-     Van en su propio elemento y no en un pseudo porque necesitan su propia
-     línea de tiempo: el ruido tiembla continuo, los desgarros van a tirones. */
-  .nda-desgarro{
-    position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;
-    background:
-      repeating-linear-gradient(to bottom, rgba(255,255,255,.9) 0 2px, transparent 2px 9px),
-      repeating-linear-gradient(to bottom, rgba(255,255,255,.5) 0 1px, transparent 1px 4px);
-    background-size:100% 42px, 100% 17px;
-    animation:nda-desgarro .28s steps(1,end) infinite;
-  }
-  /* Rayado fino encima de todo, siempre igual: es la trama del tubo, no un
-     efecto, y por eso no se anima. */
-  .nda-estatica::after{
-    content:"";position:absolute;inset:0;pointer-events:none;
-    background:repeating-linear-gradient(to bottom, rgba(0,0,0,.62) 0 1px, transparent 1px 3px);
-  }
-
-  @keyframes nda-ruido{
-    0%  {transform:translate(0,0);}
-    25% {transform:translate(-13%,7%);}
-    50% {transform:translate(9%,-11%);}
-    75% {transform:translate(-6%,-8%);}
-    100%{transform:translate(11%,5%);}
-  }
-  /* El eje X es el desgarro horizontal: la imagen se parte y se desplaza de
-     golpe, como una línea que pierde el enganche. */
-  @keyframes nda-desgarro{
-    0%  {transform:translate(0,0);opacity:.5;}
-    18% {transform:translate(-9%,-34%);opacity:.85;}
-    34% {transform:translate(6%,12%);opacity:.35;}
-    52% {transform:translate(-14%,48%);opacity:.9;}
-    68% {transform:translate(3%,-19%);opacity:.45;}
-    84% {transform:translate(11%,27%);opacity:.75;}
-    100%{transform:translate(-4%,-6%);opacity:.55;}
-  }
-
-  /* Aberración cromática en la sigla. El bloque negro detrás no es decoración:
-     con la estática a este contraste, sin él las letras se picaban y dejaban de
-     leerse — la misma regla dura que se aplicó al logotipo en el #40. */
-  .nda-estatica .nda-sigla{
-    position:relative;z-index:1;
-    font-family:var(--f);font-weight:800;font-stretch:75%;
-    font-size:clamp(1.6rem,3.4vw,2.8rem);letter-spacing:.22em;text-indent:.22em;
-    color:#fff;padding:.15em .5em;background:rgba(0,0,0,.72);
-    text-shadow:-2px 0 0 rgba(255,0,72,.9), 2px 0 0 rgba(0,229,255,.9);
-    animation:nda-aberracion 2.6s steps(1,end) infinite;
-  }
-  @keyframes nda-aberracion{
-    0%,70%,100%{text-shadow:-2px 0 0 rgba(255,0,72,.9), 2px 0 0 rgba(0,229,255,.9);transform:translateX(0);}
-    76%        {text-shadow:-6px 0 0 rgba(255,0,72,.95), 5px 0 0 rgba(0,229,255,.95);transform:translateX(-3px);}
-    82%        {text-shadow:-1px 0 0 rgba(255,0,72,.85), 7px 0 0 rgba(0,229,255,.85);transform:translateX(4px);}
-  }
-  .nda-estatica .nda-nota{
-    position:relative;z-index:1;
-    font-size:var(--fs-micro);letter-spacing:.14em;text-transform:uppercase;
-    color:#fff;padding:.2em .6em;background:rgba(0,0,0,.72);
-  }
-  @media (prefers-reduced-motion: reduce){
-    .nda-estatica::before,
-    .nda-desgarro,
-    .nda-estatica .nda-sigla{animation:none;}
-  }
-  }
 
   /* Sin `max-width`: las filas ocupan todo el ancho del bloque. El tope de
      1040px venía de cuando el índice compartía sitio con la foto a sangre y

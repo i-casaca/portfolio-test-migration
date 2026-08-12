@@ -368,90 +368,25 @@
 
   // ------------------------------------------------- letras de aeropuerto
 
-  /* El barrido no puede mover el layout. Roboto Flex no es monoespaciada, así
-   * que cambiar una letra por otra cambia el ancho de la palabra y arrastra la
-   * fila entera — y el alto del hero está calculado para que asome media fila
-   * (#51), o sea que un temblor aquí se propaga hasta arriba.
+  /* El barrido de letras vive en assets/js/flap.js desde el #56, cuando la
+   * navegación Prev/Next de las páginas de proyecto pidió el mismo gesto. El
+   * porqué de cada pieza —por qué se trocea, por qué se congela el ancho, por
+   * qué se mide con `document.fonts.ready`— está allí.
    *
-   * Por eso cada carácter se envuelve en un <span> al que se le fija SU ancho
-   * natural antes de animar nada. El glifo de dentro cambia; la caja no. */
-  var ALFABETO = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-  function preparar(nombre) {
-    var texto = nombre.textContent;
-    var frag = document.createDocumentFragment();
-    var celdas = [];
-
-    texto.split('').forEach(function (ch) {
-      var s = document.createElement('span');
-      s.className = 'flap';
-      s.textContent = ch;
-      frag.appendChild(s);
-      celdas.push({ el: s, final: ch });
-    });
-
-    nombre.textContent = '';
-    nombre.appendChild(frag);
-    return celdas;
-  }
-
-  /* Medir es un paso aparte de trocear, y **cuándo** se mide fue un fallo real:
-   * midiendo al arrancar, Roboto Flex todavía no había cargado (va con
-   * `display=swap`), así que cada celda se quedaba con el ancho de la fuente de
-   * reserva —más ancha— y al llegar la buena los glifos bailaban dentro de
-   * cajas grandes. En móvil se veía clarísimo: "M a n u   C a r d i e l".
+   * Aquí solo importa una consecuencia local: el alto del hero está calculado
+   * para que asome media fila del primer proyecto (#51), así que un temblor de
+   * ancho en este nombre se propaga hasta arriba del todo. Es exactamente lo
+   * que el congelado de cajas impide.
    *
-   * Se mide con `document.fonts.ready`, igual que motion.js hace con
-   * ScrollTrigger y por el mismo motivo. Y se vuelve a medir al cambiar el
-   * tamaño, porque el cuerpo del nombre es fluido (`clamp(...,6vw,...)`): un
-   * ancho congelado en píxeles deja de valer en cuanto cambia el viewport. */
-  function medir(celdas) {
-    celdas.forEach(function (c) { c.el.style.width = 'auto'; });
-    celdas.forEach(function (c) {
-      c.el.style.width = c.el.getBoundingClientRect().width + 'px';
-    });
-  }
-
-  function barrer(celdas) {
-    /* Un solo rAF para todas las celdas de la fila, no un temporizador por
-     * letra: es la misma razón por la que la inversión del #54 se mueve con un
-     * solo número. N relojes independientes se desincronizan y el efecto se
-     * deshilacha. */
-    var t0 = null;
-    var DUR = 520;          // ms hasta que la última letra se asienta
-    var ESCALON = 34;       // ms de retraso por letra: el barrido corre de izquierda a derecha
-
-    function paso(ahora) {
-      if (t0 === null) t0 = ahora;
-      var t = ahora - t0;
-      var vivos = 0;
-
-      for (var i = 0; i < celdas.length; i++) {
-        var c = celdas[i];
-        if (c.final === ' ') continue;
-        var propio = t - i * ESCALON;
-        if (propio < 0) { vivos++; continue; }
-        if (propio >= DUR) { c.el.textContent = c.final; continue; }
-        vivos++;
-        /* Cuanto más cerca del final, menos probable que siga girando: la
-         * letra se "asienta" en vez de pararse de golpe. */
-        if (Math.random() < propio / DUR) c.el.textContent = c.final;
-        else c.el.textContent = ALFABETO[(Math.random() * ALFABETO.length) | 0];
-      }
-
-      if (vivos) requestAnimationFrame(paso);
-      else celdas.forEach(function (c) { c.el.textContent = c.final; });
-    }
-
-    requestAnimationFrame(paso);
-  }
-
-  /* Solo se trocea el nombre donde el barrido puede ocurrir. En táctil no hay
+   * Solo se trocea el nombre donde el barrido puede ocurrir. En táctil no hay
    * hover que lo dispare, así que partir el título en celdas allí no aporta
    * nada y sí puede romper: es el reparto en `<span>` lo que hacía que el
    * nombre se desmontara en móvil. Sin puntero fino, el título se queda como
    * un texto normal. */
-  if (!reducido && punteroFino) {
+  if (!reducido && punteroFino && window.Flap) {
+    var preparar = window.Flap.preparar;
+    var medir = window.Flap.medir;
+    var barrer = window.Flap.barrer;
     var todas = [];
 
     items.forEach(function (item) {
