@@ -92,7 +92,11 @@
      nombre, así que 'power2.inOut' se aproxima con este cubic-bezier. Ver
      DESIGN.md > Transiciones de página. */
   --ease-move: cubic-bezier(.45,0,.55,1);
-  --dur-move: .6s;
+  /* 0,75 s, punto medio al que se llegó mirándolo con Ismael: 0,6 resolvía el
+     morfismo antes de que el ojo lo siguiera, y 0,95 ya se sentía lento. Es la
+     duración de un cambio de página, no de una microinteracción — se quiere
+     que se lea el recorrido, pero sin esperar a que acabe. */
+  --dur-move: .75s;
 
   /* Escala tipográfica: un solo clamp() en la raíz (suelo y techo), y cada
      paso declarado en rem para que respire de golpe con el viewport. Ver
@@ -218,8 +222,22 @@ a{color:inherit;text-decoration:none;}
    del titular. La diferencia es que aquí sí hay dónde apartarse: el efecto
    vive en las zonas planas —entrada, hero, textos— y desaparece al apuntar
    un proyecto. Sale por la misma transición de opacidad que ya tenía, así
-   que el relevo entre mancha y foto se lee como una cesión, no como un corte. */
-body:has(.hero-preview-img.is-on) #backdrop-blob{opacity:0;}
+   que el relevo entre mancha y foto se lee como una cesión, no como un corte.
+
+   El enganche se rehízo en el ticket #55: antes era
+   `body:has(.hero-preview-img.is-on)`, y ese elemento desapareció con la foto
+   a sangre. Ahora la regla importa MÁS que antes, no menos: la imagen
+   flotante vive pegada al cursor, que es exactamente donde vive la mancha —
+   sin esto se solaparían siempre, no de vez en cuando. */
+body:has(#index-float.is-on) #backdrop-blob{opacity:0;}
+
+/* Y no existe durante la entrada. La secuencia de saludos y el indicador de
+   carga son una pieza cerrada con su propia coreografía (#40); una mancha
+   invirtiendo por encima mientras cargan la ensucia y, peor, adelanta un
+   efecto del sitio antes de que el sitio haya llegado. `is-entering` lo pone
+   y lo quita entry.js, así que esto se apaga solo cuando la entrada termina.
+   Pesa (1,1,1) contra el (1,1,0) de `.is-on`, así que gana sin `!important`. */
+html.is-entering #backdrop-blob{opacity:0;}
 /* Blanco puro: con `difference`, blanco sobre X da exactamente el negativo de
    X. Cualquier otro color daría un tinte en vez de una inversión. */
 #backdrop-blob i{
@@ -287,11 +305,6 @@ body:has(.hero-preview-img.is-on) #backdrop-blob{opacity:0;}
    cinco. El navegador interpola tamaño y posición solo entre las dos
    capturas; no hace falta describir el "se asienta en su hueco de layout"
    a mano, es la animación por defecto de un elemento con nombre. */
-.project-body .media:first-of-type{ view-transition-name:project-cover; }
-::view-transition-group(project-cover){
-  animation-duration:var(--dur-move);
-  animation-timing-function:var(--ease-move);
-}
 
 /* Texto solo para lectores de pantalla (los enlaces del hero son puro dibujo). */
 .sr-only{
@@ -368,6 +381,21 @@ body:has(.hero-preview-img.is-on) #backdrop-blob{opacity:0;}
 html.js .media{opacity:0;transform:translateY(30px) scale(.985);}
 html.js .media.is-visible{opacity:1;transform:none;}
 
+/* La portada del proyecto queda FUERA del reveal, y no es una excepción
+   estética: es la que lleva `project-cover`, o sea el destino del morfismo
+   desde la imagen flotante del índice.
+
+   El fallo que corrige, encontrado navegando de verdad: al llegar a la página,
+   la transición capturaba el destino con `opacity:0` y desplazado 30px, así
+   que el morfismo salía de la imagen flotante y entraba **en la nada**. Se
+   veía la salida y no la entrada. Ninguno de los dos tickets que se cruzan
+   aquí podía verlo solo — el reveal (#39) y la transición de página (#42)
+   funcionan cada uno por su lado.
+
+   Además, revelar por scroll algo que ya está en pantalla al cargar nunca
+   tuvo sentido: esta figura vive por encima del pliegue. */
+html.js .project-body .media:first-of-type{opacity:1;transform:none;}
+
 @media (max-width: 860px){
   .text-cols{grid-template-columns:1fr;gap:2.5rem;margin:5vh 0;}
   .media{width:100%;margin:5vh auto;}
@@ -411,3 +439,60 @@ html.js .media.is-visible{opacity:1;transform:none;}
   margin-top:7vh;padding-top:1.2rem;border-top:1px solid var(--line);
   font-size:var(--fs-micro);opacity:.6;
 }
+
+/* ---------- el muro de NDA ----------
+   Sube aqui desde el <style> de las tres paginas con NDA porque a partir
+   del #55 tambien lo usa la home: el muro salta AL HACER CLIC en el indice,
+   no al llegar al proyecto. Antes se veia entrar la pagina y taparse acto
+   seguido; ahora la transicion solo ocurre cuando ya se puede ver. */
+.password-gate{
+  display:none;position:fixed;inset:0;align-items:center;justify-content:center;padding:2rem;
+  /* z-index alto: el índice de proyectos es `position:relative; z-index:1`, así
+     que sin esto el muro quedaba POR DEBAJO de los títulos y las descripciones
+     y el texto se le cruzaba por encima. Va por delante de todo salvo el panel
+     de transición entre páginas (9998/10000). */
+  z-index:9995;
+  /* Opaco de verdad: con el velo translúcido se leía el índice a través del
+     muro y la pregunta competía con lo que estaba tapando. */
+  background:color-mix(in oklab, var(--c-negro) 93%, transparent);
+  backdrop-filter:blur(8px);
+}
+
+/* Con el muro abierto no queda nada vivo detrás: ni cursor propio, ni mancha,
+   ni imagen flotante, ni hovers del índice. Un modal que deja el fondo
+   reaccionando se lee como que el sitio no te ha oído. */
+html.muro-abierto{overflow:hidden;}
+html.muro-abierto #cursor-dot,
+html.muro-abierto #backdrop-blob,
+html.muro-abierto #index-float{opacity:0 !important;visibility:hidden !important;}
+html.muro-abierto .project-index,
+html.muro-abierto .nav{pointer-events:none;}
+/* El cursor a medida se apaga con el puntero del sistema de vuelta: dentro del
+   muro hay que poder apuntar un campo de texto. */
+html.muro-abierto .hero,
+html.muro-abierto .hero-statement{cursor:auto;}
+.gate-wrap.locked .password-gate{display:flex;}
+.gate-card{
+  background:var(--surface1);border:1px solid var(--line);border-radius:10px;padding:2rem 2.2rem;
+  max-width:360px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.35);
+  }
+.gate-card .lock-icon{font-size:1.6rem;margin-bottom:.6rem;}
+.gate-card h3{
+  font-family:var(--f);font-weight:500;font-stretch:110%;
+  font-size:var(--fs-h3);line-height:var(--lh-h3);margin:0 0 .5rem;
+  }
+.gate-card p{font-size:var(--fs-small);line-height:var(--lh-small);opacity:.72;margin:0 0 1.2rem;}
+.gate-card input[type="password"]{
+  width:100%;padding:.7rem .9rem;border:1px solid var(--line);border-radius:6px;
+  font-size:var(--fs-body);font-family:var(--f);margin-bottom:.7rem;
+  background:var(--bg);color:var(--ink);
+  }
+.gate-card input[type="password"]::placeholder{color:var(--ink);opacity:.6;}
+.gate-card input[type="password"]:focus{outline:2px solid var(--ink);outline-offset:1px;}
+.gate-card button{
+  width:100%;padding:.7rem;border:none;border-radius:6px;background:var(--ink);color:var(--bg);
+  font-family:var(--f);font-weight:600;font-size:var(--fs-small);cursor:pointer;
+  }
+.gate-card button:hover{opacity:.9;}
+.gate-error{color:#E8776A;font-size:var(--fs-small);min-height:1.2em;margin-top:.6rem;}
+.gate-contact{font-size:var(--fs-micro);opacity:.62;margin-top:1.1rem;padding-top:1rem;border-top:1px solid var(--line);}

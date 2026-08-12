@@ -742,6 +742,13 @@ cuatro copias: dos elementos con el mismo nombre invalidan la transición entera
 
 ## Transiciones de página
 
+> **Revisado en el [#55](https://github.com/i-casaca/portfolio-test-migration/issues/55): la ida ya
+> no la hacen las View Transitions.** Lo que sigue describe el mecanismo tal como se decidió, y
+> sigue siendo cierto para **la vuelta** (proyecto → índice) y para el resto de la página. Pero el
+> morfismo de la foto **hacia** el proyecto se hace ahora en dos fases de JS, y el porqué está en
+> [La ida, en dos fases](#la-ida-en-dos-fases). No es un cambio de gusto: es que el navegador no
+> captura la imagen flotante en el documento que sale.
+
 Decidido en el ticket
 [La transición del índice a la página de proyecto](https://github.com/i-casaca/portfolio-test-migration/issues/42),
 en conversación antes de construir. Sustituye por completo a `assets/js/page-transition.js` (el
@@ -813,6 +820,141 @@ un ease de GSAP por nombre.
 
 Apaga el morfismo entero, no solo sus curvas: con menos movimiento, el salto de página tiene que
 ser eso, un salto — no una versión más lenta del mismo gesto.
+
+## La ida, en dos fases
+
+Decidido en el ticket
+[El hover del índice](https://github.com/i-casaca/portfolio-test-migration/issues/55), después de
+cuatro rondas de diagnóstico.
+
+**El problema.** Con `view-transition-name` en la imagen flotante y en la portada del proyecto, la
+navegación de ida creaba `::view-transition-new(project-cover)` **pero nunca el `old` ni el grupo**.
+Sin `old` no hay grupo, y sin grupo lo que se ve es la imagen nueva apareciendo sola: un fundido.
+La vuelta, en cambio, creaba los tres. Se probó con la imagen `fixed` y con la imagen `absolute`, y
+el resultado no cambió: **el navegador no captura ese elemento en el documento que sale.**
+
+**La solución: partirlo en dos animaciones, una dentro de cada página.**
+
+| | |
+|---|---|
+| **Fase 1** (`assets/js/indice.js`) | La imagen flotante crece hasta llenar la pantalla, **se queda 0,34 s** y entonces navega |
+| **Fase 2** (`assets/js/entrada-proyecto.js`) | La página de proyecto recoge el testigo con la portada a pantalla completa y la baja a su hueco, mientras la cabecera se enciende por partes |
+
+Ninguna de las dos necesita que la otra capture nada, así que no depende del emparejamiento de
+snapshots y funciona igual en cualquier navegador.
+
+**La pausa no es relleno.** Es lo que convierte dos animaciones sueltas en una que continúa al otro
+lado: sin ella la imagen llegaba a pantalla completa y la página cambiaba en el mismo instante, y el
+corte se notaba.
+
+El testigo viaja por `sessionStorage` y **lleva el href**, que se comprueba contra la página para que
+uno viejo no dispare la entrada en otro proyecto. Entrando por URL directa, recargando o volviendo
+atrás, no corre nada.
+
+**Y una lección que costó una ronda entera: no dejar estado inline que sobreviva a una navegación.**
+Un intento anterior congelaba la imagen con `left`/`top` inline antes de navegar; el bfcache devuelve
+el documento tal cual se dejó, así que al volver la imagen conservaba esos valores y GSAP le sumaba
+su transform encima — doble desplazamiento, fuera de pantalla. El estado de la fase 1 se limpia
+explícitamente en `pageshow` persistido.
+
+**La portada del proyecto queda fuera del reveal** (`html.js .media{opacity:0}` del #39). Es el
+destino de la fase 2 y vive por encima del pliegue: revelarla por scroll la dejaba invisible justo
+cuando tenía que estar ahí. Fue el primer fallo encontrado de esta cadena, y era real aunque no fuera
+el único.
+
+## El hover del índice
+
+Decidido en el ticket
+[El hover del índice](https://github.com/i-casaca/portfolio-test-migration/issues/55).
+
+### La imagen flotante
+
+Al apuntar una fila, la foto de ese proyecto aparece como un objeto que persigue al cursor con
+retardo (0,55 s, `power3`). **Sustituye a la foto a sangre del #41**, y con ella desaparece su velo
+en gradiente: con la imagen pequeña y separada del texto ya no hay una foto compitiendo con el
+índice, así que el velo corregía un problema que esta solución no tiene.
+
+**Nunca se sale de la pantalla.** El efecto secundario es el que se buscaba: cuando el cursor sigue
+bajando y la imagen ya no puede, se queda pegada al borde y el cursor se separa de ella. Esa
+distancia creciente se lee como peso.
+
+**El reparto entre el `<figure>` y el `<img>` no es cosmético.** GSAP toma el figure para el
+seguimiento y **absorbe cualquier `scale` declarado en CSS dentro de su propia matriz de
+transform** — se probó ponerlo ahí y quedaba congelado, sin animar nunca. Así que el figure es solo
+posición (GSAP) y el img solo aspecto (CSS).
+
+Y **el retardo se anima sobre un objeto, no sobre el elemento**: el `transform` lo escribe el ticker
+sumando el scroll, porque la imagen es `absolute` respecto al documento y sin esa suma se quedaría
+quieta mientras la página se mueve.
+
+### Las letras de aeropuerto
+
+El nombre del proyecto se descompone en caracteres que barren el alfabeto y se asientan de izquierda
+a derecha (520 ms, 34 ms de escalón). Un **solo `requestAnimationFrame` para toda la fila**, no un
+temporizador por letra: N relojes independientes se desincronizan y el efecto se deshilacha. Es la
+misma razón por la que la inversión del #54 se mueve con un solo número.
+
+**Cada carácter vive en una caja de ancho congelado**, y eso sostiene dos cosas a la vez: que el
+barrido no mueva la palabra —Roboto Flex no es monoespaciada— y que el nombre pueda **engordar a
+`wght 850`** al apuntarlo sin ensanchar la fila. Sustituye a la cursiva del #41: con el barrido
+encima se leían como dos efectos compitiendo.
+
+**Cuándo se mide fue un fallo real.** Midiendo al arrancar, Roboto Flex todavía no había cargado
+(va con `display=swap`), así que cada celda se quedaba con el ancho de la fuente de reserva y los
+glifos bailaban dentro de cajas grandes — en móvil se veía «M a n u   C a r d i e l». Se mide con
+`document.fonts.ready`, igual que motion.js hace con ScrollTrigger, y se vuelve a medir al cambiar
+el tamaño porque el cuerpo del nombre es fluido. Y **solo se trocea el nombre donde el barrido puede
+ocurrir**: en táctil no hay hover que lo dispare y partirlo allí no aporta nada.
+
+Importa mantenerlo: el alto del hero está calculado para que asome media fila del primer proyecto
+(ver [Hero](#hero)), así que un temblor aquí se propaga hasta arriba del todo.
+
+### La fila
+
+Rejilla en el `<nav>` y filas que la heredan con `subgrid`. Con la rejilla en cada fila, cada una
+era independiente y `max-content` se resolvía por separado: la descripción arrancaba en una x
+distinta en cada fila (medido: 515, 574, 581, 619, 673). `subgrid` y no `display:contents` porque la
+fila es un `<a>` y `contents` le borraría la caja.
+
+La descripción va **debajo** del nombre, hasta tres líneas, y el número y el meta se alinean con la
+línea del título, no con el bloque entero.
+
+**El nombre va a `max-content` sin nada que compita.** Con un `1fr` al final y 42ch de descripción,
+esas dos se repartían el ancho antes de que el título cogiera el suyo: la columna quedaba en 176 px
+cuando «Manu Cardiel» necesita 197 y el nombre se desbordaba. Peor, el JS remide las celdas del
+barrido dentro de esa columna, así que el error se realimentaba.
+
+## Proyectos bajo NDA
+
+Los tres proyectos con NDA **no enseñan su foto: enseñan estática de televisión** con la sigla NDA y
+«requiere contraseña». Antes se enseñaba la foto real desenfocada, y era una promesa falsa — la
+imagen estaba ahí, solo tapada. Ahora **ni siquiera se le pone el `src`**, así que no llega al
+navegador hasta que hay contraseña.
+
+**El muro salta en la home, al pulsar, no al llegar al proyecto.** Antes se veía entrar la página con
+toda su transición y taparse acto seguido. Preguntando primero, la transición solo ocurre cuando ya
+hay algo que enseñar. Acertando, se rehace el hover para cambiar la estática por la foto y se vuelve
+a pulsar: el mismo manejador hace la transición completa, sin duplicar la coreografía.
+
+Con el muro abierto **no queda nada vivo detrás**: se apagan el cursor propio, la mancha, la imagen
+flotante y los hovers del índice, y se bloquea el scroll. Un modal que deja el fondo reaccionando se
+lee como que el sitio no te ha oído. Se cierra con Escape y con clic fuera — un muro que solo se
+cierra acertando es una trampa, no una puerta.
+
+**Cómo se construye la estática** (tres capas, y ninguna es sutil a propósito):
+
+- **Ruido**: `feTurbulence` con **una sola octava** y `baseFrequency` alta — mota fina de un tamaño,
+  que es lo que hace grano de televisión; con más octavas salen manchas y parece humo. El `feFuncA`
+  aplasta el alfa a 1, porque el turbulence genera ruido también en ese canal y sin eso sale
+  semitransparente y lavado. `contrast(5.5)` parte el gris medio en blanco y negro puros. A 20 fps:
+  por debajo se ve el bucle, por encima se emborrona en gris.
+- **Desgarros**: bandas que saltan de sitio, en su propio elemento y con su propia línea de tiempo
+  —el ruido tiembla continuo, los desgarros van a tirones—. Es lo que separa «ruido» de «señal rota».
+- **Trama**: rayado fino fijo. No se anima: es el tubo, no un efecto.
+
+La sigla lleva **aberración cromática** (copias roja y cian desplazadas, con un tic cada pocos
+segundos) sobre un bloque negro. El bloque no es decoración: con la estática a este contraste, sin él
+las letras se picaban y dejaban de leerse — la misma regla dura que se aplicó al logotipo en el #40.
 
 ## Interacción
 
