@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="proyecto">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -36,6 +36,11 @@
 <script src="./assets/js/reveal.js" defer></script>
 <script src="./assets/js/entrada-proyecto.js" defer></script>
 <script src="./assets/js/backdrop.js" defer></script>
+<!-- Las letras de aeropuerto (compartidas con el indice desde el #56) y el
+     Prev/Next del pie. flap.js va ANTES, que es quien lo consume. -->
+<script src="./assets/js/flotante.js" defer></script>
+<script src="./assets/js/flap.js" defer></script>
+<script src="./assets/js/nav-proyecto.js" defer></script>
 </head>
 <body>
 
@@ -64,7 +69,10 @@
 </div>
 
 <div class="project-header project-wrap" id="ficha">
-  <span class="eyebrow">Personal · 2024</span>
+  <div class="project-kicker">
+    <span class="project-num">01</span>
+    <span class="eyebrow">Personal · 2024</span>
+  </div>
   <h1>Manu Cardiel</h1>
   <div class="meta-row">
     <div><span>Organización</span>Manu Cardiel</div>
@@ -118,9 +126,34 @@
   <figure class="media">
     <img src="./assets/images/manu-cardiel/mockup-4.jpg" width="1400" height="787" loading="lazy" decoding="async" alt="Vista final de la web de Manu Cardiel" />
   </figure>
-
-  <a class="next-project" href="./adrenaline.html"><span>Siguiente proyecto</span>Adrenaline →</a>
 </div>
+
+
+<!-- Salir del proyecto (ticket #56). Estructura de navegacion —anterior a la
+     izquierda, siguiente a la derecha, con el rotulo siempre visible— y la
+     interaccion del indice de la home: el hover revela el nombre (barrido de
+     letras) y la foto persigue al cursor.
+
+     Va FUERA del .gate-wrap a proposito: en las paginas con NDA el contenido
+     protegido queda desenfocado y sin puntero mientras el muro esta echado,
+     pero la navegacion no es contenido del proyecto y tiene que seguir viva.
+     El listado es circular en los dos sentidos. -->
+<nav class="project-nav project-wrap" aria-label="Otros proyectos">
+  <a class="pnav pnav-prev" href="./el-paraguas.html" data-foto="./assets/images/el-paraguas/hero.jpg">
+    <span class="pnav-rol">Proyecto anterior</span>
+    <span class="pnav-destino">
+      <span class="pnav-num">05</span>
+      <span class="pnav-name">El Paraguas</span>
+    </span>
+  </a>
+  <a class="pnav pnav-next" href="./adrenaline.html" data-nda>
+    <span class="pnav-rol">Proyecto siguiente</span>
+    <span class="pnav-destino">
+      <span class="pnav-num">02</span>
+      <span class="pnav-name">Adrenaline</span>
+    </span>
+  </a>
+</nav>
 
 <footer class="site-footer" id="contacto">
   <span class="eyebrow">Contacto</span>
@@ -145,6 +178,11 @@
 <!-- La mancha que sigue al ratón (ticket #53). Va vacía: backdrop.js crea
      dentro los circulos que la forman, y no la monta siquiera sin puntero
      fino. Delante del grano y del contenido, detras de la burbuja del chat. -->
+<!-- La imagen que persigue al cursor al apuntar una de las dos salidas: la
+     misma pieza que el hover del indice (.foto-flotante en site.css,
+     seguimiento en flotante.js). Hija directa de <body> y `absolute`, para que
+     ningun contenedor con overflow la recorte. -->
+<figure id="pnav-float" class="foto-flotante" aria-hidden="true"><img alt="" decoding="async" /><div class="nda-estatica"><i class="nda-desgarro" aria-hidden="true"></i><span class="nda-sigla">NDA</span><span class="nda-nota">Requiere contrase&#241;a</span></div></figure>
 <div id="backdrop-blob" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
 </body>

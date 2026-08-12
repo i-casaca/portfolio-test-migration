@@ -166,38 +166,17 @@
    * a `gsap.set` más abajo lanzaría y se llevaría por delante el barrido. */
   var hayGsap = !!window.gsap;
 
-  if (hayGsap && punteroFino && !reducido) {
-    /* `quickTo` en vez de un tween por evento: devuelve una función que
-     * reapunta el mismo tween en marcha, así que no se crean objetos en cada
-     * `pointermove`. El retardo (0,55 s con `power3`) es lo que hace que la
-     * imagen "persiga" en vez de ir pegada — pegada al cursor no se lee como
-     * un objeto, se lee como parte del puntero. */
-    /* El retardo se anima sobre un objeto, no sobre el elemento, y el
-     * `transform` lo escribe el ticker sumando el scroll.
-     *
-     * Por qué así: la imagen dejó de ser `position:fixed` —era lo que impedía
-     * el morfismo de ida— y una absoluta se queda quieta en el documento
-     * mientras la página se mueve. Sumando `scrollY` en cada fotograma se
-     * comporta exactamente como antes a la vista, pero el elemento que el
-     * navegador captura ya es una caja normal.
-     *
-     * Animar el objeto y no el elemento es lo que permite que el retardo viva
-     * en coordenadas de pantalla y el scroll se aplique después, sin que una
-     * cosa arrastre a la otra. */
-    var pos = { x: -9999, y: -9999 };
-    var toX = gsap.quickTo(pos, 'x', { duration: 0.55, ease: 'power3' });
-    var toY = gsap.quickTo(pos, 'y', { duration: 0.55, ease: 'power3' });
+  /* El seguimiento —retardo, suma del scroll y clamp contra los bordes— vive en
+   * assets/js/flotante.js desde el #56, compartido con el Prev/Next de las
+   * páginas de proyecto. El porqué de cada pieza está allí. Aquí se queda lo que
+   * SÍ es propio del índice: el muro de NDA y la fase 1 de la transición. */
+  var seguidor = (hayGsap && punteroFino && !reducido)
+    ? window.Flotante && window.Flotante.crear(flotante)
+    : null;
 
+  if (seguidor) {
+    colocar = seguidor.colocar;
     var saliendo = false;
-
-    gsap.ticker.add(function () {
-      /* Durante la salida manda la animación de la fase 1, que escribe
-       * `left`/`top`/`width`/`height` directamente. Si el ticker siguiera
-       * pisando el `transform`, las dos se pelearían. */
-      if (saliendo) return;
-      flotante.style.transform =
-        'translate3d(' + (pos.x + window.scrollX) + 'px,' + (pos.y + window.scrollY) + 'px,0)';
-    });
 
     /* ---------- fase 1 de la transición al proyecto ----------
      * La imagen crece hasta llenar la pantalla y solo entonces se navega. La
@@ -233,7 +212,9 @@
         var r = flotante.getBoundingClientRect();
         e.preventDefault();
         saliendo = true;
-        gsap.killTweensOf(pos);
+        /* A partir de aquí manda la fase 1: el seguidor suelta el `transform`
+         * para no pelearse con el `left`/`top`/`width`/`height` de la timeline. */
+        seguidor.pausar(true);
 
         /* Se pasa a `fixed` conservando exactamente la posición que se ve: a
          * partir de aquí la imagen ya no sigue al cursor ni al scroll, va a
@@ -271,40 +252,8 @@
       if (!e.persisted) return;
       saliendo = false;
       flotante.classList.remove('is-on');
-      flotante.style.cssText = '';
+      seguidor.reset();
     });
-
-    /* El desfase saca la imagen de debajo del cursor: centrada, el propio
-     * puntero tapa el centro de la foto y el `#cursor-dot` invierte justo ahí. */
-    var DX = 28, DY = 24;
-    var MARGEN = 16;
-
-    /* La imagen no puede salirse de la pantalla. Sin esto, al apuntar las
-     * filas de abajo se iba por el borde inferior y desaparecía justo cuando
-     * se estaba mirando — el objeto perdía su razón de ser.
-     *
-     * El efecto secundario es el interesante y es el que se busca: cuando el
-     * cursor sigue bajando y la imagen ya no puede, **se queda pegada al borde
-     * y el cursor se separa de ella**. Esa distancia creciente entre puntero e
-     * imagen se lee como resistencia, como si el objeto tuviera peso y
-     * estuviera topando contra el marco. */
-    function encajar(v, tam, limite) {
-      var max = limite - tam - MARGEN;
-      if (max < MARGEN) return (limite - tam) / 2;   // pantallas más pequeñas que la imagen
-      return v < MARGEN ? MARGEN : (v > max ? max : v);
-    }
-
-    /* Único punto por el que se mueve la imagen. `yaEncajado` lo usa el foco de
-     * teclado, que calcula su sitio a partir de la fila y no necesita clamp. */
-    colocar = function (x, y, yaEncajado) {
-      if (yaEncajado) { toX(x); toY(y); return; }
-      toX(encajar(x, flotante.offsetWidth, window.innerWidth));
-      toY(encajar(y, flotante.offsetHeight, window.innerHeight));
-    };
-
-    window.addEventListener('pointermove', function (e) {
-      colocar(e.clientX + DX, e.clientY + DY);
-    }, { passive: true });
 
     items.forEach(function (item, i) {
       item.addEventListener('pointerenter', function () { mostrar(i); });
@@ -368,90 +317,25 @@
 
   // ------------------------------------------------- letras de aeropuerto
 
-  /* El barrido no puede mover el layout. Roboto Flex no es monoespaciada, así
-   * que cambiar una letra por otra cambia el ancho de la palabra y arrastra la
-   * fila entera — y el alto del hero está calculado para que asome media fila
-   * (#51), o sea que un temblor aquí se propaga hasta arriba.
+  /* El barrido de letras vive en assets/js/flap.js desde el #56, cuando la
+   * navegación Prev/Next de las páginas de proyecto pidió el mismo gesto. El
+   * porqué de cada pieza —por qué se trocea, por qué se congela el ancho, por
+   * qué se mide con `document.fonts.ready`— está allí.
    *
-   * Por eso cada carácter se envuelve en un <span> al que se le fija SU ancho
-   * natural antes de animar nada. El glifo de dentro cambia; la caja no. */
-  var ALFABETO = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-  function preparar(nombre) {
-    var texto = nombre.textContent;
-    var frag = document.createDocumentFragment();
-    var celdas = [];
-
-    texto.split('').forEach(function (ch) {
-      var s = document.createElement('span');
-      s.className = 'flap';
-      s.textContent = ch;
-      frag.appendChild(s);
-      celdas.push({ el: s, final: ch });
-    });
-
-    nombre.textContent = '';
-    nombre.appendChild(frag);
-    return celdas;
-  }
-
-  /* Medir es un paso aparte de trocear, y **cuándo** se mide fue un fallo real:
-   * midiendo al arrancar, Roboto Flex todavía no había cargado (va con
-   * `display=swap`), así que cada celda se quedaba con el ancho de la fuente de
-   * reserva —más ancha— y al llegar la buena los glifos bailaban dentro de
-   * cajas grandes. En móvil se veía clarísimo: "M a n u   C a r d i e l".
+   * Aquí solo importa una consecuencia local: el alto del hero está calculado
+   * para que asome media fila del primer proyecto (#51), así que un temblor de
+   * ancho en este nombre se propaga hasta arriba del todo. Es exactamente lo
+   * que el congelado de cajas impide.
    *
-   * Se mide con `document.fonts.ready`, igual que motion.js hace con
-   * ScrollTrigger y por el mismo motivo. Y se vuelve a medir al cambiar el
-   * tamaño, porque el cuerpo del nombre es fluido (`clamp(...,6vw,...)`): un
-   * ancho congelado en píxeles deja de valer en cuanto cambia el viewport. */
-  function medir(celdas) {
-    celdas.forEach(function (c) { c.el.style.width = 'auto'; });
-    celdas.forEach(function (c) {
-      c.el.style.width = c.el.getBoundingClientRect().width + 'px';
-    });
-  }
-
-  function barrer(celdas) {
-    /* Un solo rAF para todas las celdas de la fila, no un temporizador por
-     * letra: es la misma razón por la que la inversión del #54 se mueve con un
-     * solo número. N relojes independientes se desincronizan y el efecto se
-     * deshilacha. */
-    var t0 = null;
-    var DUR = 520;          // ms hasta que la última letra se asienta
-    var ESCALON = 34;       // ms de retraso por letra: el barrido corre de izquierda a derecha
-
-    function paso(ahora) {
-      if (t0 === null) t0 = ahora;
-      var t = ahora - t0;
-      var vivos = 0;
-
-      for (var i = 0; i < celdas.length; i++) {
-        var c = celdas[i];
-        if (c.final === ' ') continue;
-        var propio = t - i * ESCALON;
-        if (propio < 0) { vivos++; continue; }
-        if (propio >= DUR) { c.el.textContent = c.final; continue; }
-        vivos++;
-        /* Cuanto más cerca del final, menos probable que siga girando: la
-         * letra se "asienta" en vez de pararse de golpe. */
-        if (Math.random() < propio / DUR) c.el.textContent = c.final;
-        else c.el.textContent = ALFABETO[(Math.random() * ALFABETO.length) | 0];
-      }
-
-      if (vivos) requestAnimationFrame(paso);
-      else celdas.forEach(function (c) { c.el.textContent = c.final; });
-    }
-
-    requestAnimationFrame(paso);
-  }
-
-  /* Solo se trocea el nombre donde el barrido puede ocurrir. En táctil no hay
+   * Solo se trocea el nombre donde el barrido puede ocurrir. En táctil no hay
    * hover que lo dispare, así que partir el título en celdas allí no aporta
    * nada y sí puede romper: es el reparto en `<span>` lo que hacía que el
    * nombre se desmontara en móvil. Sin puntero fino, el título se queda como
    * un texto normal. */
-  if (!reducido && punteroFino) {
+  if (!reducido && punteroFino && window.Flap) {
+    var preparar = window.Flap.preparar;
+    var medir = window.Flap.medir;
+    var barrer = window.Flap.barrer;
     var todas = [];
 
     items.forEach(function (item) {
