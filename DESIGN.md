@@ -810,6 +810,18 @@ en `site.css`, con tres grupos de elementos nombrados:
 `assets/js/motion.js`) a un `cubic-bezier` — las View Transitions son CSS puro y no pueden llamar a
 un ease de GSAP por nombre.
 
+### El relevo de tema no cruza porque no hay nada que cruzar
+
+Decidido con [Las páginas de proyecto en el tema claro](https://github.com/i-casaca/portfolio-test-migration/issues/56).
+El riesgo real de esta transición era interpolar dos temas dentro de `::view-transition-old/new` — un
+destello si el fondo de una página cambia de color a mitad del morfismo. No hizo falta resolverlo con
+CSS: se resolvió con el mismo tema en los dos lados. Las páginas de proyecto son claras de un tirón
+(ver [Páginas de proyecto](#páginas-de-proyecto)), y una fila del índice solo es pulsable con
+`#trabajo` sustancialmente en pantalla — momento en el que `--t` ya está cerca de 1. La vuelta, igual:
+si el navegador restaura el scroll donde se dejó el índice, sigue claro. Comprobado navegando la
+secuencia completa en Chrome: `--t` es 1 a los dos lados de cada salto, sin fotograma intermedio que
+delate el cruce.
+
 ### `prefers-reduced-motion`
 
 ```css
@@ -924,6 +936,109 @@ esas dos se repartían el ancho antes de que el título cogiera el suyo: la colu
 cuando «Manu Cardiel» necesita 197 y el nombre se desbordaba. Peor, el JS remide las celdas del
 barrido dentro de esa columna, así que el error se realimentaba.
 
+## Páginas de proyecto
+
+Decidido en el ticket
+[Las páginas de proyecto en el tema claro](https://github.com/i-casaca/portfolio-test-migration/issues/56).
+El sitio es oscuro hasta el hero y **claro de los proyectos en adelante** (decidido el 2026-08-10, al
+construir [El índice en claro](https://github.com/i-casaca/portfolio-test-migration/issues/54)): las
+cinco páginas de proyecto son la parte "de adelante", así que son claras de un tirón.
+
+### Claras de un tirón, sin eje que mover
+
+En `index.html` el claro es un **tramo del scroll**: `#trabajo` lo trae y "Sobre mí" lo deshace (ver
+[Color > La inversión](#la-inversión)). Una página de proyecto no tiene ese tramo — es, de arriba
+abajo, contenido de proyecto —, así que no hace falta un eje que se mueva dentro de ella:
+
+```css
+html.proyecto{ --t: 1; --tk: 1; }
+```
+
+Las cinco páginas llevan `class="proyecto"` en el `<html>`. `tema.js` ni se carga ahí —comprueba
+`#trabajo` y no lo encuentra, y no hace nada— así que no hay dos mecanismos escribiendo las mismas
+custom properties.
+
+**Efecto colateral buscado, no solo tolerado.** Una fila del índice solo es pulsable con `#trabajo`
+sustancialmente en pantalla, momento en el que `--t` ya está cerca de 1. La ida entra en una página
+que **ya es del mismo color** — no hay tema que virar dentro de la transición. Y la vuelta llega a un
+índice que, si el navegador restaura el scroll donde se dejó, también sigue claro. El riesgo de
+destello que preguntaba el ticket —interpolar dos temas dentro de
+`::view-transition-old/new`— sale sobrando: no cruza tema quien ya vive en el mismo. Comprobado
+navegando la secuencia completa (índice → proyecto → volver → otro proyecto) en Chrome: `--t` llega
+a 1 antes de pulsar y se queda en 1 al volver, sin fotograma intermedio.
+
+### El `<style>` inline no sobrevivió
+
+Las cinco páginas ya compartían casi todo su CSS vía `site.css` desde antes de este ticket —dos de
+ellas (`manu-cardiel.html`, `el-paraguas.html`) no llevaban ni una línea de `<style>` propio—, pero
+las tres páginas con NDA seguían cargando un `<style>` inline idéntico, después del `<link>` a
+`site.css` y ganando la cascada por orden de aparición. Era la última razón real por la que
+`.gate-wrap`/`.gated-content`/`.gate-contact a` no estaban ya en `site.css`: nadie los había movido
+todavía. Se movieron y el `<style>` se borró de las tres páginas; el único fondo del muro que queda
+es el de `site.css`, que además es el correcto —`color-mix` sobre `--c-negro` en vez del `rgba()`
+literal que llevaba el inline, ya desincronizado del sistema de dos tokens.
+
+### La cabecera, reconocible como la fila que acaba de crecer
+
+El índice ya numera cada fila (`.index-num`, 01–05). La cabecera de la página de proyecto no llevaba
+ese número, así que el salto se leía como "otro sitio", no como la misma pieza a tamaño completo.
+Ahora lo repite con el mismo tratamiento —tamaño, opacidad `var(--dim-faint)`, tabular-nums— delante
+del `.eyebrow`, en un `.project-kicker`. No se animó el propio número: la continuidad la da la
+tipografía, no un morfismo nuevo que mantener.
+
+### La foto sobre hueso
+
+Las fotos de proyecto no cambiaron de tratamiento: siguen siendo la única fuente de color saturado
+del sitio, ahora sobre `--bg` claro en vez de oscuro. Miradas las cinco, ninguna pedía ajuste — son
+fotografía de producto/mockup con su propio fondo, no imágenes editadas para fundirse con un lienzo
+oscuro. La mancha del fondo (ver [Interacción](#interacción)) es la única pieza que sí necesitó
+tocarse para que la foto siguiera leyéndose como la fuente de color.
+
+### El contraste no se heredó, se midió
+
+**Restricción no negociable del ticket.** Medido con el propio par `--bg`/`--ink` del sistema
+(oklab → sRGB → luminancia relativa WCAG) contra el fondo claro real, no supuesto: seis reglas de
+`site.css` llevaban una opacidad de texto **fija**, calibrada mirando solo el extremo oscuro y nunca
+medida en claro porque hasta este ticket ningún elemento con esa clase vivía ahí —
+`.eyebrow`(.62→4,45:1), `.disclaimer`(.6→4,19:1), `.meta-row div span`(.58→3,95:1), `.next-project
+span`(.58→3,95:1), `.site-footer .eyebrow`(.58→3,95:1) y `.footer-base`(.6→4,19:1) — las seis por
+debajo del mínimo de 4.5:1 para texto que no es grande. Pasan todas a `opacity:var(--dim)`, el mismo
+escalón que ya interpola con `--tk` para `--dim-faint`/`--dim` desde el #54 (ver
+[Color > El suelo de opacidad no se hereda](#el-suelo-de-opacidad-no-se-hereda)): 5,35:1 en claro,
+sin tocar el extremo oscuro (ya pasaba, y .6 es casi exactamente el valor dark de `--dim`).
+
+El placeholder del campo de contraseña y `.gate-contact` del muro de NDA tenían el mismo defecto
+(.6/.62 fijos, 3,96:1/4,19:1 medidos contra `--surface1` claro) y se corrigieron igual.
+
+**Un séptimo caso no era de opacidad.** `.gate-error` («Contraseña incorrecta») llevaba un rojo
+literal (`#E8776A`) elegido mirando solo el extremo oscuro: 5,08:1 ahí, pero **1,95:1** sobre
+`--surface1` claro — casi invisible. Un rojo no puede resolverse con el mecanismo de `--bg`/`--ink`
+(intercambiar dos tokens): hace falta un tono más oscuro para leerse sobre claro, no una opacidad
+distinta. Se añadió una tercera pareja de tokens, misma idea que `--bg`/`--ink` pero para esta única
+excepción funcional de color:
+
+```css
+--c-error-oscuro: #E8776A;             /* validado: 5,08:1 sobre superficie oscura */
+--c-error-claro:  oklch(45% 0.18 25);  /* mismo tono, L más baja: 5,51:1 sobre superficie clara */
+--error: color-mix(in oklab, var(--c-error-oscuro), var(--c-error-claro) calc(var(--t) * 100%));
+```
+
+### Lo que no hizo falta tocar
+
+- **El muro de NDA.** Su velo (`background: color-mix(in oklab, var(--c-negro) 93%, transparent)`)
+  se queda fijo en oscuro a propósito: es un scrim de modal, no contenido de la página, y un modal
+  que oscurece el fondo se lee igual de bien —mejor, de hecho, más contraste— sobre una página clara
+  que sobre una oscura. El `.gate-card` de dentro sí sigue el tema (`var(--surface1)`).
+- **La burbuja del chat.** Su lanzador (círculo `--cb-ink`, casi negro) llevaba un borde añadido en
+  el #38 solo para no fundirse con el fondo oscuro. Sobre el fondo claro de una página de proyecto
+  el contraste es alto sin ese borde —lo confirma con margen incluso dejándolo puesto—, así que no
+  se tocó: seguirá esperando su propio ticket (niebla del mapa) para el resto de su rediseño.
+- **Los `eyebrow` de las secciones (`↳ Contexto`, `↳ Ejecución`, `↳ Resultado`).** La niebla del mapa
+  apuntaba a revisar si las páginas de proyecto arrastraban el mismo andamiaje vacío que
+  `index.html` (`↳ Sobre mí`, etc.). No: en las páginas de proyecto ese texto vive directamente en el
+  `<h2>` de cada sección, es la voz real del título, no una etiqueta repetida encima de él. Nada que
+  vaciar aquí.
+
 ## Proyectos bajo NDA
 
 Los tres proyectos con NDA **no enseñan su foto: enseñan estática de televisión** con la sigla NDA y
@@ -996,16 +1111,32 @@ sobre el sitio real con un medidor de fps delante. Un fundido alto con un multip
 **bajo** es lo que da el borde con halo; con multiplicadores altos (se probó ×26) la silueta salía
 recortada a cuchillo y sobre el fondo cálido leía como un pegote, no como niebla.
 
-**La mancha se aparta cuando hay una foto de proyecto en pantalla.** Sobre el fondo plano la
-inversión se lee como un gesto; sobre la fotografía la convierte en un negativo azulado que parece
-un fallo de pintado, y contradice de frente la excepción deliberada nº 4 (la foto es la única fuente
-de color saturado). Es el mismo modo de fallo por el que el
+**La mancha se aparta cuando hay una foto de proyecto en pantalla — en la home.** Sobre el fondo
+plano la inversión se lee como un gesto; sobre la fotografía la convierte en un negativo azulado que
+parece un fallo de pintado, y contradice de frente la excepción deliberada nº 4 (la foto es la única
+fuente de color saturado). Es el mismo modo de fallo por el que el
 [#41](https://github.com/i-casaca/portfolio-test-migration/issues/41) retiró la distorsión líquida
-del titular; la diferencia es que aquí sí hay dónde apartarse. Hoy el enganche es
-`body:has(.hero-preview-img.is-on)` — **y ese elemento desaparece cuando el
-[#55](https://github.com/i-casaca/portfolio-test-migration/issues/55) sustituya el preview a sangre
-por la imagen flotante al cursor. Ese ticket tiene que rehacer el enganche o la mancha volverá a
-invertir la foto.**
+del titular. El enganche, rehecho en el [#55](https://github.com/i-casaca/portfolio-test-migration/issues/55)
+cuando el preview a sangre pasó a ser la imagen flotante al cursor: `body:has(#index-float.is-on)
+#backdrop-blob{opacity:0;}`.
+
+**En las páginas de proyecto no cede: se queda siempre detrás.** Restricción de Ismael sobre el
+[#56](https://github.com/i-casaca/portfolio-test-migration/issues/56), llegada revisando el hover del
+índice: ahí la fotografía es el contenido principal, no una imagen de fondo entre otras, así que la
+mancha no puede invertirla "de vez en cuando" — no puede invertirla nunca.
+
+```css
+html.proyecto #backdrop-blob{ z-index: -1; }
+```
+
+Basta con el z-index, sin tocar `.media` ni el resto del contenido: en el mismo contexto de
+apilamiento, un hijo con z-index negativo pinta *antes* que el contenido en flujo normal sin z-index
+propio (orden de pintado CSS2.1). El contenido de una página de proyecto —`.media`, párrafos, `.nav`—
+no declara z-index en ningún punto de su cadena de ancestros (`.gate-wrap` en las tres páginas con
+NDA usa `position:relative` sin z-index, que no abre un contexto de apilamiento nuevo), así que sigue
+en el mismo contexto que la mancha y la regla alcanza. No hizo falta el remedio que avisaba el
+ticket —darle a `.media` su propio contexto de apilamiento—: eso habría sido necesario solo si algo
+en la cadena ya tuviera z-index propio.
 
 **Coste, medido**: 120 fps sostenidos. El filtro no cubre la pantalla — vive en una caja de 760 px
 que viaja con la mancha, porque un filtro SVG cuesta en proporción a su región. `contain: strict`

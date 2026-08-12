@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="proyecto">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -36,43 +36,6 @@
 <script src="./assets/js/reveal.js" defer></script>
 <script src="./assets/js/entrada-proyecto.js" defer></script>
 <script src="./assets/js/backdrop.js" defer></script>
-<style>
-  .gate-wrap{position:relative;}
-  .gate-wrap.locked .gated-content{
-    filter:blur(14px);user-select:none;pointer-events:none;
-  }
-
-  .password-gate{
-    display:none;position:fixed;inset:0;align-items:center;justify-content:center;padding:2rem;
-    background:rgba(32,25,21,.62);
-  }
-  .gate-wrap.locked .password-gate{display:flex;}
-  .gate-card{
-    background:var(--surface1);border:1px solid var(--line);border-radius:10px;padding:2rem 2.2rem;
-    max-width:360px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.35);
-  }
-  .gate-card .lock-icon{font-size:1.6rem;margin-bottom:.6rem;}
-  .gate-card h3{
-    font-family:var(--f);font-weight:500;font-stretch:110%;
-    font-size:var(--fs-h3);line-height:var(--lh-h3);margin:0 0 .5rem;
-  }
-  .gate-card p{font-size:var(--fs-small);line-height:var(--lh-small);opacity:.72;margin:0 0 1.2rem;}
-  .gate-card input[type="password"]{
-    width:100%;padding:.7rem .9rem;border:1px solid var(--line);border-radius:6px;
-    font-size:var(--fs-body);font-family:var(--f);margin-bottom:.7rem;
-    background:var(--bg);color:var(--ink);
-  }
-  .gate-card input[type="password"]::placeholder{color:var(--ink);opacity:.6;}
-  .gate-card input[type="password"]:focus{outline:2px solid var(--ink);outline-offset:1px;}
-  .gate-card button{
-    width:100%;padding:.7rem;border:none;border-radius:6px;background:var(--ink);color:var(--bg);
-    font-family:var(--f);font-weight:600;font-size:var(--fs-small);cursor:pointer;
-  }
-  .gate-card button:hover{opacity:.9;}
-  .gate-error{color:#E8776A;font-size:var(--fs-small);min-height:1.2em;margin-top:.6rem;}
-  .gate-contact{font-size:var(--fs-micro);opacity:.62;margin-top:1.1rem;padding-top:1rem;border-top:1px solid var(--line);}
-  .gate-contact a{text-decoration:underline;}
-</style>
 </head>
 <body>
 
@@ -101,7 +64,10 @@
 </div>
 
 <div class="project-header project-wrap" id="ficha">
-  <span class="eyebrow">Cliente · 2023</span>
+  <div class="project-kicker">
+    <span class="project-num">02</span>
+    <span class="eyebrow">Cliente · 2023</span>
+  </div>
   <h1>Adrenaline</h1>
   <div class="meta-row">
     <div><span>Organización</span>Top Global IT Company</div>

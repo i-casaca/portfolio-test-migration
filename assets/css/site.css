@@ -1,8 +1,11 @@
 /* ===========================================================================
    site.css — estilos comunes a las 6 páginas del portfolio.
-   Lo específico de cada página (el hero interactivo de la home, el muro de
-   contraseña de los 3 proyectos con NDA) sigue viviendo en un <style> dentro
-   de esa página. Aquí solo va lo que se repite en todas.
+   Lo específico de cada página (el hero interactivo de la home) sigue
+   viviendo en un <style> dentro de esa página. Aquí va lo que se repite en
+   todas — incluido, desde el ticket #56, el muro de contraseña de los 3
+   proyectos con NDA: vivía duplicado en un <style> por página, tres copias
+   idénticas que ya habían empezado a desincronizarse (el fondo del muro
+   seguía un literal `rgba()` ahí, sin pasar por --c-negro).
    =========================================================================== */
 
 /* ---------- la inversión de tema ----------
@@ -87,6 +90,19 @@
   --dim-faint: calc(.5 + .13 * var(--tk));
   --dim:       calc(.6 + .08 * var(--tk));
 
+  /* El rojo de error (`.gate-error`, muro de NDA) es la única tercera
+     familia de color del sitio — una excepción funcional, no decorativa: un
+     error tiene que leerse como error, no como el hueso/negro de siempre.
+     Hasta el #56 era un literal fijo (#E8776A) calibrado solo contra el
+     extremo oscuro (5,08:1 sobre `--surface1` oscuro) y nunca medido en
+     claro: ahí daba 1,95:1, casi invisible sobre `--surface1` claro. Mismo
+     tono y croma, luminosidad más baja para el extremo claro, mezclados con
+     `--t` igual que `--bg`/`--ink`: 5,51:1 en claro sin perder el 5,08:1 que
+     ya funcionaba en oscuro. */
+  --c-error-oscuro: #E8776A;
+  --c-error-claro: oklch(45% 0.18 25);
+  --error: color-mix(in oklab, var(--c-error-oscuro), var(--c-error-claro) calc(var(--t) * 100%));
+
   /* Traducción a CSS de Motion.ease.move / Motion.dur.move (assets/js/motion.js):
      las View Transitions son CSS puro y no pueden llamar a un ease de GSAP por
      nombre, así que 'power2.inOut' se aproxima con este cubic-bezier. Ver
@@ -121,6 +137,34 @@
   --lh-h2:      1.15;
   --lh-h1:      1.08;
   --lh-display: 0.95;
+}
+
+/* ---------- las páginas de proyecto son el mundo claro, de un tirón ----------
+   Decidido el 2026-08-10 (ver DESIGN.md > Páginas de proyecto): el sitio es
+   oscuro hasta el hero y claro de los proyectos en adelante. En index.html el
+   claro es un TRAMO del scroll —#trabajo lo trae y "Sobre mí" lo deshace,
+   ver tema.js—, pero una página de proyecto no tiene un tramo equivalente:
+   es, de arriba abajo, contenido de proyecto. No hace falta un eje que se
+   mueva porque no hay nada de lo que salir ni a lo que volver dentro de la
+   misma página.
+
+   Por eso aquí no hay scroll-driven nada: `html.proyecto` fija el mismo par
+   de tokens que tema.js escribiría si `--t` llegara a 1 y se quedara. Las
+   cinco páginas de proyecto llevan esta clase en el `<html>`; tema.js ni se
+   carga ahí (comprueba `#trabajo` y no lo encuentra), así que no hay dos
+   mecanismos compitiendo por las mismas custom properties.
+
+   Efecto colateral buscado, no solo tolerado: como el índice ya está en
+   `--t` cercano a 1 en el momento en que se puede pulsar un ítem (la fila
+   tiene que estar sustancialmente en pantalla para ser clicable), la ida
+   entra en una página que YA es del mismo color — no hay tema que virar
+   dentro de la transición. Y la vuelta llega a un índice que, si el
+   navegador restaura el scroll donde se dejó, también sigue claro. El
+   riesgo de destello que este ticket preguntaba si hacía falta cubrir con
+   una guardia; sale sobrando: no cruza tema quien ya vive en el mismo. */
+html.proyecto{
+  --t: 1;
+  --tk: 1;
 }
 
 *{box-sizing:border-box;}
@@ -210,6 +254,21 @@ a{color:inherit;text-decoration:none;}
   contain:strict;
 }
 #backdrop-blob.is-on{opacity:1;}
+
+/* En las páginas de proyecto la mancha no cede al acercarse a una foto —como
+   en la home— porque ahí NUNCA está delante de una: se queda detrás siempre.
+   Restricción de Ismael sobre el #56 (revisión del hover del índice, #55):
+   la fotografía es el contenido principal de una página de proyecto, así que
+   invertirla no es un gesto que ceda de vez en cuando, es un error que no
+   puede ocurrir nunca.
+
+   Basta con el z-index: `.media` y el resto del contenido de la página son
+   flujo normal, sin z-index propio, así que pintan DESPUÉS de un hijo con
+   z-index negativo dentro del mismo contexto de apilamiento (orden de pintado
+   CSS2.1: los negativos van antes que el contenido en flujo). No hace falta
+   darle a `.media` un contexto de apilamiento propio para conseguirlo — ver
+   el razonamiento largo en DESIGN.md > Interacción. */
+html.proyecto #backdrop-blob{z-index:-1;}
 
 /* La mancha se aparta en cuanto hay una foto de proyecto en pantalla.
    Encontrado construyendo, no razonado: sobre el fondo plano la inversión se
@@ -332,9 +391,15 @@ html.is-entering #backdrop-blob{opacity:0;}
 [data-split] .char{line-height:1.2;padding-bottom:.2em;}
 
 /* ---------- tipografía compartida ---------- */
+/* `opacity:.62` fijo hasta el #56 — calibrado mirando solo el extremo oscuro,
+   nunca medido en claro porque hasta ahora ningún `.eyebrow` vivía ahí. Con
+   la foto de la página de proyecto en tema claro daba 4.45:1, por debajo del
+   mínimo de 4.5:1. `var(--dim)` es el mismo escalón que ya usan `--dim`/
+   `--dim-faint` en site.css: interpola con `--tk` y ya está medido en los dos
+   extremos (ver DESIGN.md > Color > El suelo de opacidad no se hereda). */
 .eyebrow{
   font-size:var(--fs-micro);line-height:var(--lh-micro);letter-spacing:.1em;
-  text-transform:uppercase;opacity:.62;display:block;margin-bottom:.6rem;
+  text-transform:uppercase;opacity:var(--dim);display:block;margin-bottom:.6rem;
 }
 
 /* ---------- páginas de proyecto ---------- */
@@ -360,8 +425,11 @@ html.is-entering #backdrop-blob{opacity:0;}
 .text-end{margin:7vh 0;max-width:56ch;}
 
 /* .5 de opacidad daba 4,34:1 sobre --bg — por debajo del mínimo de 4.5:1 para
-   texto que no es grande. .6 sube a ~5,7:1. */
-.disclaimer{opacity:.6;font-size:var(--fs-small);}
+   texto que no es grande. .6 subía a ~5,7:1 — pero esa medida era solo del
+   extremo oscuro. Sobre el claro (#56) .6 fijo da 4,19:1, otra vez por debajo
+   del mínimo. `var(--dim)` interpola con `--tk` y ya pasa 4.5:1 en los dos
+   extremos. */
+.disclaimer{opacity:var(--dim);font-size:var(--fs-small);}
 
 /* Las imágenes van centradas y anchas, pero nunca a sangre: llegan hasta el
    contenedor (88vw) y ahí paran. Comparten eje con el texto y con el nav a
@@ -407,22 +475,35 @@ html.js .project-body .media:first-of-type{opacity:1;transform:none;}
 }
 
 .project-header{padding:5vh 0 3vh;}
+/* La cabecera tiene que leerse como la misma fila del índice que acaba de
+   crecer, no como la entrada a otro sitio (ticket #56). El índice ya lleva
+   su número (`.index-num` en index.html) delante del nombre; aquí se repite
+   con el mismo tratamiento —tamaño, opacidad, tabular-nums— para que la
+   continuidad sea tipográfica y no haya que animarla. */
+.project-kicker{display:flex;align-items:baseline;gap:.9rem;margin-bottom:.6rem;}
+.project-kicker .eyebrow{margin-bottom:0;}
+.project-num{
+  font-size:var(--fs-small);opacity:var(--dim-faint);font-variant-numeric:tabular-nums;
+}
 .project-header h1{
   font-family:var(--f);font-weight:500;font-stretch:114%;
   font-size:var(--fs-h1);line-height:var(--lh-h1);margin:0 0 1.2rem;letter-spacing:-.01em;
 }
 .meta-row{display:flex;gap:2.5rem;flex-wrap:wrap;font-size:var(--fs-small);border-top:1px solid var(--line);padding-top:1rem;}
-.meta-row div span{display:block;opacity:.58;font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem;}
+/* .58/.6 fijos, la misma historia que `.eyebrow` de arriba: medidos una vez
+   contra el negro y nunca contra el hueso. Todos por debajo de 4.5:1 en claro
+   (3,95:1–4,19:1, medido) hasta que pasan a `var(--dim)`. */
+.meta-row div span{display:block;opacity:var(--dim);font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem;}
 .meta-row a{text-decoration:underline;}
 
 .next-project{
   display:inline-block;margin-top:1rem;font-size:var(--fs-small);border-top:1px solid var(--line);padding-top:1rem;
 }
-.next-project span{opacity:.58;display:block;font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;}
+.next-project span{opacity:var(--dim);display:block;font-size:var(--fs-micro);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;}
 
 /* ---------- franja de contacto: un paso elevado, el remate del sitio ---------- */
 .site-footer{background:var(--surface1);color:var(--ink);padding:9vh 6vw 2.2rem;}
-.site-footer .eyebrow{opacity:.58;}
+.site-footer .eyebrow{opacity:var(--dim);}
 .footer-lead{
   font-family:var(--f);font-weight:500;font-stretch:118%;
   font-size:var(--fs-h1);line-height:var(--lh-h1);margin:0 0 1.8rem;max-width:16ch;letter-spacing:-.01em;
@@ -437,14 +518,22 @@ html.js .project-body .media:first-of-type{opacity:1;transform:none;}
 .footer-base{
   display:flex;justify-content:space-between;gap:.8rem;flex-wrap:wrap;
   margin-top:7vh;padding-top:1.2rem;border-top:1px solid var(--line);
-  font-size:var(--fs-micro);opacity:.6;
+  font-size:var(--fs-micro);opacity:var(--dim);
 }
 
 /* ---------- el muro de NDA ----------
    Sube aqui desde el <style> de las tres paginas con NDA porque a partir
    del #55 tambien lo usa la home: el muro salta AL HACER CLIC en el indice,
    no al llegar al proyecto. Antes se veia entrar la pagina y taparse acto
-   seguido; ahora la transicion solo ocurre cuando ya se puede ver. */
+   seguido; ahora la transicion solo ocurre cuando ya se puede ver.
+
+   `.gate-wrap`/`.gated-content` no habían llegado aquí con el resto en el
+   #55: las tres páginas los seguían declarando en su propio <style>, la
+   única razón real por la que ese bloque seguía vivo (ticket #56). */
+.gate-wrap{position:relative;}
+.gate-wrap.locked .gated-content{
+  filter:blur(14px);user-select:none;pointer-events:none;
+}
 .password-gate{
   display:none;position:fixed;inset:0;align-items:center;justify-content:center;padding:2rem;
   /* z-index alto: el índice de proyectos es `position:relative; z-index:1`, así
@@ -487,12 +576,13 @@ html.muro-abierto .hero-statement{cursor:auto;}
   font-size:var(--fs-body);font-family:var(--f);margin-bottom:.7rem;
   background:var(--bg);color:var(--ink);
   }
-.gate-card input[type="password"]::placeholder{color:var(--ink);opacity:.6;}
+.gate-card input[type="password"]::placeholder{color:var(--ink);opacity:var(--dim);}
 .gate-card input[type="password"]:focus{outline:2px solid var(--ink);outline-offset:1px;}
 .gate-card button{
   width:100%;padding:.7rem;border:none;border-radius:6px;background:var(--ink);color:var(--bg);
   font-family:var(--f);font-weight:600;font-size:var(--fs-small);cursor:pointer;
   }
 .gate-card button:hover{opacity:.9;}
-.gate-error{color:#E8776A;font-size:var(--fs-small);min-height:1.2em;margin-top:.6rem;}
-.gate-contact{font-size:var(--fs-micro);opacity:.62;margin-top:1.1rem;padding-top:1rem;border-top:1px solid var(--line);}
+.gate-error{color:var(--error);font-size:var(--fs-small);min-height:1.2em;margin-top:.6rem;}
+.gate-contact{font-size:var(--fs-micro);opacity:var(--dim);margin-top:1.1rem;padding-top:1rem;border-top:1px solid var(--line);}
+.gate-contact a{text-decoration:underline;}
