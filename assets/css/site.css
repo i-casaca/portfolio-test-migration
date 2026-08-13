@@ -274,13 +274,26 @@ a{color:inherit;text-decoration:none;}
    invertirla no es un gesto que ceda de vez en cuando, es un error que no
    puede ocurrir nunca.
 
-   Basta con el z-index: `.media` y el resto del contenido de la página son
-   flujo normal, sin z-index propio, así que pintan DESPUÉS de un hijo con
-   z-index negativo dentro del mismo contexto de apilamiento (orden de pintado
-   CSS2.1: los negativos van antes que el contenido en flujo). No hace falta
-   darle a `.media` un contexto de apilamiento propio para conseguirlo — ver
-   el razonamiento largo en DESIGN.md > Interacción. */
-html.proyecto #backdrop-blob{z-index:-1;}
+   **No se consigue bajando la mancha, sino subiendo las imágenes.** El #56 lo
+   resolvió con `html.proyecto #backdrop-blob{z-index:-1}` y eso la hacía
+   desaparecer del todo: un z-index negativo pinta antes que los fondos de los
+   bloques en flujo, y `body` lleva un `background` opaco (`--bg`), así que el
+   propio fondo de la página la tapaba. Se veía como que el efecto no existía
+   en las páginas de proyecto — que es justo lo que reportó Ismael.
+
+   Así que la mancha se queda en su capa de siempre (40), invirtiendo el fondo
+   plano y el texto como en la home, y lo que sube por encima es la fotografía.
+   Tres capas por orden: mancha (40) → imágenes (41) → grano (42). El grano
+   tiene que ir el último porque hasta ahora se apoyaba en el orden del
+   documento para cubrirlo todo, y en cuanto una imagen tiene z-index propio
+   ese apoyo deja de valer: sin subirlo, las fotos se quedarían sin película.
+
+   Todo acotado a `html.proyecto`: en la home la mancha sigue pasando por
+   encima de todo salvo de la imagen flotante, que ya se aparta sola. */
+html.proyecto .media{position:relative;z-index:41;}
+/* La foto del Prev/Next es tan foto de proyecto como las del cuerpo. */
+html.proyecto #pnav-float{z-index:41;}
+html.proyecto .grain{z-index:42;}
 
 /* La mancha se aparta en cuanto hay una foto de proyecto en pantalla.
    Encontrado construyendo, no razonado: sobre el fondo plano la inversión se
