@@ -1466,18 +1466,33 @@ cuando el preview a sangre pasó a ser la imagen flotante al cursor: `body:has(#
 índice: ahí la fotografía es el contenido principal, no una imagen de fondo entre otras, así que la
 mancha no puede invertirla "de vez en cuando" — no puede invertirla nunca.
 
+**No se consigue bajando la mancha, sino subiendo las imágenes.** El #56 lo resolvió con
+`html.proyecto #backdrop-blob{z-index:-1}` y **eso la hacía desaparecer del todo**: un z-index
+negativo pinta antes que los fondos de los bloques en flujo, y `body` lleva un `background` opaco
+(`--bg`), así que el propio fondo de la página la tapaba. En las páginas de proyecto el efecto
+sencillamente no existía. Lo reportó Ismael mirándolo, y se corrigió en el patch **v0.3.1**.
+
 ```css
-html.proyecto #backdrop-blob{ z-index: -1; }
+html.proyecto .media{ position:relative; z-index:41; }
+html.proyecto #pnav-float{ z-index:41; }
+html.proyecto .grain{ z-index:42; }
 ```
 
-Basta con el z-index, sin tocar `.media` ni el resto del contenido: en el mismo contexto de
-apilamiento, un hijo con z-index negativo pinta *antes* que el contenido en flujo normal sin z-index
-propio (orden de pintado CSS2.1). El contenido de una página de proyecto —`.media`, párrafos, `.nav`—
-no declara z-index en ningún punto de su cadena de ancestros (`.gate-wrap` en las tres páginas con
-NDA usa `position:relative` sin z-index, que no abre un contexto de apilamiento nuevo), así que sigue
-en el mismo contexto que la mancha y la regla alcanza. No hizo falta el remedio que avisaba el
-ticket —darle a `.media` su propio contexto de apilamiento—: eso habría sido necesario solo si algo
-en la cadena ya tuviera z-index propio.
+La mancha se queda en su capa de siempre (40) —invirtiendo el fondo plano y el texto igual que en la
+home— y lo que sube por encima es la fotografía. Tres capas por orden: **mancha (40) → imágenes (41)
+→ grano (42)**.
+
+El grano tiene que subir con ellas, y esa es la trampa del arreglo: hasta aquí se apoyaba en el orden
+del documento para cubrirlo todo (es `position:fixed` sin z-index, último hijo de `<body>`), y ese
+apoyo deja de valer en cuanto una imagen tiene z-index propio. Sin subirlo, las fotos de proyecto se
+habrían quedado sin película.
+
+Todo acotado a `html.proyecto`: en la home la mancha sigue pasando por encima de todo salvo de la
+imagen flotante, que ya se aparta sola por opacidad.
+
+**La lección, que vale para la próxima capa que se quiera mandar al fondo:** con `<body>` pintando un
+fondo opaco, «detrás de todo» no se consigue con un z-index negativo — eso es detrás *del fondo*, que
+es lo mismo que no existir. Se consigue subiendo lo que tiene que quedar delante.
 
 **Coste, medido**: 120 fps sostenidos. El filtro no cubre la pantalla — vive en una caja de 760 px
 que viaja con la mancha, porque un filtro SVG cuesta en proporción a su región. `contain: strict`
